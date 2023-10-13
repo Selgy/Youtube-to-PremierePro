@@ -9,7 +9,8 @@ import socketio
 import requests
 import json
 import logging
-
+from pathlib import Path
+import base64  # Import the base64 module
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -59,6 +60,7 @@ def download_video(video_url, resolution, framerate, download_path):
     ydl_opts = {
         'outtmpl': f'{download_path}/%(title)s.%(ext)s',
         'format': f'bestvideo[ext=mp4][vcodec*=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'nooverwrites': False,  # This will overwrite the video file if it already exists
     }
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -89,7 +91,11 @@ if __name__ == "__main__":
     # Modify these lines to extract values from the settings dictionary
     resolution = settings['resolution']
     framerate = settings['framerate']
-    download_path = settings['downloadPath']
+    download_path_encoded = settings['downloadPath']
+    download_path = download_path_encoded.encode('latin1').decode('utf-8')
+
+
+
 
     response = requests.get('http://localhost:3000/get-video-url')
     video_url = response.json()['videoUrl']
@@ -101,5 +107,5 @@ if __name__ == "__main__":
     logging.info('Download completed')
     # After downloading the video, trigger the import function in Adobe Premiere Pro via Node.js server
     sio.connect('http://localhost:3000')
-    sio.emit('import', download_path)
+    sio.emit('import', str(download_path))
     sio.disconnect()

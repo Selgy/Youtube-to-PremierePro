@@ -31,7 +31,8 @@ let latestVideoUrl = '';  // New variable to store the latest video URL
 
 app.post('/settings', (req, res) => {
     console.log('Received settings:', req.body);
-    settings = req.body; 
+    settings = req.body;
+    settings.downloadPath = decodeURIComponent(settings.downloadPath);
     fs.writeFileSync('settings.json', JSON.stringify(settings, null, 2));
     res.json(settings);    
 });

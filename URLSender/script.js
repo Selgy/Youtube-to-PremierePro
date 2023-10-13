@@ -16,8 +16,9 @@ button.addEventListener('click', () => {
     const settings = {
         resolution: document.getElementById('resolution').value,
         framerate: document.getElementById('framerate').value,
-        downloadPath: document.getElementById('download-path').value,
+        downloadPath: encodeURIComponent(document.getElementById('download-path').value),
     };
+    
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Settings saved');
