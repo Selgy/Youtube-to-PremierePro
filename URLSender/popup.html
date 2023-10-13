@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background-color: #1F1F1F;
+        color: #D0D0D0;
+        width: 300px;
+      }
+      button {
+        background-color: #CF000F;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 10px; /* Space between buttons */
+ 
+      }
+      button:hover {
+        background-color: #9B000A;
+      }
+      select {
+        width: 100%;
+        margin-bottom: 10px; /* Space between select and next element */
+      }
+      #save-settings {
+    display: block;
+    margin: 20px auto 0 auto; /* top auto right auto bottom */
+      }
+      #message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #CF000F;
+      padding: 10px;
+      display: none; /* initially hidden */
+      border-radius: 4px;
+      transition: opacity 0.5s;
+      }
+
+</style>
+    </style>
+  </head>
+  <body>
+    <label for="resolution">Resolution:</label>
+    <select id="resolution">
+      <option value="2160p">4K (2160p)</option>
+      <option value="1440p">2K (1440p)</option>
+      <option value="1080p" selected>Full HD (1080p)</option>
+      <option value="720p">HD (720p)</option>
+      <option value="480p">SD (480p)</option>
+      <option value="360p">360p</option>
+    </select>
+    <br>
+    <label for="framerate">Frame Rate:</label>
+    <select id="framerate">
+      <option value="60">60 fps</option>
+      <option value="30" selected>30 fps</option>
+    </select>
+    <br>
+    <label for="download-path">Download Path:</label>
+    <input type="text" id="download-path" value="D:/youtube download" />
+    <br>
+    <button id="save-settings">Save Settings</button>
+    <div id="message">Settings saved</div>
+    <script src="script.js"></script>
+  </body>
+</html>
