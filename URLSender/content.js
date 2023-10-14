@@ -57,38 +57,44 @@ function sendURL() {
     }
 }
 
+function isVideoPage() {
+    return window.location.href.includes('/watch?v=');
+}
+
 function tryModifyMenu() {
-    const topLevelButtons = document.querySelector('#top-level-buttons-computed');
-    if (topLevelButtons && !document.getElementById('send-to-premiere-button')) {
-        const premiereButton = createButton();
-        const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
-        if (shareButton) {
-            shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
+    if (isVideoPage()) {  // Check if it's a video page before proceeding
+        const topLevelButtons = document.querySelector('#top-level-buttons-computed');
+        if (topLevelButtons && !document.getElementById('send-to-premiere-button')) {
+            const premiereButton = createButton();
+            const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
+            if (shareButton) {
+                shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
+            } else {
+                console.error('Share button not found.');
+            }
         } else {
-            console.error('Share button not found.');
+            // If the top level buttons div isn't available yet, try again in a moment
+            setTimeout(tryModifyMenu, 100);
         }
-    } else {
-        // If the top level buttons div isn't available yet, try again in a moment
-        setTimeout(tryModifyMenu, 100);
+    }
+}
+
+function addPremiereButton() {
+    if (isVideoPage()) {  // Check if it's a video page before proceeding
+        const topLevelButtons = document.querySelector('#top-level-buttons-computed');
+        if (topLevelButtons) {
+            const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
+            if (shareButton) {
+                const premiereButton = createButton();
+                shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
+                observer.disconnect();  // Stop observing once the button has been added
+            }
+        }
     }
 }
 
 // Start the first attempt to modify the menu
 tryModifyMenu();
-
-
-
-function addPremiereButton() {
-    const topLevelButtons = document.querySelector('#top-level-buttons-computed');
-    if (topLevelButtons) {
-        const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
-        if (shareButton) {
-            const premiereButton = createButton();
-            shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
-            observer.disconnect();  // Stop observing once the button has been added
-        }
-    }
-}
 
 // Start observing the document
 const observer = new MutationObserver(addPremiereButton);

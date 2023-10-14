@@ -92,7 +92,7 @@ if __name__ == "__main__":
     resolution = settings['resolution']
     framerate = settings['framerate']
     download_path_encoded = settings['downloadPath']
-    download_path = download_path_encoded.encode('latin1').decode('utf-8')
+    download_path = download_path_encoded.encode('cp1252').decode('utf-8')
 
 
 

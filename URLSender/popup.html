@@ -1,72 +1,82 @@
 <!doctype html>
 <html>
-  <head>
+<head>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        background-color: #1F1F1F;
-        color: #D0D0D0;
-        width: 300px;
-      }
-      button {
-        background-color: #CF000F;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-bottom: 10px; /* Space between buttons */
- 
-      }
-      button:hover {
-        background-color: #9B000A;
-      }
-      select {
-        width: 100%;
-        margin-bottom: 10px; /* Space between select and next element */
-      }
-      #save-settings {
-    display: block;
-    margin: 20px auto 0 auto; /* top auto right auto bottom */
-      }
-      #message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #CF000F;
-      padding: 10px;
-      display: none; /* initially hidden */
-      border-radius: 4px;
-      transition: opacity 0.5s;
-      }
-
-</style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #181818;  /* Dark background color */
+            color: #ffffff;  /* Light text color */
+            width: 300px;
+        }
+        button {
+            background-color: #22042C;  /* Darker button background */
+            color: #ffffff;  /* Lighter button text color */
+            padding: 10px 20px;
+            border: 2px solid #D88EF1;  /* Border color */
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px; /* Space between buttons */
+        }
+        button:hover {
+            background-color: #D88EF1;  /* Hover background color */
+            color: #0f005d;  /* Dark text color on hover */
+        }
+        select {
+            width: 100%;
+            margin-bottom: 10px; /* Space between select and next element */
+            background-color: #22042C;  /* Darker background */
+            color: #ffffff;  /* Lighter text color */
+            border: 2px solid #D88EF1;  /* Border color */
+        }
+        #save-settings {
+            display: block;
+            margin: 20px auto 0 auto; /* top auto right auto bottom */
+        }
+        #message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #D88EF1;  /* Message background color */
+            padding: 10px;
+            display: none; /* initially hidden */
+            border-radius: 4px;
+            transition: opacity 0.5s;
+            color: #0f005d;  /* Dark text color for message */
+        }
+        input {
+            width: 100%;
+            background-color: #22042C;  /* Darker background */
+            color: #ffffff;  /* Lighter text color */
+            border: 2px solid #D88EF1;  /* Border color */
+            padding: 5px;
+            margin-bottom: 10px; /* Space between input and next element */
+        }
     </style>
-  </head>
-  <body>
-    <label for="resolution">Resolution:</label>
-    <select id="resolution">
-      <option value="2160p">4K (2160p)</option>
-      <option value="1440p">2K (1440p)</option>
-      <option value="1080p" selected>Full HD (1080p)</option>
-      <option value="720p">HD (720p)</option>
-      <option value="480p">SD (480p)</option>
-      <option value="360p">360p</option>
-    </select>
-    <br>
-    <label for="framerate">Frame Rate:</label>
-    <select id="framerate">
-      <option value="60">60 fps</option>
-      <option value="30" selected>30 fps</option>
-    </select>
-    <br>
-    <label for="download-path">Download Path:</label>
-    <input type="text" id="download-path" value="D:/youtube download" />
-    <br>
-    <button id="save-settings">Save Settings</button>
-    <div id="message">Settings saved</div>
-    <script src="script.js"></script>
-  </body>
+</head>
+<body>
+<label for="resolution">Resolution:</label>
+<select id="resolution">
+    <option value="2160p">2160p</option>
+    <option value="1440p">1440p</option>
+    <option value="1080p" selected>1080p</option>
+    <option value="720p">720p</option>
+    <option value="480p">480p</option>
+    <option value="360p">360p</option>
+</select>
+<br>
+<label for="framerate">Frame Rate:</label>
+<select id="framerate">
+    <option value="60">60 fps</option>
+    <option value="30" selected>30 fps</option>
+</select>
+<br>
+<label for="download-path">Download Path:</label>
+<input type="text" id="download-path" value="" />
+<br>
+<button id="save-settings">Save Settings</button>
+<div id="message">Settings saved</div>
+<script src="script.js"></script>
+</body>
 </html>
