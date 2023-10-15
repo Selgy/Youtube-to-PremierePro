@@ -1,4 +1,4 @@
-// content.js
+
 
 // CSS for the button
 const buttonStyles = `
@@ -33,8 +33,6 @@ function sendURL() {
     const videoUrlElement = document.querySelector('link[rel="canonical"]');
     if (videoUrlElement) {
         const videoUrl = videoUrlElement.href;
-        
-        // Replace the below URL with your server's URL
         const serverUrl = 'http://localhost:3000/handle-video-url';  // Updated to your local server
 
         fetch(serverUrl, {
@@ -44,7 +42,12 @@ function sendURL() {
             },
             body: JSON.stringify({ videoUrl }),  // Sends the video URL in the request body
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.text();  // Use text() instead of json() if the response is plain text
+        })
         .then(data => {
             console.log('Success:', data);
         })
@@ -60,6 +63,7 @@ function sendURL() {
 function isVideoPage() {
     return window.location.href.includes('/watch?v=');
 }
+
 
 function tryModifyMenu() {
     if (isVideoPage()) {  // Check if it's a video page before proceeding
@@ -78,6 +82,22 @@ function tryModifyMenu() {
         }
     }
 }
+const socket = io('http://localhost:3000');  // establish a WebSocket connection to the server
+
+socket.on('percentage', (data) => {  
+    const button = document.getElementById('send-to-premiere-button');
+    if (button) {
+        button.innerText = `Download ${data.percentage}`;  // update the button text
+    }
+});
+
+socket.on('download-complete', () => {
+    const button = document.getElementById('send-to-premiere-button');
+    if (button) {
+        button.innerText = 'Premiere Pro';  // reset the button text
+    }
+});
+
 
 function addPremiereButton() {
     if (isVideoPage()) {  // Check if it's a video page before proceeding

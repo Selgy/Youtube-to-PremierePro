@@ -8,7 +8,7 @@ const port = 3000;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'https://www.youtube.com',
+    origin: ['https://www.youtube.com', 'chrome-extension://enndkfoklmbciklcjopdaokahgocaaac'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type']
 }));
@@ -60,11 +60,14 @@ io.on('connection', (socket) => {
     socket.on('error', (error) => {
         console.error('Socket error:', error);
     });
+
+    socket.on('percentage', (data) => {  // handle the percentage update
+        console.log('Received percentage update:', data.percentage);  // Ensure this log is showing the correct percentage
+        io.emit('percentage', data);  // forward the update to all connected clients
+    });
+    
 });
 
-io.on('connect_error', (error) => {
-    console.error('Connection error:', error);
-});
 
 app.post('/handle-video-url', (req, res) => {
     console.log('Received request on /handle-video-url');
@@ -84,9 +87,11 @@ app.post('/handle-video-url', (req, res) => {
         console.error('Python script errors:', stderr);
 
         io.emit('import', 'D:\\youtube download');
+        io.emit('download-complete');  // Emit the download complete event
         res.sendStatus(200);
     });
 });
+
 
 app.get('/get-video-url', (req, res) => {  // New endpoint to get the latest video URL
     res.json({ videoUrl: latestVideoUrl });

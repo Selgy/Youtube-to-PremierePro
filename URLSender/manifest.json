@@ -3,25 +3,21 @@
   "name": "URL Sender",
   "version": "1.0",
   "description": "Sends the current tab's URL to a local server.",
-  "permissions": ["activeTab","storage"],
-  "host_permissions": [
-    "https://www.youtube.com/*",
-    "http://localhost:3000/"
-  ],
-  
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://www.youtube.com/*"],
   "action": {
     "default_icon": {
-        "48": "icon.png"
+      "48": "icon.png"
     },
     "default_popup": "popup.html"
-},
+  },
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"],
+      "js": ["socket.io.min.js", "content.js"],
       "run_at": "document_idle"
     }
   ],
