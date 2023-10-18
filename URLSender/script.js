@@ -11,6 +11,26 @@ document.addEventListener('DOMContentLoaded', (event) => {
 const button = document.getElementById('save-settings');
 const message = document.getElementById('message');
 
+function startServer() {
+    checkServerStatus().then(isRunning => {
+        if (!isRunning) {
+            // If the server is not running, start it.
+            // This could be done by executing a shell command, for example:
+            const { exec } = require('child_process');
+            exec('node server.js', (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Error starting server:', error);
+                    return;
+                }
+                console.log('Server started successfully');
+            });
+        } else {
+            console.log('Server is already running');
+        }
+    });
+}
+
+
 button.addEventListener('click', () => {
     // Save settings to Local Storage
     const settings = {
@@ -18,7 +38,9 @@ button.addEventListener('click', () => {
         framerate: document.getElementById('framerate').value,
         downloadPath: (document.getElementById('download-path').value),
     };
-    
+    sendSettingsToServer(settings);  // Send settings to the server
+
+    startServer();  // Start the server if it's not already running
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Settings saved');
@@ -34,10 +56,15 @@ button.addEventListener('click', () => {
             }, 500);
         }, 2000);  // Display for 2 seconds
     }, 10);
-
-    // Send settings to the server
-    sendSettingsToServer(settings);
 });
+
+function checkServerStatus() {
+    return fetch('http://localhost:3000/status')
+        .then(response => response.text())
+        .then(text => text === 'Server is running')
+        .catch(error => false);  // Assume server is not running if there is an error
+}
+
 
 async function sendSettingsToServer(settings) {
     try {

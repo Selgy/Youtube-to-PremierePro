@@ -1,5 +1,3 @@
-
-
 // CSS for the button
 const buttonStyles = `
     padding: 9px 18px;
@@ -28,11 +26,33 @@ function createButton() {
     return button;
 }
 
+let currentVideoUrl = '';  // Add this line to keep track of the current video URL
+let lastUrl = window.location.href;  // Store the current URL
+
+function startServer() {
+    checkServerStatus().then(isRunning => {
+        if (!isRunning) {
+            // If the server is not running, start it.
+            // This could be done by executing a shell command, for example:
+            const { exec } = require('child_process');
+            exec('node server.js', (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Error starting server:', error);
+                    return;
+                }
+                console.log('Server started successfully');
+            });
+        } else {
+            console.log('Server is already running');
+        }
+    });
+}
+
+
 // Function to send the video URL to your server
 function sendURL() {
-    const videoUrlElement = document.querySelector('link[rel="canonical"]');
-    if (videoUrlElement) {
-        const videoUrl = videoUrlElement.href;
+    updateVideoUrl();  // Update the video URL before sending it
+    if (currentVideoUrl) {  // Use currentVideoUrl instead of querying the DOM again
         const serverUrl = 'http://localhost:3000/handle-video-url';  // Updated to your local server
 
         fetch(serverUrl, {
@@ -40,7 +60,7 @@ function sendURL() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ videoUrl }),  // Sends the video URL in the request body
+            body: JSON.stringify({ videoUrl: currentVideoUrl }),  // Sends the video URL in the request body
         })
         .then(response => {
             if (!response.ok) {
@@ -64,7 +84,6 @@ function isVideoPage() {
     return window.location.href.includes('/watch?v=');
 }
 
-
 function tryModifyMenu() {
     if (isVideoPage()) {  // Check if it's a video page before proceeding
         const topLevelButtons = document.querySelector('#top-level-buttons-computed');
@@ -82,6 +101,7 @@ function tryModifyMenu() {
         }
     }
 }
+
 const socket = io('http://localhost:3000');  // establish a WebSocket connection to the server
 
 socket.on('percentage', (data) => {  
@@ -98,19 +118,39 @@ socket.on('download-complete', () => {
     }
 });
 
+// Function to update the video URL
+function updateVideoUrl() {
+    const videoUrlElement = document.querySelector('link[rel="canonical"]');
+    if (videoUrlElement) {
+        currentVideoUrl = videoUrlElement.href;
+        console.log('Updated video URL:', currentVideoUrl);  // Log the updated URL for debugging
+    }
+}
+
+// Function to check for URL changes
+function checkUrlChange() {
+    if (lastUrl !== window.location.href) {
+        lastUrl = window.location.href;
+        updateVideoUrl();
+        addPremiereButton();  // Ensure the button is added on URL change
+    }
+}
+
+// Function to check for URL changes every 500 milliseconds (replaces previous setInterval call)
+setInterval(checkUrlChange, 500);
 
 function addPremiereButton() {
-    if (isVideoPage()) {  // Check if it's a video page before proceeding
+    if (isVideoPage()) {
         const topLevelButtons = document.querySelector('#top-level-buttons-computed');
         if (topLevelButtons) {
             const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
-            if (shareButton) {
+            if (shareButton && !document.getElementById('send-to-premiere-button')) {  // Check if the button already exists
                 const premiereButton = createButton();
                 shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
-                observer.disconnect();  // Stop observing once the button has been added
             }
         }
     }
+    updateVideoUrl();
 }
 
 // Start the first attempt to modify the menu

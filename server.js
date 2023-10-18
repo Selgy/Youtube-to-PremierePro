@@ -2,16 +2,12 @@ const express = require('express');
 const fs = require('fs');
 const socketIo = require('socket.io');
 const { exec } = require('child_process');
-const cors = require('cors'); 
+const cors = require('cors');
 const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(cors({
-    origin: ['https://www.youtube.com', 'chrome-extension://enndkfoklmbciklcjopdaokahgocaaac'],
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type']
-}));
+app.use(cors());  // Enable CORS for all routes
 
 app.get('/', (req, res) => {
     res.send('Server is running');
@@ -21,13 +17,17 @@ const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);
 });
 
+app.get('/status', (req, res) => {
+    res.send('Server is running');
+});
+
 let settings = {
     resolution: '1080p',
     framerate: '30',
     downloadPath: 'D:/youtube download',
 };
 
-let latestVideoUrl = '';  // New variable to store the latest video URL
+let latestVideoUrl = '';
 
 app.post('/settings', (req, res) => {
     console.log('Received settings:', req.body);
@@ -61,18 +61,17 @@ io.on('connection', (socket) => {
         console.error('Socket error:', error);
     });
 
-    socket.on('percentage', (data) => {  // handle the percentage update
-        console.log('Received percentage update:', data.percentage);  // Ensure this log is showing the correct percentage
-        io.emit('percentage', data);  // forward the update to all connected clients
+    socket.on('percentage', (data) => {
+        console.log('Received percentage update:', data.percentage);
+        io.emit('percentage', data);
     });
     
 });
 
-
 app.post('/handle-video-url', (req, res) => {
     console.log('Received request on /handle-video-url');
     const videoUrl = req.body.videoUrl;
-    latestVideoUrl = videoUrl;  // Store the latest video URL
+    latestVideoUrl = videoUrl;
     console.log('Video URL:', videoUrl);
     console.log('Request body:', req.body);
 
@@ -87,12 +86,12 @@ app.post('/handle-video-url', (req, res) => {
         console.error('Python script errors:', stderr);
 
         io.emit('import', 'D:\\youtube download');
-        io.emit('download-complete');  // Emit the download complete event
+        io.emit('download-complete');
         res.sendStatus(200);
     });
 });
 
 
-app.get('/get-video-url', (req, res) => {  // New endpoint to get the latest video URL
+app.get('/get-video-url', (req, res) => {
     res.json({ videoUrl: latestVideoUrl });
 });
