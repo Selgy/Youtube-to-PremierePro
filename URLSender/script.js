@@ -21,8 +21,6 @@ button.addEventListener('click', () => {
     };
     sendSettingsToServer(settings);  // Send settings to the server
 
-    startServer();  // Start the server if it's not already running
-
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Settings saved');
 

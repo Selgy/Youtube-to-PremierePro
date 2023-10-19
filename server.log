@@ -5282,3 +5282,161 @@ TypeError: __init__() got an unexpected keyword argument 'success'
 2023-10-19 20:47:11,705 - INFO - 127.0.0.1 - - [19/Oct/2023 20:47:11] "GET /socket.io/?EIO=4&transport=polling&t=Oj9GrKX&sid=q2KATLS1ZgQQa8mFAAAG HTTP/1.1" 200 -
 2023-10-19 20:47:11,709 - INFO - 127.0.0.1 - - [19/Oct/2023 20:47:11] "GET /socket.io/?EIO=4&transport=polling&t=Oj9GrPR&sid=q2KATLS1ZgQQa8mFAAAG HTTP/1.1" 200 -
 2023-10-19 20:47:11,709 - INFO - 127.0.0.1 - - [19/Oct/2023 20:47:11] "GET /socket.io/?EIO=4&transport=polling&t=Oj9GrPR&sid=q2KATLS1ZgQQa8mFAAAG HTTP/1.1" 200 -
+2023-10-19 21:01:57,097 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:57] "GET /socket.io/?EIO=4&transport=websocket&sid=q2KATLS1ZgQQa8mFAAAG HTTP/1.1" 200 -
+2023-10-19 21:01:57,097 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:57] "GET /socket.io/?EIO=4&transport=websocket&sid=q2KATLS1ZgQQa8mFAAAG HTTP/1.1" 200 -
+2023-10-19 21:01:58,598 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9KDsH HTTP/1.1" 200 -
+2023-10-19 21:01:58,598 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9KDsH HTTP/1.1" 200 -
+2023-10-19 21:01:58,863 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "POST /socket.io/?EIO=4&transport=polling&t=Oj9KDx8&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 21:01:58,863 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "POST /socket.io/?EIO=4&transport=polling&t=Oj9KDx8&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 21:01:58,911 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9KDx9&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 21:01:58,911 - INFO - 127.0.0.1 - - [19/Oct/2023 21:01:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9KDx9&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 21:15:24,542 - INFO - 127.0.0.1 - - [19/Oct/2023 21:15:24] "GET /socket.io/?EIO=4&transport=websocket&sid=iTMopI2Yvmzxa2axAAAA HTTP/1.1" 200 -
+2023-10-19 21:15:24,542 - INFO - 127.0.0.1 - - [19/Oct/2023 21:15:24] "GET /socket.io/?EIO=4&transport=websocket&sid=iTMopI2Yvmzxa2axAAAA HTTP/1.1" 200 -
+2023-10-19 21:22:00,357 - INFO - 127.0.0.1 - - [19/Oct/2023 21:22:00] "GET /socket.io/?EIO=4&transport=websocket&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 21:22:00,357 - INFO - 127.0.0.1 - - [19/Oct/2023 21:22:00] "GET /socket.io/?EIO=4&transport=websocket&sid=jzOEl3i6P1QWSPbqAAAI HTTP/1.1" 200 -
+2023-10-19 23:29:53,602 - INFO - Script starting...
+2023-10-19 23:29:53,602 - INFO - Script starting...
+2023-10-19 23:29:53,602 - INFO - Settings loaded: {'resolution': '1080', 'framerate': '30', 'downloadPath': 'C:\\Users\\micka\\Extension Test\\YoutubeDL'}
+2023-10-19 23:29:53,602 - INFO - Settings loaded: {'resolution': '1080', 'framerate': '30', 'downloadPath': 'C:\\Users\\micka\\Extension Test\\YoutubeDL'}
+2023-10-19 23:29:53,615 - DEBUG - STREAM b'IHDR' 16 13
+2023-10-19 23:29:53,615 - DEBUG - STREAM b'IHDR' 16 13
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'cHRM' 41 32
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'cHRM' 41 32
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'PLTE' 85 462
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'PLTE' 85 462
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'tRNS' 559 24
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'tRNS' 559 24
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'bKGD' 595 1
+2023-10-19 23:29:53,616 - DEBUG - STREAM b'bKGD' 595 1
+2023-10-19 23:29:53,617 - DEBUG - b'bKGD' 595 1 (unknown)
+2023-10-19 23:29:53,618 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:3001
+2023-10-19 23:29:53,617 - DEBUG - b'bKGD' 595 1 (unknown)
+2023-10-19 23:29:53,618 - DEBUG - STREAM b'tIME' 608 7
+2023-10-19 23:29:53,618 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://localhost:3001
+2023-10-19 23:29:53,619 - INFO - [33mPress CTRL+C to quit[0m
+2023-10-19 23:29:53,618 - DEBUG - STREAM b'tIME' 608 7
+2023-10-19 23:29:53,619 - DEBUG - b'tIME' 608 7 (unknown)
+2023-10-19 23:29:53,619 - INFO - [33mPress CTRL+C to quit[0m
+2023-10-19 23:29:53,619 - DEBUG - b'tIME' 608 7 (unknown)
+2023-10-19 23:29:53,619 - DEBUG - STREAM b'IDAT' 627 540
+2023-10-19 23:29:53,619 - DEBUG - STREAM b'IDAT' 627 540
+2023-10-19 23:29:53,629 - DEBUG - STREAM b'tEXt' 1179 37
+2023-10-19 23:29:53,629 - DEBUG - STREAM b'tEXt' 1179 37
+2023-10-19 23:29:53,630 - DEBUG - STREAM b'tEXt' 1228 37
+2023-10-19 23:29:53,630 - DEBUG - STREAM b'tEXt' 1228 37
+2023-10-19 23:29:53,630 - DEBUG - STREAM b'tEXt' 1277 40
+2023-10-19 23:29:53,630 - DEBUG - STREAM b'tEXt' 1277 40
+2023-10-19 23:29:53,631 - DEBUG - Importing BlpImagePlugin
+2023-10-19 23:29:53,631 - DEBUG - Importing BlpImagePlugin
+2023-10-19 23:29:53,632 - DEBUG - Importing BmpImagePlugin
+2023-10-19 23:29:53,632 - DEBUG - Importing BmpImagePlugin
+2023-10-19 23:29:53,633 - DEBUG - Importing BufrStubImagePlugin
+2023-10-19 23:29:53,633 - DEBUG - Importing BufrStubImagePlugin
+2023-10-19 23:29:53,634 - DEBUG - Importing CurImagePlugin
+2023-10-19 23:29:53,634 - DEBUG - Importing CurImagePlugin
+2023-10-19 23:29:53,635 - DEBUG - Importing DcxImagePlugin
+2023-10-19 23:29:53,635 - DEBUG - Importing DcxImagePlugin
+2023-10-19 23:29:53,636 - DEBUG - Importing DdsImagePlugin
+2023-10-19 23:29:53,636 - DEBUG - Importing DdsImagePlugin
+2023-10-19 23:29:53,637 - DEBUG - Importing EpsImagePlugin
+2023-10-19 23:29:53,637 - DEBUG - Importing EpsImagePlugin
+2023-10-19 23:29:53,639 - DEBUG - Importing FitsImagePlugin
+2023-10-19 23:29:53,639 - DEBUG - Importing FitsImagePlugin
+2023-10-19 23:29:53,640 - DEBUG - Importing FliImagePlugin
+2023-10-19 23:29:53,640 - DEBUG - Importing FliImagePlugin
+2023-10-19 23:29:53,641 - DEBUG - Importing FpxImagePlugin
+2023-10-19 23:29:53,641 - DEBUG - Importing FpxImagePlugin
+2023-10-19 23:29:53,644 - DEBUG - Importing FtexImagePlugin
+2023-10-19 23:29:53,644 - DEBUG - Importing FtexImagePlugin
+2023-10-19 23:29:53,645 - DEBUG - Importing GbrImagePlugin
+2023-10-19 23:29:53,645 - DEBUG - Importing GbrImagePlugin
+2023-10-19 23:29:53,646 - DEBUG - Importing GifImagePlugin
+2023-10-19 23:29:53,646 - DEBUG - Importing GifImagePlugin
+2023-10-19 23:29:53,646 - DEBUG - Importing GribStubImagePlugin
+2023-10-19 23:29:53,646 - DEBUG - Importing GribStubImagePlugin
+2023-10-19 23:29:53,648 - DEBUG - Importing Hdf5StubImagePlugin
+2023-10-19 23:29:53,648 - DEBUG - Importing Hdf5StubImagePlugin
+2023-10-19 23:29:53,649 - DEBUG - Importing IcnsImagePlugin
+2023-10-19 23:29:53,649 - DEBUG - Importing IcnsImagePlugin
+2023-10-19 23:29:53,651 - DEBUG - Importing IcoImagePlugin
+2023-10-19 23:29:53,651 - DEBUG - Importing IcoImagePlugin
+2023-10-19 23:29:53,652 - DEBUG - Importing ImImagePlugin
+2023-10-19 23:29:53,652 - DEBUG - Importing ImImagePlugin
+2023-10-19 23:29:53,654 - DEBUG - Importing ImtImagePlugin
+2023-10-19 23:29:53,654 - DEBUG - Importing ImtImagePlugin
+2023-10-19 23:29:53,656 - DEBUG - Importing IptcImagePlugin
+2023-10-19 23:29:53,656 - DEBUG - Importing IptcImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing JpegImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing JpegImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing Jpeg2KImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing Jpeg2KImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing McIdasImagePlugin
+2023-10-19 23:29:53,657 - DEBUG - Importing McIdasImagePlugin
+2023-10-19 23:29:53,658 - DEBUG - Importing MicImagePlugin
+2023-10-19 23:29:53,658 - DEBUG - Importing MicImagePlugin
+2023-10-19 23:29:53,663 - DEBUG - Importing MpegImagePlugin
+2023-10-19 23:29:53,663 - DEBUG - Importing MpegImagePlugin
+2023-10-19 23:29:53,664 - DEBUG - Importing MpoImagePlugin
+2023-10-19 23:29:53,664 - DEBUG - Importing MpoImagePlugin
+2023-10-19 23:29:53,666 - DEBUG - Importing MspImagePlugin
+2023-10-19 23:29:53,666 - DEBUG - Importing MspImagePlugin
+2023-10-19 23:29:53,667 - DEBUG - Importing PalmImagePlugin
+2023-10-19 23:29:53,667 - DEBUG - Importing PalmImagePlugin
+2023-10-19 23:29:53,668 - DEBUG - Importing PcdImagePlugin
+2023-10-19 23:29:53,668 - DEBUG - Importing PcdImagePlugin
+2023-10-19 23:29:53,669 - DEBUG - Importing PcxImagePlugin
+2023-10-19 23:29:53,669 - DEBUG - Importing PcxImagePlugin
+2023-10-19 23:29:53,669 - DEBUG - Importing PdfImagePlugin
+2023-10-19 23:29:53,669 - DEBUG - Importing PdfImagePlugin
+2023-10-19 23:29:53,681 - DEBUG - Importing PixarImagePlugin
+2023-10-19 23:29:53,681 - DEBUG - Importing PixarImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PngImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PngImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PpmImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PpmImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PsdImagePlugin
+2023-10-19 23:29:53,682 - DEBUG - Importing PsdImagePlugin
+2023-10-19 23:29:53,684 - DEBUG - Importing QoiImagePlugin
+2023-10-19 23:29:53,684 - DEBUG - Importing QoiImagePlugin
+2023-10-19 23:29:53,684 - DEBUG - Importing SgiImagePlugin
+2023-10-19 23:29:53,684 - DEBUG - Importing SgiImagePlugin
+2023-10-19 23:29:53,685 - DEBUG - Importing SpiderImagePlugin
+2023-10-19 23:29:53,685 - DEBUG - Importing SpiderImagePlugin
+2023-10-19 23:29:53,687 - DEBUG - Importing SunImagePlugin
+2023-10-19 23:29:53,687 - DEBUG - Importing SunImagePlugin
+2023-10-19 23:29:53,688 - DEBUG - Importing TgaImagePlugin
+2023-10-19 23:29:53,688 - DEBUG - Importing TgaImagePlugin
+2023-10-19 23:29:53,689 - DEBUG - Importing TiffImagePlugin
+2023-10-19 23:29:53,689 - DEBUG - Importing TiffImagePlugin
+2023-10-19 23:29:53,689 - DEBUG - Importing WebPImagePlugin
+2023-10-19 23:29:53,689 - DEBUG - Importing WebPImagePlugin
+2023-10-19 23:29:53,691 - DEBUG - Importing WmfImagePlugin
+2023-10-19 23:29:53,691 - DEBUG - Importing WmfImagePlugin
+2023-10-19 23:29:53,692 - DEBUG - Importing XbmImagePlugin
+2023-10-19 23:29:53,692 - DEBUG - Importing XbmImagePlugin
+2023-10-19 23:29:53,694 - DEBUG - Importing XpmImagePlugin
+2023-10-19 23:29:53,694 - DEBUG - Importing XpmImagePlugin
+2023-10-19 23:29:53,695 - DEBUG - Importing XVThumbImagePlugin
+2023-10-19 23:29:53,695 - DEBUG - Importing XVThumbImagePlugin
+2023-10-19 23:29:53,765 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:53] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s4KT HTTP/1.1" 200 -
+2023-10-19 23:29:53,765 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:53] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s4KT HTTP/1.1" 200 -
+2023-10-19 23:29:53,984 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:53] "POST /socket.io/?EIO=4&transport=polling&t=Oj9s4je&sid=ludqf3g-mrgtqhMeAAAA HTTP/1.1" 200 -
+2023-10-19 23:29:53,984 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:53] "POST /socket.io/?EIO=4&transport=polling&t=Oj9s4je&sid=ludqf3g-mrgtqhMeAAAA HTTP/1.1" 200 -
+2023-10-19 23:29:54,078 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:54] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s4jf&sid=ludqf3g-mrgtqhMeAAAA HTTP/1.1" 200 -
+2023-10-19 23:29:54,078 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:54] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s4jf&sid=ludqf3g-mrgtqhMeAAAA HTTP/1.1" 200 -
+2023-10-19 23:29:58,519 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s5tr HTTP/1.1" 200 -
+2023-10-19 23:29:58,519 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s5tr HTTP/1.1" 200 -
+2023-10-19 23:29:58,834 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "POST /socket.io/?EIO=4&transport=polling&t=Oj9s5tw&sid=6QFDVR5UidPXT3NSAAAC HTTP/1.1" 200 -
+2023-10-19 23:29:58,834 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "POST /socket.io/?EIO=4&transport=polling&t=Oj9s5tw&sid=6QFDVR5UidPXT3NSAAAC HTTP/1.1" 200 -
+2023-10-19 23:29:58,835 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s5tx&sid=6QFDVR5UidPXT3NSAAAC HTTP/1.1" 200 -
+2023-10-19 23:29:58,835 - INFO - 127.0.0.1 - - [19/Oct/2023 23:29:58] "GET /socket.io/?EIO=4&transport=polling&t=Oj9s5tx&sid=6QFDVR5UidPXT3NSAAAC HTTP/1.1" 200 -
+2023-10-19 23:30:00,218 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:00] "OPTIONS /settings HTTP/1.1" 200 -
+2023-10-19 23:30:00,218 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:00] "OPTIONS /settings HTTP/1.1" 200 -
+2023-10-19 23:30:00,469 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:00] "POST /settings HTTP/1.1" 200 -
+2023-10-19 23:30:00,469 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:00] "POST /settings HTTP/1.1" 200 -
+2023-10-19 23:30:02,236 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:02] "POST /settings HTTP/1.1" 200 -
+2023-10-19 23:30:02,236 - INFO - 127.0.0.1 - - [19/Oct/2023 23:30:02] "POST /settings HTTP/1.1" 200 -
+2023-10-19 23:32:09,023 - INFO - 127.0.0.1 - - [19/Oct/2023 23:32:09] "OPTIONS /settings HTTP/1.1" 200 -
+2023-10-19 23:32:09,023 - INFO - 127.0.0.1 - - [19/Oct/2023 23:32:09] "OPTIONS /settings HTTP/1.1" 200 -

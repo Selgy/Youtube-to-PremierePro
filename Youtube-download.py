@@ -212,7 +212,7 @@ def exit_action(icon, item):
 
 def run_tray_icon():
     image = create_image()
-    icon = pystray.Icon("test_icon", image, "My System Tray Icon", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
+    icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
     icon.run()
 
 if __name__ == "__main__":
