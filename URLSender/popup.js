@@ -3,7 +3,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
   const framerate = document.getElementById('framerate').value;
   const downloadPath = document.getElementById('download-path').value;
 
-  fetch('http://localhost:3000/settings', {
+  fetch('http://localhost:3001/settings', {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',

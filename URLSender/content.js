@@ -53,7 +53,7 @@ function startServer() {
 function sendURL() {
     updateVideoUrl();  // Update the video URL before sending it
     if (currentVideoUrl) {  // Use currentVideoUrl instead of querying the DOM again
-        const serverUrl = 'http://localhost:3000/handle-video-url';  // Updated to your local server
+        const serverUrl = 'http://localhost:3001/handle-video-url';  // Updated to your local server
 
         fetch(serverUrl, {
             method: 'POST',
@@ -102,7 +102,7 @@ function tryModifyMenu() {
     }
 }
 
-const socket = io('http://localhost:3000');  // establish a WebSocket connection to the server
+const socket = io('http://localhost:3001');  // establish a WebSocket connection to the server
 
 socket.on('percentage', (data) => {  
     const button = document.getElementById('send-to-premiere-button');

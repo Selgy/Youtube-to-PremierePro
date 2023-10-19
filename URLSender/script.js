@@ -11,25 +11,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
 const button = document.getElementById('save-settings');
 const message = document.getElementById('message');
 
-function startServer() {
-    checkServerStatus().then(isRunning => {
-        if (!isRunning) {
-            // If the server is not running, start it.
-            // This could be done by executing a shell command, for example:
-            const { exec } = require('child_process');
-            exec('node server.js', (error, stdout, stderr) => {
-                if (error) {
-                    console.error('Error starting server:', error);
-                    return;
-                }
-                console.log('Server started successfully');
-            });
-        } else {
-            console.log('Server is already running');
-        }
-    });
-}
-
 
 button.addEventListener('click', () => {
     // Save settings to Local Storage
@@ -58,17 +39,10 @@ button.addEventListener('click', () => {
     }, 10);
 });
 
-function checkServerStatus() {
-    return fetch('http://localhost:3000/status')
-        .then(response => response.text())
-        .then(text => text === 'Server is running')
-        .catch(error => false);  // Assume server is not running if there is an error
-}
-
 
 async function sendSettingsToServer(settings) {
     try {
-        const response = await fetch('http://localhost:3000/settings', {
+        const response = await fetch('http://localhost:3001/settings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

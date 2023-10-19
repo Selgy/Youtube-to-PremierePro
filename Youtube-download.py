@@ -4,36 +4,119 @@ import winsound
 import yt_dlp as youtube_dl
 import pymiere
 import sys
-import socketio
-import requests
-import json
 import logging
+from flask_cors import CORS
+from flask import Flask, request, jsonify
+from flask_socketio import SocketIO, emit
+import socketio as sio_client  
+import json
+import threading
+import pystray
+from PIL import Image, ImageDraw 
+import re
+import psutil
+import tkinter as tk
+from tkinter import messagebox
+from pymiere.core import check_premiere_is_alive
+
+SETTINGS_FILE = 'settings.json'
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler('server.log'), logging.StreamHandler()])
+log_handler = logging.FileHandler('server.log')
+log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+logging.getLogger().addHandler(log_handler)
 
-sio = socketio.Client()
+app = Flask(__name__)
+CORS(app) 
+socketio = SocketIO(app, cors_allowed_origins="*")
 
+video_url_global = None  # Define a global variable to store the video URL
+settings_global = None  # Define a global variable to store the settings
+
+@app.route('/', methods=['GET', 'POST'])
+def root():
+    if request.method == 'GET':
+        return "Premiere is alive", 200
+    elif request.method == 'POST':
+        data = request.get_json()
+        # ... process the data
+        return jsonify(success=True), 200
+    else:
+        return "Method not allowed", 405
+
+
+@app.route('/settings', methods=['POST'])
+def update_settings():
+    new_settings = request.get_json()
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(new_settings, f, indent=4)
+    return jsonify(success=True), 200
+
+@app.route('/get-video-url', methods=['GET'])
+def get_video_url():
+    global video_url_global
+    if video_url_global is None:
+        return jsonify(error="No video URL set"), 404
+    return jsonify(videoUrl=video_url_global)
+
+def is_premiere_running():
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
+            return True
+    return False
+
+
+@app.route('/handle-video-url', methods=['POST'])
+def handle_video_url():
+    logging.info(f'settings_global at handle_video_url start: {settings_global}')
+    global video_url_global
+    data = request.get_json()
+    video_url_global = data.get('videoUrl')
+    logging.info(f'Video URL received: {video_url_global}')
+
+    # Ensure settings have been received before attempting to download the video
+    if settings_global is None:
+        logging.error("Settings not received from the extension.")
+        return jsonify(error="Settings not received"), 400
+
+    # Get the settings values
+    resolution = settings_global['resolution']
+    framerate = settings_global['framerate']
+    download_path = settings_global['downloadPath']
+
+    # Check if Adobe Premiere Pro is running
+    if not is_premiere_running():
+        root = tk.Tk()
+        root.withdraw()  # Hide the main window
+        messagebox.showerror("Error", "Adobe Premiere Pro is not running")
+        return jsonify(error="Adobe Premiere Pro is not running"), 400
+
+    # Initiate the download of the video
+    download_video(video_url_global, resolution, framerate, download_path)
+
+    return jsonify(success=True), 200
 
 def read_settings_from_local():
-    try:
-        settings_path = os.path.join(os.path.dirname(__file__), 'settings.json')
-        with open('settings.json', 'r') as file:
-            settings = json.load(file)
-        logging.info('Settings read from local file successfully')
-        return settings
-    except Exception as e:
-        logging.error(f'Error reading settings: {e}')
+    global settings_global
+    if settings_global is None:
+        logging.error("Settings not received from the extension.")
         sys.exit(1)
+    return settings_global
+
 
 def import_video_to_premiere(video_path):
     try:
+        logging.info('Attempting to import video to Premiere...')
         proj = pymiere.objects.app.project
+        logging.info('Got project object: %s', proj)
         root_bin = proj.rootItem
+        logging.info('Got root bin: %s', root_bin)
         proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
         logging.info(f'Video imported to Premiere successfully: {video_path}')
     except Exception as e:
-        logging.error(f'Error importing video: {e}')
+        logging.error(f'Error importing video: {e}', exc_info=True)
+
 
 def sanitize_title(title):
     return (title.replace(":", " -")
@@ -41,19 +124,18 @@ def sanitize_title(title):
                  .replace("：", " -")  
                  .replace("｜", "-"))  
 
-
 def progress_hook(d):
     if d['status'] == 'downloading':
         percentage = d['_percent_str']
-        print(f'Progress: {percentage}')  # Add this line
-        sio.emit('percentage', {'percentage': percentage})  # emit the percentage update
+        # Remove ANSI escape codes
+        percentage = re.sub(r'\x1B\[[0-?]*[ -/]*[@-~]', '', percentage)
+        print(f'Progress: {percentage}')
+        socketio.emit('percentage', {'percentage': percentage})
 
 
 def download_video(video_url, resolution, framerate, download_path):
     logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
-    # Ensure download_path ends with a backslash
     download_path = os.path.join(download_path, '')
-
 
     with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
         info_dict = ydl.extract_info(video_url, download=False)
@@ -71,49 +153,82 @@ def download_video(video_url, resolution, framerate, download_path):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
 
-
-    # Check if the download was successful (result == 0)
     if result == 0:
-        video_title = sanitize_title(info_dict['title'])  # Sanitizing title here
+        video_title = sanitize_title(info_dict['title'])
         video_filename = os.path.join(download_path, f"{video_title}.mp4")
-
         import_video_to_premiere(video_filename)
+        # Emit the 'download-complete' event here
+        socketio.emit('download-complete')
     else:
         logging.error(f'Failed to download video from {video_url}')
 
     if os.path.exists(video_filename):
-        # Signal completion with a beep
         winsound.MessageBeep()
-        time.sleep(2)  # This sleep is to delay the logging message, adjust as needed
+        time.sleep(2)
         logging.info(f'Download and import completed successfully for {video_url}')
     else:
         logging.error("Video download failed.")
 
 
-sio = socketio.Client()
+def load_settings():
+    if os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, 'r') as f:
+            settings = json.load(f)
+        return settings
+    return None
+
+def main():
+    logging.info('Script starting...')  # Log the starting of the script
+    global settings_global
+    settings_global = load_settings()  # Load settings from file
+    logging.info('Settings loaded: %s', settings_global)  # Log the loaded settings
+    try:
+        # Start the Flask server in a separate thread
+        from threading import Thread
+        logging.info('Starting server thread...')  # Log before starting the server thread
+        server_thread = Thread(target=lambda: socketio.run(app, host='localhost', port=3001))
+        server_thread.start()
+        logging.info('Server thread started')  # Log after starting the server thread
+        # ... (rest of your code)
+    except Exception as e:
+        logging.exception(f'An error occurred: {e}')
+
+    else:
+        # Stop the server when done
+        server_thread.join()
+
+
+def create_image():
+    # Load the icon.png file
+    icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
+    print(f'Icon path: {icon_path}')  # Add this line
+    image = Image.open(icon_path)
+    return image
+
+
+def exit_action(icon, item):
+    icon.stop()
+    os._exit(0) 
+
+def run_tray_icon():
+    image = create_image()
+    icon = pystray.Icon("test_icon", image, "My System Tray Icon", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
+    icon.run()
 
 if __name__ == "__main__":
-    # Establish the Socket.IO connection at the beginning
-    sio.connect('http://localhost:3000')
+    logging.info('Script starting...')
+    settings_global = load_settings()  # Load settings from file
+    logging.info('Settings loaded: %s', settings_global)
+    try:
+        # Start the Flask server in a separate thread
+        server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
+        server_thread.start()
 
-    settings = read_settings_from_local()
-    if len(settings) != 3:
-        logging.error("Error: Invalid settings format from the server.")
-        sys.exit(1)
-
-    resolution = settings['resolution']
-    framerate = settings['framerate']
-    download_path = settings['downloadPath']
-    response = requests.get('http://localhost:3000/get-video-url')
-    video_url = response.json()['videoUrl']
-    if not video_url:
-        logging.error('No video URL received from server')
-        sys.exit(1)
-
-    download_video(video_url, resolution, framerate, download_path)
-    logging.info('Download completed')
-
-    # Emit the import event
-    sio.emit('import', download_path)
-    # Disconnect from the server
-    sio.disconnect()
+        # Start the pystray icon in a separate thread
+        icon_thread = threading.Thread(target=run_tray_icon)
+        icon_thread.start()
+    except Exception as e:
+        logging.exception(f'An unhandled exception occurred: {e}')
+    finally:
+        server_thread.join()
+        icon_thread.join()
