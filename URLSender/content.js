@@ -51,8 +51,9 @@ function startServer() {
 
 // Function to send the video URL to your server
 function sendURL() {
-    updateVideoUrl();  // Update the video URL before sending it
-    if (currentVideoUrl) {  // Use currentVideoUrl instead of querying the DOM again
+    const videoId = new URLSearchParams(window.location.search).get('v');
+    if (videoId) {
+        const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;  // Construct the video URL
         const serverUrl = 'http://localhost:3001/handle-video-url';  // Updated to your local server
 
         fetch(serverUrl, {
@@ -79,6 +80,7 @@ function sendURL() {
         console.error('No video URL found.');
     }
 }
+
 
 function isVideoPage() {
     return window.location.href.includes('/watch?v=');

@@ -22,10 +22,10 @@ from pymiere.core import check_premiere_is_alive
 SETTINGS_FILE = 'settings.json'
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler('server.log'), logging.StreamHandler()])
-log_handler = logging.FileHandler('server.log')
-log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-logging.getLogger().addHandler(log_handler)
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler('server.log'), logging.StreamHandler()])
+#log_handler = logging.FileHandler('server.log')
+#log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+#logging.getLogger().addHandler(log_handler)
 
 app = Flask(__name__)
 CORS(app) 

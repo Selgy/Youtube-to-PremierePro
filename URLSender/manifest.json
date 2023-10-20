@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "URL Sender",
+  "name": "Youtube to Premiere pro",
   "version": "1.0",
-  "description": "Sends the current tab's URL to a local server.",
+  "description": "Sends the current tab's URL to a local server and to Premiere pro throught Pymiere.",
   "permissions": ["activeTab", "storage"],
   "host_permissions": ["https://www.youtube.com/*"],
   "action": {
@@ -17,7 +17,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["socket.io.min.js", "content.js"],
+      "js": ["socket.io.min.js", "content.js","script.js","popup.js"],
       "run_at": "document_idle"
     }
   ],
