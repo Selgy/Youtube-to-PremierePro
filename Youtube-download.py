@@ -186,9 +186,10 @@ def download_video(video_url, resolution, framerate, download_path):
     else:
         logging.error("Video download failed.")
 
-def play_notification_sound():
+def play_notification_sound(volume=0.5):  # Default volume set to 50%
     pygame.mixer.init()
-    pygame.mixer.music.load("notification_sound.mp3")  # You can replace this with your notification sound file
+    pygame.mixer.music.load("notification_sound.mp3")  # Load your notification sound file
+    pygame.mixer.music.set_volume(volume)  # Set the volume
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
