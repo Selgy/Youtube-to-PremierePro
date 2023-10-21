@@ -18,7 +18,6 @@ set "ShortcutName=%StartupFolder%\StartServer.lnk"
 :: Use PowerShell to create the shortcut
 powershell -command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%ShortcutName%'); $s.TargetPath = '%~dp0%BatchName%'; $s.Save()"
 
-<<<<<<< HEAD
 :: Change directory to the location of the batch file
 cd /d %~dp0
 
@@ -49,8 +48,6 @@ powershell -command "Remove-Item .\ffmpeg_temp -Recurse"
 echo FFmpeg has been downloaded and extracted.
 
 
-=======
->>>>>>> parent of fe866dc (update)
 :: Auto install PymiereLink extension to Premiere on windows
 echo Downloading Adobe Extension Manager
 curl "http://download.macromedia.com/pub/extensionmanager/ExManCmd_win.zip" --output %temp%\ExManCmd_win.zip
@@ -74,4 +71,4 @@ if %ERRORLEVEL% NEQ 0 (
     echo Installation successful !
 )
 
-endlocal
+PAUSE

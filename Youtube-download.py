@@ -160,13 +160,21 @@ def download_video(video_url, resolution, framerate, download_path):
     video_title = sanitize_title(info_dict['title'])
     sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
 
+    # Get the directory where this script is located
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Build the path to ffmpeg
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+
     ydl_opts = {
         'outtmpl': sanitized_output_template,
+        'ffmpeg_location': ffmpeg_path,  # Specify the path to ffmpeg
         'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False
-        }
+        'progress_hooks': [progress_hook],
+        'writesubtitles': False,
+        'writeautomaticsub': False
+    }
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
 
@@ -217,7 +225,6 @@ def main():
         server_thread = Thread(target=lambda: socketio.run(app, host='localhost', port=3001))
         server_thread.start()
         logging.info('Server thread started')  # Log after starting the server thread
-        # ... (rest of your code)
     except Exception as e:
         logging.exception(f'An error occurred: {e}')
 
