@@ -18,6 +18,39 @@ set "ShortcutName=%StartupFolder%\StartServer.lnk"
 :: Use PowerShell to create the shortcut
 powershell -command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%ShortcutName%'); $s.TargetPath = '%~dp0%BatchName%'; $s.Save()"
 
+<<<<<<< HEAD
+:: Change directory to the location of the batch file
+cd /d %~dp0
+
+:: Upgrade pip and Install the necessary Python libraries
+echo Upgrading pip and Installing Python libraries...
+pip install --only-binary Pillow Pillow
+pip install Flask flask-cors flask-socketio python-socketio[client] yt-dlp pymiere psutil Pillow pystray pygame
+"%~dp0venv\Scripts\python.exe" -m pip install --upgrade pip
+echo Python libraries have been installed.
+echo.
+
+:: Download FFmpeg
+echo Downloading FFmpeg...
+curl -L -o %TEMP%\ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2023-10-13-18-10/ffmpeg-n6.0-36-gc5039e158d-win64-gpl-6.0.zip
+
+:: Extract FFmpeg
+echo Extracting FFmpeg...
+powershell -command "Expand-Archive -Path %TEMP%\ffmpeg.zip -DestinationPath .\ffmpeg_temp"
+
+:: Move the contents from ffmpeg-n6.0-36-gc5039e158d-win64-gpl-6.0 to ffmpeg
+echo Moving FFmpeg files...
+powershell -command "Move-Item .\ffmpeg_temp\ffmpeg-n6.0-36-gc5039e158d-win64-gpl-6.0\* .\ffmpeg"
+
+:: Remove the temporary directory
+powershell -command "Remove-Item .\ffmpeg_temp -Recurse"
+
+:: Echo FFmpeg extraction complete
+echo FFmpeg has been downloaded and extracted.
+
+
+=======
+>>>>>>> parent of fe866dc (update)
 :: Auto install PymiereLink extension to Premiere on windows
 echo Downloading Adobe Extension Manager
 curl "http://download.macromedia.com/pub/extensionmanager/ExManCmd_win.zip" --output %temp%\ExManCmd_win.zip

@@ -1,6 +1,6 @@
 import os
 import time
-import winsound
+import pygame.mixer
 import yt_dlp as youtube_dl
 import pymiere
 import sys
@@ -84,7 +84,6 @@ def is_premiere_running():
 
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
-    logging.info(f'settings_global at handle_video_url start: {settings_global}')
     global video_url_global
     data = request.get_json()
     video_url_global = data.get('videoUrl')
@@ -93,8 +92,9 @@ def handle_video_url():
     # Ensure settings have been received before attempting to download the video
     if settings_global is None:
         logging.error("Settings not received from the extension.")
-        return jsonify(error="Settings not received"), 400
-
+        return jsonify(error="Settings not received"), 500 
+    
+    
     # Get the settings values
     resolution = settings_global['resolution']
     framerate = settings_global['framerate']
@@ -176,23 +176,33 @@ def download_video(video_url, resolution, framerate, download_path):
         import_video_to_premiere(video_filename)
         # Emit the 'download-complete' event here
         socketio.emit('download-complete')
+        play_notification_sound()
     else:
         logging.error(f'Failed to download video from {video_url}')
 
     if os.path.exists(video_filename):
-        winsound.MessageBeep()
         time.sleep(2)
         logging.info(f'Download and import completed successfully for {video_url}')
     else:
         logging.error("Video download failed.")
+
+def play_notification_sound():
+    pygame.mixer.init()
+    pygame.mixer.music.load("notification_sound.mp3")  # You can replace this with your notification sound file
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy():
+        pygame.time.Clock().tick(10)
 
 
 def load_settings():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
+        logging.info(f'Loaded settings: {settings}')  # Log the loaded settings
         return settings
+    logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
+
 
 def main():
     logging.info('Script starting...')  # Log the starting of the script
@@ -241,11 +251,9 @@ if __name__ == "__main__":
         server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
         server_thread.start()
 
-        # Start the pystray icon in a separate thread
-        icon_thread = threading.Thread(target=run_tray_icon)
-        icon_thread.start()
+        # Call run_tray_icon directly on the main thread
+        run_tray_icon()
     except Exception as e:
         logging.exception(f'An unhandled exception occurred: {e}')
     finally:
         server_thread.join()
-        icon_thread.join()
