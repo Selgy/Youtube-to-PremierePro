@@ -8,7 +8,6 @@ import logging
 from flask_cors import CORS
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
-import socketio as sio_client  
 import json
 import threading
 import pystray
@@ -17,7 +16,6 @@ import re
 import psutil
 import tkinter as tk
 from tkinter import messagebox
-from pymiere.core import check_premiere_is_alive
 
 SETTINGS_FILE = 'settings.json'
 
@@ -33,6 +31,23 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 video_url_global = None  # Define a global variable to store the video URL
 settings_global = None  # Define a global variable to store the settings
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin')  # Changed line
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'  # Add this line
+    return response
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify(error=str(e)), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return jsonify(error=str(e)), 500
 
 @app.route('/', methods=['GET', 'POST'])
 def root():
@@ -95,7 +110,9 @@ def handle_video_url():
     # Initiate the download of the video
     download_video(video_url_global, resolution, framerate, download_path)
 
-    return jsonify(success=True), 200
+    response = jsonify(success=True)
+    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
+    return response, 200
 
 def read_settings_from_local():
     global settings_global

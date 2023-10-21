@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "Youtube to Premiere Pro",
+  "version": "1.0",
+  "description": "Sends the current tab's URL to a local server and to Premiere Pro through Pymiere.",
+  "permissions": ["activeTab", "tabs", "storage", "https://www.youtube.com/*", "http://localhost:3001/*"],
+  "browser_action": {
+      "default_icon": {
+          "48": "icon.png"
+      },
+      "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+      {
+          "matches": ["https://www.youtube.com/*"],
+          "js": ["socket.io.min.js", "content.js", "script.js", "popup.js"],
+          "run_at": "document_idle"
+      }
+  ],
+  "icons": {
+      "48": "icon.png"
+  }
+}

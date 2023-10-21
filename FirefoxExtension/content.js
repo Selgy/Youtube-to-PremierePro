@@ -29,53 +29,15 @@ function createButton() {
 let currentVideoUrl = '';  // Add this line to keep track of the current video URL
 let lastUrl = window.location.href;  // Store the current URL
 
-function startServer() {
-    checkServerStatus().then(isRunning => {
-        if (!isRunning) {
-            // If the server is not running, start it.
-            // This could be done by executing a shell command, for example:
-            const { exec } = require('child_process');
-            exec('node server.js', (error, stdout, stderr) => {
-                if (error) {
-                    console.error('Error starting server:', error);
-                    return;
-                }
-                console.log('Server started successfully');
-            });
-        } else {
-            console.log('Server is already running');
-        }
-    });
-}
 
 
-// Function to send the video URL to your server
 function sendURL() {
+    console.log('sendURL function called');
     const videoId = new URLSearchParams(window.location.search).get('v');
     if (videoId) {
         const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;  // Construct the video URL
-        const serverUrl = 'http://localhost:3001/handle-video-url';  // Updated to your local server
-
-        fetch(serverUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ videoUrl: currentVideoUrl }),  // Sends the video URL in the request body
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.text();  // Use text() instead of json() if the response is plain text
-        })
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-
+        // Send message to background script
+        browser.runtime.sendMessage({type: 'sendUrl', videoUrl: currentVideoUrl});
     } else {
         console.error('No video URL found.');
     }

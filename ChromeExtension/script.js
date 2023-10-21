@@ -6,13 +6,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('framerate').value = settings.framerate || '30';
         document.getElementById('download-path').value = settings.downloadPath || 'D:/youtube download';
     }
-});
 
-const button = document.getElementById('save-settings');
-const message = document.getElementById('message');
+    const button = document.getElementById('save-settings');
+    const message = document.getElementById('message');
 
-
-button.addEventListener('click', () => {
+    button.addEventListener('click', () => {
     // Save settings to Local Storage
     const settings = {
         resolution: document.getElementById('resolution').value,
@@ -53,4 +51,10 @@ async function sendSettingsToServer(settings) {
     } catch (error) {
         console.error('Error:', error);
     }
-}
+}    
+});
+
+
+
+
+
