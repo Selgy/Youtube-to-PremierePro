@@ -81,7 +81,7 @@ function tryModifyMenu() {
             }
         } else {
             // If the top level buttons div isn't available yet, try again in a moment
-            setTimeout(tryModifyMenu, 100);
+            setTimeout(tryModifyMenu, 1000);  // Increased delay to 1000 milliseconds (1 second)
         }
     }
 }
@@ -137,14 +137,17 @@ function addPremiereButton() {
     updateVideoUrl();
 }
 
-// Start the first attempt to modify the menu
-tryModifyMenu();
+// Ensure the script runs after the page has fully loaded
+window.onload = function() {
+    // Start the first attempt to modify the menu
+    tryModifyMenu();
 
-// Start observing the document
-const observer = new MutationObserver(addPremiereButton);
+    // Start observing the document
+    const observer = new MutationObserver(addPremiereButton);
 
-// Start observing the document with the configured parameters
-observer.observe(document.body, { childList: true, subtree: true });
+    // Start observing the document with the configured parameters
+    observer.observe(document.body, { childList: true, subtree: true });
 
-// Initially try to add the button
-addPremiereButton();
+    // Initially try to add the button
+    addPremiereButton();
+}
