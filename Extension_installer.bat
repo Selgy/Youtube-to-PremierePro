@@ -40,12 +40,33 @@ set "ShortcutName=%StartupFolder%\StartServer.lnk"
 echo Creating shortcut to start server...
 powershell -command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%ShortcutName%'); $s.TargetPath = '%~dp0%BatchName%'; $s.Save()"
 
-:: Continue with the rest of your script as-is...
-
 :: Download FFmpeg
 echo Downloading FFmpeg...
 curl -L -o %TEMP%\ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2023-10-13-18-10/ffmpeg-n6.0-36-gc5039e158d-win64-gpl-6.0.zip
 
-:: ... rest of your script ...
+:: Auto install PymiereLink extension to Premiere on windows
+echo Downloading Adobe Extension Manager
+curl "http://download.macromedia.com/pub/extensionmanager/ExManCmd_win.zip" --output %temp%\ExManCmd_win.zip
+echo.
+
+echo Download PymiereLink extension
+curl "https://raw.githubusercontent.com/qmasingarbe/pymiere/master/pymiere_link.zxp" --output %temp%\pymiere_link.zxp
+echo.
+
+echo Unzip Extension Manager
+rem require powershell
+powershell Expand-Archive %temp%\ExManCmd_win.zip -DestinationPath %temp%\ExManCmd_win -Force
+echo.
+
+echo Install Extension
+call %temp%\ExManCmd_win\ExManCmd.exe /install %temp%\pymiere_link.zxp
+if %ERRORLEVEL% NEQ 0 (
+    echo Installation failed...
+) else (
+    echo.
+    echo Installation successful !
+)
+
+PAUSE
 
 PAUSE
