@@ -1,4 +1,4 @@
-[ENGLISH]([[https://www.google.com](https://github.com/Selgy/Youtube-to-PremierePro/blob/main/README_EN.md))]
+[ENGLISH]([https://www.google.com](https://github.com/Selgy/Youtube-to-PremierePro/blob/main/README_EN.md)]
 
 # Importateur YouTube vers Premiere Pro
 
