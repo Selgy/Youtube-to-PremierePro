@@ -11,7 +11,10 @@ Streamline your video editing workflow by enabling a direct import of YouTube vi
 
 ## Installation
 ### Browser Extension
-- Install the browser extension from [here](https://chrome.google.com/webstore/detail/lhoepckbiamgobehojaibapoddjpfmfo).
+- Download the `ChromeExtension` folder from the latest release on the project's release page.
+- Open the Chrome browser, and navigate to `chrome://extensions/`.
+- At the top-right corner, toggle on the `Developer mode`.
+- Click `Load unpacked` and select the `ChromeExtension` folder from your computer, usually located in `C:\Program Files (x86)\YoutubetoPremiere\ChromeExtension`.
 
 ### Server and Pymiere Extension
 - Download the latest release of this project for your operating system from the releases page.
@@ -29,5 +32,3 @@ Streamline your video editing workflow by enabling a direct import of YouTube vi
 4. Click the 'Premiere Pro' button to start the download and import process.
 5. Monitor the progress on the button label.
 6. Once the import is complete, check Adobe Premiere Pro for the imported video.
-
-
