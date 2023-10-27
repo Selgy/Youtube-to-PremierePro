@@ -66,7 +66,3 @@ if %ERRORLEVEL% NEQ 0 (
     echo.
     echo Installation successful !
 )
-
-PAUSE
-
-PAUSE

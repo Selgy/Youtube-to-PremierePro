@@ -1,33 +1,36 @@
-# YouTube to Premiere Pro Importer
+# Importateur YouTube vers Premiere Pro
 
-Streamline your video editing workflow by enabling a direct import of YouTube videos into Adobe Premiere Pro with a simple click. This tool, through a combination of custom scripts and an Adobe extension, creates a seamless integration between YouTube and Premiere Pro to enhance productivity by reducing the manual steps of downloading and importing videos.
-
-## Features
-1. **Direct Import**: Import YouTube videos directly into Adobe Premiere Pro with a click.
-2. **Easy Access**: A simple button on the YouTube UI triggers the import process.
-3. **Real-Time Progress**: Monitor the download and import progress in real-time.
-4. **Cross-Platform**: Compatible with both Windows and MacOS.
-5. **Streamlined Workflow**: Aims to save time and enhance productivity in your video editing process.
-
-## Installation
-### Browser Extension
-- Install the browser extension from [here](https://chrome.google.com/webstore/detail/lhoepckbiamgobehojaibapoddjpfmfo).
-
-### Server and Pymiere Extension
-- Download the latest release of this project for your operating system from the releases page.
-- Extract the downloaded zip file.
-- Run the provided `.bat` file (for Windows) or `.sh` file (for MacOS) to install the server and the Pymiere extension.
-
-### Verification
-- Navigate to YouTube and you should see a 'Premiere Pro' button next to the share button on video pages.
-- Click the 'Premiere Pro' button to start the import process, and ensure the video is imported into Adobe Premiere Pro.
-
-## Usage
-1. Ensure the server script is running (it should start automatically upon installation).
-2. Open YouTube in your browser.
-3. Navigate to the video you wish to import.
-4. Click the 'Premiere Pro' button to start the download and import process.
-5. Monitor the progress on the button label.
-6. Once the import is complete, check Adobe Premiere Pro for the imported video.
+Importez des vidéos YouTube directement dans Adobe Premiere Pro en un clic.
 
 
+### Installation
+- Téléchargez le [YoutubetoPremiere-WinInstaller.exe](https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1/YoutubetoPremiere-WinInstaller.exe).
+- Après l'installation, un fichier `StartServer.bat` sera créée dans le dossier de démarrage de Windows pour assurer le lancement automatique du serveur au démarrage de Windows.
+- Vous trouverez une icône dans la barre des tâches en bas à droite de votre écran Windows qui représente le serveur. Vous pouvez quitter le serveur à tout moment en faisant un clic droit sur cette icône et en sélectionnant 'Quitter'.
+- Si vous souhaitez lancer le serveur manuellement, vous pouvez le faire en naviguant vers le répertoire d'installation de `YoutubetoPremiere` (généralement `C:\Program Files (x86)\YoutubetoPremiere`) et en exécutant le fichier `startserver.bat`.
+- Après vous être assuré que le serveur est en cours d'exécution, naviguez vers YouTube et vous devriez voir un bouton 'Premiere Pro' à côté du bouton de partage sur les pages vidéo.
+- Cliquez sur le bouton 'Premiere Pro' pour commencer le processus d'importation, et assurez-vous que la vidéo est importée dans Adobe Premiere Pro.
+
+### Extension pour Google Chrome
+- Téléchargez le dossier `ChromeExtension` de la dernière version sur la page des versions du projet.
+- Ouvrez le navigateur Chrome, et naviguez vers `chrome://extensions/`.
+- En haut à droite, activez le `Mode développeur`.
+- Cliquez sur `Charger l'extension non empaquetée` et sélectionnez le dossier `ChromeExtension` de votre ordinateur, généralement situé dans `C:\Program Files (x86)\YoutubetoPremiere\ChromeExtension`.
+
+### Choix de qualité et emplacement de téléchargement
+- Vous pouvez choisir où télécharger vos vidéos en cliquant sur l'extension sur chrome
+- Une popup devrait apparaitre pour choisir la qualité et où vous souhaitez télécharger votre vidéo.
+- Une fois fait, vous avez juste à cliquer sur 'Save Setting'
+
+### Vérification
+- Sur YouTube, vous devriez voir un bouton 'Premiere Pro' à côté du bouton de partage sous les vidéos youtube.
+- Cliquez sur le bouton 'Premiere Pro' pour commencer le téléchargement et l'importation, et assurez-vous que la vidéo est importée dans Adobe Premiere Pro.
+
+## Utilisation
+1. Assurez-vous que le script du serveur est en cours d'exécution (il devrait démarrer automatiquement lors du démarrage de Windows).
+2. Assurez-vous que Premiere Pro est ouvert.
+3. Ouvrez YouTube dans votre navigateur.
+4. Naviguez vers la vidéo que vous souhaitez importer.
+5. Cliquez sur le bouton 'Premiere Pro' pour commencer le processus de téléchargement et d'importation.
+6. Surveillez la progression sur le bouton 'Premiere pro'.
+7. Une fois l'importation terminée, vérifiez dans Adobe Premiere Pro pour la vidéo importée.
