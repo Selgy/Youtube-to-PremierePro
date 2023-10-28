@@ -7,17 +7,15 @@ Importez des vidéos YouTube directement dans Adobe Premiere Pro en un clic.
 
 ### Installation
 - Téléchargez le [YoutubetoPremiere-WinInstaller.exe](https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1/YoutubetoPremiere-WinInstaller.exe).
-- Après l'installation, un fichier `StartServer.bat` sera créée dans le dossier de démarrage de Windows pour assurer le lancement automatique du serveur au démarrage de Windows.
+- Après l'installation, un fichier  YoutubeToPremiere.exe sera créée dans le dossier de démarrage de Windows pour assurer le lancement automatique du serveur au démarrage de Windows.
 - Vous trouverez une icône dans la barre des tâches en bas à droite de votre écran Windows qui représente le serveur. Vous pouvez quitter le serveur à tout moment en faisant un clic droit sur cette icône et en sélectionnant 'Quitter'.
-- Si vous souhaitez lancer le serveur manuellement, vous pouvez le faire en naviguant vers le répertoire d'installation de `YoutubetoPremiere` (généralement `C:\Program Files (x86)\YoutubetoPremiere`) et en exécutant le fichier `startserver.bat`.
+- Si vous souhaitez lancer le serveur manuellement, vous pouvez le faire en naviguant vers le répertoire d'installation de `YoutubetoPremiere` (généralement `C:\Program Files (x86)\YoutubetoPremiere`) et en exécutant le fichier `YoutubeToPremiere.exe`.
 - Après vous être assuré que le serveur est en cours d'exécution, naviguez vers YouTube et vous devriez voir un bouton 'Premiere Pro' à côté du bouton de partage sur les pages vidéo.
 - Cliquez sur le bouton 'Premiere Pro' pour commencer le processus d'importation, et assurez-vous que la vidéo est importée dans Adobe Premiere Pro.
 
 ### Extension pour Google Chrome
-- Téléchargez le dossier `ChromeExtension` de la dernière version sur la page des versions du projet.
-- Ouvrez le navigateur Chrome, et naviguez vers `chrome://extensions/`.
-- En haut à droite, activez le `Mode développeur`.
-- Cliquez sur `Charger l'extension non empaquetée` et sélectionnez le dossier `ChromeExtension` de votre ordinateur, généralement situé dans `C:\Program Files (x86)\YoutubetoPremiere\ChromeExtension`.
+- Après l'installation la page de l'extension Chrome va s'ouvir, il faudra donc l'installer.
+- Si ce n'est pas le cas, ouvrez le navigateur Chrome et naviguez vers https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo?hl
 
 ### Choix de qualité et emplacement de téléchargement
 - Vous pouvez choisir où télécharger vos vidéos en cliquant sur l'extension sur chrome
