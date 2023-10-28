@@ -36,3 +36,7 @@ Importez des vidéos YouTube directement dans Adobe Premiere Pro en un clic.
 5. Cliquez sur le bouton 'Premiere Pro' pour commencer le processus de téléchargement et d'importation.
 6. Surveillez la progression sur le bouton 'Premiere pro'.
 7. Une fois l'importation terminée, vérifiez dans Adobe Premiere Pro pour la vidéo importée.
+
+## Issue
+- Pour l'instant quand vous ouvrez chrome pour la première fois il faut actualiser la page une fois et ensuite le bouton sera disponible sur toutes les vidéos.
+- certaine vidéos ne peuvent pas ce télécharger à cause de certain charactère dans le titre.
