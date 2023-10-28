@@ -134,28 +134,34 @@ setInterval(checkUrlChange, 500);
 function addPremiereButton() {
     if (isVideoPage()) {
         const topLevelButtons = document.querySelector('#top-level-buttons-computed');
-        if (topLevelButtons) {
-            const shareButton = topLevelButtons.querySelector('ytd-button-renderer[button-next]');
-            if (shareButton && !document.getElementById('send-to-premiere-button')) {  // Check if the button already exists
-                const premiereButton = createButton();
-                shareButton.parentNode.insertBefore(premiereButton, shareButton.nextSibling);
-            }
+        if (topLevelButtons && !document.getElementById('send-to-premiere-button')) {  // Check if the button already exists
+            const premiereButton = createButton();
+            topLevelButtons.appendChild(premiereButton);  // Append the button at the end of the toolbar
         }
     }
     updateVideoUrl();
 }
 
-// Ensure the script runs after the page has fully loaded
+
 window.onload = function() {
-    // Start the first attempt to modify the menu
-    tryModifyMenu();
+    setTimeout(function(){
+        // Start the first attempt to modify the menu
+        tryModifyMenu();
 
-    // Start observing the document
-    const observer = new MutationObserver(addPremiereButton);
+        // Start observing the document
+        const observer = new MutationObserver(addPremiereButton);
 
-    // Start observing the document with the configured parameters
-    observer.observe(document.body, { childList: true, subtree: true });
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
 
-    // Initially try to add the button
-    addPremiereButton();
+        document.addEventListener('DOMContentLoaded', (event) => {
+            tryModifyMenu();
+        
+            const observer = new MutationObserver(addPremiereButton);
+            observer.observe(document.body, { childList: true, subtree: true });
+            
+            addPremiereButton();
+        });
+        addPremiereButton();
+    }, 1000);  
 }
