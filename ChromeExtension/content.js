@@ -86,9 +86,11 @@ function tryModifyMenu() {
     }
 }
 
-const socket = io('http://localhost:3001');  // establish a WebSocket connection to the server
+const socket = io.connect('http://localhost:3001');
+
 
 socket.on('percentage', (data) => {  
+    console.log(data);  // Add this line
     const button = document.getElementById('send-to-premiere-button');
     if (button) {
         button.innerText = `Download ${data.percentage}`;  // update the button text
@@ -101,7 +103,13 @@ socket.on('download-complete', () => {
         button.innerText = 'Premiere Pro';  // reset the button text
     }
 });
+socket.on('connect', () => {
+    console.log('Connected to server');
+});
 
+socket.on('disconnect', () => {
+    console.log('Disconnected from server');
+});
 // Function to update the video URL
 function updateVideoUrl() {
     const videoUrlElement = document.querySelector('link[rel="canonical"]');

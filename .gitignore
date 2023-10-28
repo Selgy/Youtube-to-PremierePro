@@ -3,3 +3,8 @@ StartServer.bat
 ffmpeg
 venv
 YoutubetoPremiere Installer.exe
+YoutubetoPremiere.exe
+_Internal
+build
+youtubetoPremiere.spec
+icon.ico

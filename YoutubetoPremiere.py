@@ -17,7 +17,16 @@ import psutil
 import tkinter as tk
 from tkinter import messagebox
 
-SETTINGS_FILE = 'settings.json'
+appdata_path = os.environ['APPDATA']
+settings_path = os.path.join(appdata_path, 'YoutubetoPremiere', 'settings.json')
+
+
+settings_dir = os.path.dirname(settings_path)
+if not os.path.exists(settings_dir):
+    os.makedirs(settings_dir)
+
+SETTINGS_FILE = settings_path
+
 
 # Configure logging
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.FileHandler('server.log'), logging.StreamHandler()])
@@ -27,7 +36,7 @@ SETTINGS_FILE = 'settings.json'
 
 app = Flask(__name__)
 CORS(app) 
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 video_url_global = None  # Define a global variable to store the video URL
 settings_global = None  # Define a global variable to store the settings
@@ -160,11 +169,14 @@ def download_video(video_url, resolution, framerate, download_path):
     video_title = sanitize_title(info_dict['title'])
     sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
 
-    # Get the directory where this script is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, 'frozen', False):
+                script_dir = os.path.dirname(sys.executable)
+    else:
+        # The application is not bundled
+        script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Build the path to ffmpeg
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+    
 
     ydl_opts = {
         'outtmpl': sanitized_output_template,
@@ -212,7 +224,6 @@ def load_settings():
     logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
 
-
 def main():
     logging.info('Script starting...')  # Log the starting of the script
     global settings_global
@@ -232,10 +243,14 @@ def main():
         # Stop the server when done
         server_thread.join()
 
-
 def create_image():
-    # Load the icon.png file
-    icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
+    # Check if running as a bundled application
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # Bundled application, icon is in the temp directory
+        icon_path = os.path.join(sys._MEIPASS, 'icon.png')
+    else:
+        # Not bundled, icon is in the script directory
+        icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
     print(f'Icon path: {icon_path}')  # Add this line
     image = Image.open(icon_path)
     return image
