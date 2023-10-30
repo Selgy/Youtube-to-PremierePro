@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Youtube to Premiere pro",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Sends the current tab's URL to a local server and to Premiere pro throught Pymiere.",
   "permissions": ["activeTab"],
   "host_permissions": ["https://www.youtube.com/*"],
