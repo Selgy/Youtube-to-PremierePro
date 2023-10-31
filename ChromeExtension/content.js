@@ -29,7 +29,9 @@ function createButton() {
 let currentVideoUrl = '';  // Add this line to keep track of the current video URL
 let lastUrl = window.location.href;  // Store the current URL
 
-
+console.log(document.querySelector('#top-level-buttons-computed'));
+const topLevelButtons = document.querySelector('#top-level-buttons-computed');
+console.log(topLevelButtons);  
 
 // Function to send the video URL to your server
 function sendURL() {
@@ -112,12 +114,12 @@ socket.on('disconnect', () => {
 });
 // Function to update the video URL
 function updateVideoUrl() {
-    const videoUrlElement = document.querySelector('link[rel="canonical"]');
-    if (videoUrlElement) {
-        currentVideoUrl = videoUrlElement.href;
-        console.log('Updated video URL:', currentVideoUrl);  // Log the updated URL for debugging
+    if (window.location.href.includes('/watch?v=')) {
+        currentVideoUrl = window.location.href;
+        console.log('Updated video URL:', currentVideoUrl);
     }
 }
+
 
 // Function to check for URL changes
 function checkUrlChange() {
@@ -132,6 +134,7 @@ function checkUrlChange() {
 setInterval(checkUrlChange, 500);
 
 function addPremiereButton() {
+    if (document.getElementById('send-to-premiere-button')) return;
     if (isVideoPage()) {
         const topLevelButtons = document.querySelector('#top-level-buttons-computed');
         if (topLevelButtons && !document.getElementById('send-to-premiere-button')) {  // Check if the button already exists
@@ -149,16 +152,36 @@ window.onload = function() {
         tryModifyMenu();
 
         // Start observing the document
-        const observer = new MutationObserver(addPremiereButton);
-
-        // Start observing the document with the configured parameters
-        observer.observe(document.body, { childList: true, subtree: true });
+        const observer = new MutationObserver((mutationsList, observer) => {
+            for (let mutation of mutationsList) {
+                console.log('Mutation observed:', mutation);  
+                if (mutation.target.id !== 'some-specific-element') continue;
+                if (mutation.type === 'childList') {
+                    debouncedAddPremiereButton();
+                }
+            }
+        });
+    
+        
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+        
+        const debouncedAddPremiereButton = debounce(addPremiereButton, 300);  // 300ms delay
+        
+        // Use debounced function in your MutationObserver callback
+            
 
         document.addEventListener('DOMContentLoaded', (event) => {
+            console.log('DOM fully loaded and parsed');
             tryModifyMenu();
-        
-            const observer = new MutationObserver(addPremiereButton);
-            observer.observe(document.body, { childList: true, subtree: true });
+            const targetNode = document.querySelector('#container');  // You might need to find a more specific container
+            observer.observe(targetNode, { childList: true, subtree: true });    
+            console.log('tryModifyMenu called');  // Log when the function is called
             
             addPremiereButton();
         });

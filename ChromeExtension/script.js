@@ -4,20 +4,22 @@ document.addEventListener('DOMContentLoaded', (event) => {
     if (settings) {
         document.getElementById('resolution').value = settings.resolution || '1080p';
         document.getElementById('framerate').value = settings.framerate || '30';
-        document.getElementById('download-path').value = settings.downloadPath || 'D:/youtube download';
+        document.getElementById('download-path').value = settings.downloadPath || 'TEST';
+        document.getElementById('download-mp3').checked = settings.downloadMP3 || false;  // New line
     }
 
     const button = document.getElementById('save-settings');
     const message = document.getElementById('message');
 
     button.addEventListener('click', () => {
-    // Save settings to Local Storage
-    const settings = {
-        resolution: document.getElementById('resolution').value,
-        framerate: document.getElementById('framerate').value,
-        downloadPath: (document.getElementById('download-path').value),
-    };
-    sendSettingsToServer(settings);  // Send settings to the server
+        const settings = {
+            resolution: document.getElementById('resolution').value,
+            framerate: document.getElementById('framerate').value,
+            downloadPath: document.getElementById('download-path').value,
+            downloadMP3: document.getElementById('download-mp3').checked  // New line
+        };
+        sendSettingsToServer(settings); 
+    
 
     localStorage.setItem('settings', JSON.stringify(settings));
     console.log('Settings saved');
