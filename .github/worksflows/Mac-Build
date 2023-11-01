@@ -1,0 +1,45 @@
+name: Build and Package for macOS
+
+on:
+  push:
+    branches:
+      - Pre-released  # Trigger this workflow on push to the main branch
+
+jobs:
+  build:
+    runs-on: macOS-latest  # Use the latest macOS runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Checkout your repository code
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8.8  # Replace with your Python version
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller
+          npm install -g create-dmg
+
+      - name: Download FFmpeg
+        run: |
+          curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
+          unzip ffmpeg.zip
+          mv ffmpeg ffmpeg-darwin-x86_64
+          chmod +x ffmpeg-darwin-x86_64
+
+      - name: Build Application with PyInstaller
+        run: |
+          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64;." --add-data "icon.png;." --add-data "notification_sound.mp3;." --icon=icon.ico --distpath=. YoutubetoPremiere.py
+
+      - name: Create DMG
+        run: |
+          create-dmg 'dist/YoutubetoPremiere' --dmg-title='YoutubetoPremiere' dist  # Adjust paths and titles as necessary
+
+      - name: Upload DMG Installer
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS-installer
+          path: dist/YoutubetoPremiere.dmg
