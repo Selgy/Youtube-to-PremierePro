@@ -23,9 +23,16 @@ jobs:
           pip install pyinstaller
           npm install -g create-dmg
 
+      - name: Download FFmpeg
+        run: |
+          curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
+          unzip ffmpeg.zip
+          mv ffmpeg ffmpeg-darwin-x86_64
+          chmod +x ffmpeg-darwin-x86_64
+
       - name: Build Application with PyInstaller
         run: |
-          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg;." --add-data "icon.png;." --add-data "notification_sound.mp3;." --icon=icon.ico --distpath=. YoutubetoPremiere.py
+          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64;." --add-data "icon.png;." --add-data "notification_sound.mp3;." --icon=icon.ico --distpath=. YoutubetoPremiere.py
 
       - name: Create DMG
         run: |
@@ -36,4 +43,3 @@ jobs:
         with:
           name: macOS-installer
           path: dist/YoutubetoPremiere.dmg
-
