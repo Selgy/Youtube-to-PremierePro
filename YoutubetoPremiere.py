@@ -101,15 +101,16 @@ def handle_video_url():
     logging.info(f'Video URL received: {video_url_global}')
 
     # Ensure settings have been received before attempting to download the video
-    if settings_global is None:
+    settings = load_settings()
+    if settings is None:
         logging.error("Settings not received from the extension.")
         return jsonify(error="Settings not received"), 500 
-    
-    
+
     # Get the settings values
-    resolution = settings_global['resolution']
-    framerate = settings_global['framerate']
-    download_path = settings_global['downloadPath']
+    resolution = settings['resolution']
+    framerate = settings['framerate']
+    download_path = settings['downloadPath']
+    download_mp3 = settings['downloadMP3'] 
 
     # Check if Adobe Premiere Pro is running
     if not is_premiere_running():
@@ -119,7 +120,7 @@ def handle_video_url():
         return jsonify(error="Adobe Premiere Pro is not running"), 400
 
     # Initiate the download of the video
-    download_video(video_url_global, resolution, framerate, download_path)
+    download_video(video_url_global, resolution, framerate, download_path, download_mp3) 
 
     response = jsonify(success=True)
     response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
@@ -134,6 +135,8 @@ def read_settings_from_local():
 
 
 def import_video_to_premiere(video_path):
+    if os.path.exists(video_path):
+        logging.info(f'File already exists: {video_path}. Overwriting...')
     try:
         logging.info('Attempting to import video to Premiere...')
         proj = pymiere.objects.app.project
@@ -147,10 +150,15 @@ def import_video_to_premiere(video_path):
 
 
 def sanitize_title(title):
-    return (title.replace(":", " -")
-                 .replace("|", "-")
-                 .replace("：", " -")  
-                 .replace("｜", "-"))  
+    # Replace known problematic characters
+    sanitized_title = (title.replace(":", " -")
+                             .replace("|", "-")
+                             .replace("：", " -")  
+                             .replace("｜", "-")
+                             .replace('*', '#'))
+                             
+    
+    return sanitized_title
 
 def progress_hook(d):
     if d['status'] == 'downloading':
@@ -160,8 +168,17 @@ def progress_hook(d):
         print(f'Progress: {percentage}')
         socketio.emit('percentage', {'percentage': percentage})
 
+def get_default_ydl_opts():
+    return {
+        'quiet': True,
+        'writesubtitles': False,
+        'writeautomaticsub': False,
+        'writethumbnail': False,
+        'nooverwrites': False,
+    }
 
-def download_video(video_url, resolution, framerate, download_path):
+def download_video(video_url, resolution, framerate, download_path, download_mp3):
+    ydl_opts = get_default_ydl_opts()
     logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
     download_path = os.path.join(download_path, '')
 
@@ -169,36 +186,53 @@ def download_video(video_url, resolution, framerate, download_path):
         info_dict = ydl.extract_info(video_url, download=False)
     
     video_title = sanitize_title(info_dict['title'])
+
     sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
 
+
     if getattr(sys, 'frozen', False):
-                script_dir = os.path.dirname(sys.executable)
+        script_dir = os.path.dirname(sys.executable)
     else:
-        # The application is not bundled
         script_dir = os.path.dirname(os.path.abspath(__file__))
 
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
     
-
     ydl_opts = {
         'outtmpl': sanitized_output_template,
-        'ffmpeg_location': ffmpeg_path,  # Specify the path to ffmpeg
-        'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'ffmpeg_location': ffmpeg_path,
         'progress_hooks': [progress_hook],
         'writesubtitles': False,
-        'writeautomaticsub': False
+        'writeautomaticsub': False,
+        'writethumbnail': False,
+        'nooverwrites': False,
     }
 
+    if download_mp3:  # change this to something like download_audio
+        ydl_opts.update({
+            'format': f'bestaudio[ext=m4a]/best',
+            # ... other options
+        })
+    else:
+        ydl_opts.update({
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'outtmpl': f'{download_path}{video_title}.%(ext)s',
+        })
+
+    logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
+    logging.info(f'ydl_opts before download: {ydl_opts}') 
+    print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([video_url])
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
 
+    logging.info(f'download_mp3: {download_mp3}')
+
     if result == 0:
         video_title = sanitize_title(info_dict['title'])
-        video_filename = os.path.join(download_path, f"{video_title}.mp4")
+        file_extension = "m4a" if download_mp3 else "mp4"
+        video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")
         import_video_to_premiere(video_filename)
-        # Emit the 'download-complete' event here
-        socketio.emit('download-complete')
-        play_notification_sound()
     else:
         logging.error(f'Failed to download video from {video_url}')
 
@@ -231,7 +265,8 @@ def load_settings():
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
-        logging.info(f'Loaded settings: {settings}')  # Log the loaded settings
+        logging.info(f'Loaded settings: {settings}')
+        logging.info(f'Settings file contents: {settings}')  # Log the loaded settings
         return settings
     logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
