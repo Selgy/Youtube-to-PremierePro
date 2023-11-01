@@ -2,7 +2,7 @@
 setlocal
 
 :: Path to your packed Python executable
-set "PythonExePath=%~dp0youtube-download.exe"
+set "PythonExePath=%~dp0YoutubetoPremiere.exe"
 
 
 :: Auto install PymiereLink extension to Premiere on windows
