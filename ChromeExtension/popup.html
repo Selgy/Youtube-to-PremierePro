@@ -10,31 +10,44 @@
             width: 300px;
             font-size: 18px;  /* Larger base font size */
         }
+        button, select, input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 18px;  /* Larger font size */
+            border: none;
+            margin-bottom: 20px; /* Increased space between elements */
+        }
         button {
             background-color: #9093ff;  /* Darker button background */
             color: #ffffff;  /* Lighter button text color */
-            padding: 10px 20px;
-            border: 2px solid #1e2057;  /* Border color */
-            border-radius: 4px;
             cursor: pointer;
-            margin-bottom: 10px; /* Space between buttons */
-            font-size: 18px;  /* Larger font size for buttons */
+            border: 2px solid #1e2057;  /* Border color */
         }
         button:hover {
-            background-color: #9093ff;  /* Hover background color */
-            color: #0f005d;  /* Dark text color on hover */
+            background-color: #7072ff;  /* Brighter background on hover */
         }
-        select {
-            width: 100%;
-            margin-bottom: 10px; /* Space between select and next element */
-            background-color: #9093ff;  /* Darker background */
-            color: #ffffff;  /* Lighter text color */
-            border: 2px solid #1e2057;  /* Border color */
-            font-size: 18px;  /* Larger font size for select */
+        select, input {
+            background-color: #2e2f77;  /* Slightly brighter background */
+            color: #ffffff;  /* Light text color */
         }
-        #save-settings {
-            display: block;
-            margin: 20px auto 0 auto; /* top auto right auto bottom */
+        label {
+            display: block; /* Block element */
+            margin-bottom: 5px; /* Space between label and input/select */
+        }
+        .checkbox-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px; /* Space between checkbox and next element */
+        }
+        .checkbox-container label {
+            margin: 0; /* Remove margin-bottom from label */
+        }
+        .checkbox-container input {
+            margin-left: 10px; /* Space between label and checkbox */
+            transform: scale(1.5); /* Scale the checkbox up to 1.5 times its original size */
+            margin-bottom: -5px; /* Adjust vertical alignment */
         }
         #message {
             position: fixed;
@@ -49,20 +62,7 @@
             color: #0f005d;  /* Dark text color for message */
             font-size: 18px;  /* Larger font size for message */
         }
-        input {
-            width: 100%;
-            background-color: #9093ff;  /* Darker background */
-            color: #ffffff;  /* Lighter text color */
-            border: 2px solid #22042C;  /* Border color */
-            padding: 5px;
-            margin-bottom: 10px; /* Space between input and next element */
-            font-size: 18px;  /* Larger font size for input */
-        }
-        label {
-            font-size: 18px;  /* Larger font size for labels */
-        }
     </style>
-    
 </head>
 <body>
 <label for="resolution">Resolution:</label>
@@ -74,22 +74,23 @@
     <option value="480">480p</option>
     <option value="360">360p</option>
 </select>
-<br>
-
 <label for="framerate">Frame Rate:</label>
 <select id="framerate">
     <option value="60">60 fps</option>
     <option value="30" selected>30 fps</option>
 </select>
-<br>
+
 <label for="download-path">Download Path:</label>
 <input type="text" id="download-path" value="" />
-<br>
-<label for="download-mp3">MP3:</label>
-<input type="checkbox" id="download-mp3">
-<br>
+
+<div class="checkbox-container">
+    <label for="download-mp3">Audio Only:</label>
+    <input type="checkbox" id="download-mp3">
+</div>
+
 <button id="save-settings">Save Settings</button>
 <div id="message">Settings saved</div>
+
 <script src="script.js"></script>
 </body>
 </html>
