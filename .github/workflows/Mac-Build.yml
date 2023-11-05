@@ -108,7 +108,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          draft: ${{ github.ref == 'refs/heads/main' }}
-          prerelease: ${{ github.ref != 'refs/heads/main' }}
+          draft: false  
+          prerelease: true 
           tag_name: V1.1
           files: ./dist/YoutubetoPremiere.dmg
