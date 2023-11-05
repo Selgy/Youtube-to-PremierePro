@@ -100,7 +100,8 @@ jobs:
             return preRelease.upload_url
      
       - name: Print upload_url
-        run: echo  "Upload URL: ${{ steps.get_release.outputs.result }}"
+        run: |
+          echo "Upload URL: ${{ steps.get_release.outputs.result }}"
 
       - name: Upload DMG to Release
         uses: actions/upload-release-asset@v1
