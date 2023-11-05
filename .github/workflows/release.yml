@@ -89,7 +89,7 @@ jobs:
       - name: Create DMG
         run: |
             mkdir -p dist/YoutubetoPremiere.app/Contents/Library/LaunchAgents
-            cp com.yourcompany.yourapp.plist dist/YoutubetoPremiere.app/Contents/Library/LaunchAgents/
+            cp com.youtubetopremiere.YoutubetoPremiere.plist dist/YoutubetoPremiere.app/Contents/Library/LaunchAgents/
             dmgbuild -s settings.py "YoutubetoPremiere" ./dist/YoutubetoPremiere.dmg
   
   
