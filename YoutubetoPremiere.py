@@ -207,17 +207,34 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     if download_mp3:  # change this to something like download_audio
         ydl_opts.update({
             'format': f'bestaudio[ext=m4a]/best',
-            # ... other options
+            'outtmpl': sanitized_output_template,
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False,
         })
     else:
         ydl_opts.update({
             'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': f'{download_path}{video_title}.%(ext)s',
+            'outtmpl': f'{download_path}{sanitized_output_template}.%(ext)s',
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False,
         })
+
+    file_extension = "m4a" if download_mp3 else "mp4"
+    video_title = sanitize_title(info_dict['title'])
+    video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")  # Define video_filename here
 
     logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
     logging.info(f'ydl_opts before download: {ydl_opts}') 
     print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
+    
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([video_url])
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
@@ -228,11 +245,13 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     if result == 0:
         video_title = sanitize_title(info_dict['title'])
         file_extension = "m4a" if download_mp3 else "mp4"
-        video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")
+        video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")  # Define video_filename here
         import_video_to_premiere(video_filename)
+        socketio.emit('download-complete')  # Emit the 'download-complete' event here
+        play_notification_sound()
     else:
         logging.error(f'Failed to download video from {video_url}')
-
+    
     if os.path.exists(video_filename):
         time.sleep(2)
         logging.info(f'Download and import completed successfully for {video_url}')
