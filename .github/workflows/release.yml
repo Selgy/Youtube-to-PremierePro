@@ -160,15 +160,50 @@ jobs:
 
     - name: Create Installer with NSIS
       run: |
-        echo "!define APP_NAME 'YoutubetoPremiere'" > installer.nsi
-        echo "!define INSTALLER_OUTFILE 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-        echo "Outfile '\${INSTALLER_OUTFILE}'" >> installer.nsi
-        echo "Section" >> installer.nsi
-        echo "  SetOutPath '\$INSTDIR'" >> installer.nsi
-        echo "  File 'dist\YoutubetoPremiere.exe'" >> installer.nsi
-        echo "SectionEnd" >> installer.nsi
+        echo '!include MUI2.nsh' > installer.nsi
+        echo 'Caption "YoutubetoPremiere Installer"' >> installer.nsi
+        echo 'Outfile "YoutubetoPremiere-WinInstaller.exe"' >> installer.nsi
+        echo 'InstallDir $PROGRAMFILES\YoutubetoPremiere' >> installer.nsi
+        echo '!define MUI_DIRECTORYPAGE_TEXT_TOP "Select the destination folder where Youtube to Premiere should be installed."' >> installer.nsi
+        echo '!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Destination Folder:"' >> installer.nsi
+        echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
+        echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
+        echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
+        echo '!insertmacro MUI_PAGE_DIRECTORY' >> installer.nsi
+        echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
+        echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
+        echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
+        echo '!insertmacro MUI_UNPAGE_INSTFILES' >> installer.nsi
+        echo 'Icon "icon.ico"' >> installer.nsi
+        echo 'Section' >> installer.nsi
+        echo 'SetOutPath $INSTDIR' >> installer.nsi
+        echo 'File icon.png' >> installer.nsi
+        echo 'File notification_sound.mp3' >> installer.nsi
+        echo 'File extension_installer.bat' >> installer.nsi
+        echo 'File package.json' >> installer.nsi
+        echo 'File package-lock.json' >> installer.nsi
+        echo 'File requirements.txt' >> installer.nsi
+        echo 'File /r node_modules' >> installer.nsi
+        echo 'File /r ffmpeg' >> installer.nsi
+        echo 'File YoutubetoPremiere.exe' >> installer.nsi
+        echo 'ExecWait "extension_installer.bat" $0' >> installer.nsi
+        echo '${If} $0 != 0' >> installer.nsi
+        echo '    MessageBox MB_ICONSTOP|MB_OK "There was an error while executing extension_installer.bat."' >> installer.nsi
+        echo '${EndIf}' >> installer.nsi
+        echo 'CreateShortcut "$SMSTARTUP\YoutubeToPremiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'CreateDirectory $SMPROGRAMS\YoutubetoPremiere' >> installer.nsi
+        echo 'CreateShortcut "$SMPROGRAMS\YoutubetoPremiere\Youtube to Premiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'CreateShortcut "$DESKTOP\Youtube to Premiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'SectionEnd' >> installer.nsi
         makensis installer.nsi
 
+        
     - name: List directory contents
       run: dir
 
