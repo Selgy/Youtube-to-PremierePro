@@ -18,8 +18,9 @@ jobs:
         with:
           python-version: 3.8.8  # Replace with your Python version
       
-      - name: Use GitHub token
-        run: echo "My token is ${{ secrets.GH_SECRET }}" 
+      - name: GET GitHub token
+        run: |
+            GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
 
       - name: Install dependencies
         run: |
@@ -106,7 +107,7 @@ jobs:
       - name: Upload DMG to Release
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release.outputs.result }}
           asset_path: ./dist/YoutubetoPremiere.dmg
