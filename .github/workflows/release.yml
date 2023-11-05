@@ -156,10 +156,13 @@ jobs:
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
 
     - name: Move FFmpeg executable
-      shell: pwsh
-      run: |
-        $ffmpegPath = (Get-ChildItem -Recurse -Filter ffmpeg.exe).FullName
-        Move-Item -Path $ffmpegPath -Destination "ffmpeg.exe"
+        shell: pwsh
+        run: |
+          $sourcePath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\ffmpeg-6.0-full_build\bin\ffmpeg.exe"
+          $destinationPath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin\ffmpeg.exe"
+          New-Item -ItemType Directory -Path "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin" -Force
+          Move-Item -Path $sourcePath -Destination $destinationPath
+  
 
     - name: Build Application with PyInstaller
       run: |
@@ -170,10 +173,10 @@ jobs:
 
     - name: Create Installer with NSIS
       run: |
-        echo '!include MUI2.nsh' > installer.nsi
-        echo 'Caption "YoutubetoPremiere Installer"' >> installer.nsi
-        echo 'Outfile "YoutubetoPremiere-WinInstaller.exe"' >> installer.nsi
-        echo 'InstallDir $PROGRAMFILES\YoutubetoPremiere' >> installer.nsi
+        echo "!include MUI2.nsh" > installer.nsi
+        echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
+        echo "Outfile 'YoutubetoPremiere-WinInstaller.exe'" >> installer.nsi
+        echo "InstallDir $PROGRAMFILES\YoutubetoPremiere" >> installer.nsi
         echo '!define MUI_DIRECTORYPAGE_TEXT_TOP "Select the destination folder where Youtube to Premiere should be installed."' >> installer.nsi
         echo '!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Destination Folder:"' >> installer.nsi
         echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
@@ -201,7 +204,7 @@ jobs:
         echo 'File requirements.txt' >> installer.nsi
         echo 'File /r node_modules' >> installer.nsi
         echo 'File /r ffmpeg' >> installer.nsi
-        echo 'File YoutubetoPremiere.exe' >> installer.nsi
+        echo "File 'dist\YoutubetoPremiere.exe'" >> installer.nsi
         echo 'ExecWait "extension_installer.bat" $0' >> installer.nsi
         echo '${If} $0 != 0' >> installer.nsi
         echo '    MessageBox MB_ICONSTOP|MB_OK "There was an error while executing extension_installer.bat."' >> installer.nsi
