@@ -174,7 +174,7 @@ jobs:
               --hidden-import=engineio.async_drivers.threading \
               --hidden-import=pygame.freetype \
               --hidden-import=encodings.utf_16_le \
-              --add-binary "ffmpeg\bin\ffmpeg.exe:." \
+              --add-binary "ffmpeg\bin\ffmpeg.exe;." \
               --add-data "icon.png;." \
               --add-data "notification_sound.mp3;." \
               --icon=icon.ico \
@@ -182,6 +182,7 @@ jobs:
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
       env:
             pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
+    
         
         
     - name: Install NSIS
