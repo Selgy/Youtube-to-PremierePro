@@ -40,8 +40,7 @@ jobs:
         
       - name: Create DMG
         run: |
-              create-dmg 'YoutubetoPremiere.app' --dmg-title='YoutubetoPremiere' --overwrite
-          
+              dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
       
       - name: Print working directory
         run: |
