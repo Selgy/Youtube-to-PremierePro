@@ -22,6 +22,9 @@ jobs:
         run: |
           pip install pyinstaller dmgbuild Pillow
 
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
       - name: Cache pip
         uses: actions/cache@v2
         with:
@@ -103,5 +106,5 @@ jobs:
         with:
           draft: ${{ github.ref == 'refs/heads/main' }}
           prerelease: ${{ github.ref != 'refs/heads/main' }}
-          tag_name: ${{ steps.package-json.outputs.version }}
+          tag_name: V1.1
           files: ./dist/YoutubetoPremiere.dmg
