@@ -49,8 +49,8 @@ jobs:
               pwd
               ls -al
     
-      - name: Find YoutubetoPremiere.dmg
-        run: find . -name "YoutubetoPremiere.dmg" -print
+      - name: Find YoutubetoPremiere.app
+        run: find . -name "YoutubetoPremiere.app" -print
             
       - name: Create settings.py
         run: |
