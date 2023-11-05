@@ -109,7 +109,7 @@ jobs:
         id: upload-release-asset
         uses: softprops/action-gh-release@v1
         env:
-              GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+              GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
         with:
               draft: ${{ github.ref == 'refs/heads/master' }}
               prerelease: ${{ github.ref != 'refs/heads/master' }}
