@@ -156,8 +156,8 @@ jobs:
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
 
     - name: Move FFmpeg executable
-        shell: pwsh
-        run: |
+      shell: pwsh
+      run: |
           $sourcePath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\ffmpeg-6.0-full_build\bin\ffmpeg.exe"
           $destinationPath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin\ffmpeg.exe"
           New-Item -ItemType Directory -Path "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin" -Force
