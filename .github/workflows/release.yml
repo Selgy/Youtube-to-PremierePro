@@ -89,6 +89,8 @@ jobs:
       - name: Create DMG
         run: dmgbuild -s settings.py "YoutubetoPremiere" ./dist/YoutubetoPremiere.dmg
   
+      - name: Remove standalone executable
+        run: rm ./dist/YoutubetoPremiere
 
       - name: List dist directory contents again
         run: |
