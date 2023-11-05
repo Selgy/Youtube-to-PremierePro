@@ -150,11 +150,10 @@ def import_video_to_premiere(video_path):
 def sanitize_title(title):
     # Replace known problematic characters
     sanitized_title = (title.replace(":", " -")
-                             .replace("|", "-")
                              .replace("：", " -")  
                              .replace("｜", "-")
-                             .replace('*', '#'))
-                             
+                             .replace('*', '#')
+                             .replace('?', '#'))
     
     return sanitized_title
 
