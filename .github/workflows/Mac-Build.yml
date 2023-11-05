@@ -21,10 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pyinstaller dmgbuild
+          
 
       - name: Install Pillow
         run: pip install Pillow
-
       - name: Download FFmpeg
         run: |
           curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
