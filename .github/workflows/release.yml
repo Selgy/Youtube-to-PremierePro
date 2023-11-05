@@ -1,4 +1,4 @@
-name: Build and Package for macOS
+name: Build and Package
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - Pre-released
 
 jobs:
-  build:
+  mac-build:
+  
     runs-on: macOS-latest
 
     
@@ -122,3 +123,73 @@ jobs:
               tag_name: V1.1
               files: |
                  ./dist/*
+
+  win-build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8.8  # Replace with your Python version
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
+
+    - name: Install dependencies
+      run: pip install pyinstaller Pillow
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Download FFmpeg
+      run: |
+        curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
+        7z x ffmpeg.7z -offmpeg
+        move ffmpeg\bin\ffmpeg.exe ffmpeg.exe
+
+    - name: Build Application with PyInstaller
+      run: |
+          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg.exe;." --add-data "icon.png;." --add-data "notification_sound.mp3;." --icon=icon.ico YoutubetoPremiere.py
+
+    - name: Install NSIS
+      run: choco install nsis
+
+    - name: Create Installer with NSIS
+      run: |
+        echo "!define APP_NAME 'YoutubetoPremiere'" > installer.nsi
+        echo "!define INSTALLER_OUTFILE 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+        echo "Outfile '\${INSTALLER_OUTFILE}'" >> installer.nsi
+        echo "Section" >> installer.nsi
+        echo "  SetOutPath '\$INSTDIR'" >> installer.nsi
+        echo "  File 'dist\YoutubetoPremiere.exe'" >> installer.nsi
+        echo "SectionEnd" >> installer.nsi
+        makensis installer.nsi
+
+    - name: List directory contents
+      run: dir
+
+    - name: Get the release
+      id: get_release
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { owner, repo } = context.repo
+          const releases = await github.rest.repos.listReleases({ owner, repo })
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          return preRelease.upload_url
+
+    - name: Upload executables to asset
+      id: upload-release-asset
+      uses: softprops/action-gh-release@v1
+      env:
+            GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
+      with:
+            draft: ${{ github.ref == 'refs/heads/master' }}
+            prerelease: ${{ github.ref != 'refs/heads/master' }}
+            tag_name: V1.1
+            files: |
+                YoutubetoPremiereInstaller.exe
