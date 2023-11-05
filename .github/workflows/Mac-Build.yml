@@ -60,11 +60,18 @@ jobs:
         run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
 
       
+      - name: List directory contents
+        run: |
+         echo "Listing contents of current directory:"
+         ls -la
+         echo "Listing contents of dist directory:"
+         ls -la dist
+
       - name: Debug - Show current directory and contents
         run: |
           pwd
           ls -al
-          
+
       - name: Find YoutubetoPremiere.app
         run: find . -name "YoutubetoPremiere.app" -print
         
