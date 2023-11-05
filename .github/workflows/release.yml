@@ -149,7 +149,17 @@ jobs:
       run: |
         curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
         7z x ffmpeg.7z -offmpeg
-        move ffmpeg\bin\ffmpeg.exe ffmpeg.exe
+
+    - name: Find ffmpeg.exe
+      shell: pwsh
+      run: |
+        Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
+
+    - name: Move FFmpeg executable
+      shell: pwsh
+      run: |
+        $ffmpegPath = (Get-ChildItem -Recurse -Filter ffmpeg.exe).FullName
+        Move-Item -Path $ffmpegPath -Destination "ffmpeg.exe"
 
     - name: Build Application with PyInstaller
       run: |
@@ -203,7 +213,7 @@ jobs:
         echo 'SectionEnd' >> installer.nsi
         makensis installer.nsi
 
-        
+
     - name: List directory contents
       run: dir
 
