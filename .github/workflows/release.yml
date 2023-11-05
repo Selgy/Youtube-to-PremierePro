@@ -87,7 +87,11 @@ jobs:
           ''' > settings.py
 
       - name: Create DMG
-        run: dmgbuild -s settings.py "YoutubetoPremiere" ./dist/YoutubetoPremiere.dmg
+        run: |
+            mkdir -p dist/YoutubetoPremiere.app/Contents/Library/LaunchAgents
+            cp com.yourcompany.yourapp.plist dist/YoutubetoPremiere.app/Contents/Library/LaunchAgents/
+            dmgbuild -s settings.py "YoutubetoPremiere" ./dist/YoutubetoPremiere.dmg
+  
   
       - name: Remove standalone executable
         run: rm ./dist/YoutubetoPremiere
