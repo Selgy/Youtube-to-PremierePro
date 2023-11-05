@@ -23,6 +23,9 @@ jobs:
           pip install pyinstaller
           npm install -g create-dmg
 
+      - name: Install Pillow
+        run: pip install Pillow
+
       - name: Download FFmpeg
         run: |
           curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
