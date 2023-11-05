@@ -36,6 +36,22 @@ jobs:
         run: |
             pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
 
+
+      - name: List directory contents
+        run: |
+             echo "Listing contents of current directory:"
+             ls -la
+             echo "Listing contents of dist directory:"
+             ls -la dist
+    
+      - name: Debug - Show current directory and contents
+        run: |
+              pwd
+              ls -al
+    
+      - name: Find YoutubetoPremiere.dmg
+        run: find . -name "YoutubetoPremiere.dmg" -print
+            
       - name: Create settings.py
         run: |
           echo '''
@@ -60,21 +76,7 @@ jobs:
         run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
 
       
-      - name: List directory contents
-        run: |
-         echo "Listing contents of current directory:"
-         ls -la
-         echo "Listing contents of dist directory:"
-         ls -la dist
 
-      - name: Debug - Show current directory and contents
-        run: |
-          pwd
-          ls -al
-
-      - name: Find YoutubetoPremiere.app
-        run: find . -name "YoutubetoPremiere.app" -print
-        
       - name: Get the release
         id: get_release
         uses: actions/github-script@v5
