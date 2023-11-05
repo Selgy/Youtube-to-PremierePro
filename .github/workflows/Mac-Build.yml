@@ -62,7 +62,7 @@ jobs:
           volume_icon = "icon.icns"  # The icon for the disk image
           format = "UDBZ"  # The format of the disk image (UDRW, UDRO, UDCO, UDTO, UFBI, UDZO, UDBZ, ULFO)
           size = None  # The size of the disk image (None for automatic sizing)
-          files = ["YoutubetoPremiere.app"]  # The files to include in the disk image
+          files = ["dist/YoutubetoPremiere.app"]   # The files to include in the disk image
           symlinks = {"Applications": "/Applications"}  # The symbolic links to include in the disk image
 
           # Appearance
@@ -74,8 +74,6 @@ jobs:
 
       - name: Create DMG
         run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
-
-      
 
       - name: Get the release
         id: get_release
