@@ -180,8 +180,10 @@ jobs:
               --add-data "notification_sound.mp3;." \
               --icon=icon.ico \
               YoutubetoPremiere.py
-
-              
+      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+      env:
+            pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
+        
     - name: Install NSIS
       run: choco install nsis
 
