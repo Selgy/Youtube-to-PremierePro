@@ -64,6 +64,9 @@ jobs:
         run: |
           pwd
           ls -al
+          
+      - name: Find YoutubetoPremiere.app
+        run: find . -name "YoutubetoPremiere.app" -print
         
       - name: Get the release
         id: get_release
