@@ -79,7 +79,13 @@ jobs:
           ''' > settings.py
 
       - name: Create DMG
-        run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
+        run: dmgbuild -s settings.py "YoutubetoPremiere" ./dist/YoutubetoPremiere.dmg
+  
+
+      - name: List dist directory contents again
+        run: |
+             echo "Listing contents of dist directory again:"
+             ls -la dist
 
       - name: Get the release
         id: get_release
@@ -91,12 +97,13 @@ jobs:
             const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
             return preRelease.upload_url
 
+
       - name: Upload DMG to Release
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release.outputs.result }}
-          asset_path: ./dist/YoutubetoPremiere.dmg
-          asset_name: YoutubetoPremiere.dmg
-          asset_content_type: application/x-diskcopy
+              upload_url: ${{ steps.get_release.outputs.result }}
+              asset_path: ./dist/YoutubetoPremiere.dmg
+              asset_name: YoutubetoPremiere.dmg
+              asset_content_type: application/x-diskcopy
