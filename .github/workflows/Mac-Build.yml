@@ -38,8 +38,22 @@ jobs:
         run: |
           create-dmg 'dist/YoutubetoPremiere' --dmg-title='YoutubetoPremiere' dist  # Adjust paths and titles as necessary
 
-      - name: Upload DMG Installer
-        uses: actions/upload-artifact@v2
+      - name: Get the release
+        id: get_release
+        uses: actions/github-script@v5
         with:
-          name: macOS-installer
-          path: dist/YoutubetoPremiere.dmg
+          script: |
+            const { owner, repo } = context.repo
+            const releases = await github.rest.repos.listReleases({ owner, repo })
+            const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'Pre-released')
+            return preRelease.upload_url
+
+      - name: Upload DMG to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.result }}
+          asset_path: ./dist/YoutubetoPremiere.dmg
+          asset_name: YoutubetoPremiere.dmg
+          asset_content_type: application/x-diskcopy
