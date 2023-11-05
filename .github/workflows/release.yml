@@ -9,6 +9,7 @@ jobs:
   build:
     runs-on: macOS-latest
 
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,6 +18,7 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.8.8  # Replace with your Python version
+
 
       - name: upgrade pip
         run: |
@@ -111,6 +113,6 @@ jobs:
         with:
               draft: ${{ github.ref == 'refs/heads/master' }}
               prerelease: ${{ github.ref != 'refs/heads/master' }}
-              tag_name: ${{ steps.package-json.outputs.version }}
+              tag_name: V1.1
               files: |
                  ./dist/*
