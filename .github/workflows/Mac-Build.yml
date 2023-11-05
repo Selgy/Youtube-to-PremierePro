@@ -3,25 +3,21 @@ name: Build and Package for macOS
 on:
   push:
     branches:
-      - Pre-released  # Trigger this workflow on push to the main branch
+      - Pre-released
 
 jobs:
   build:
-    runs-on: macOS-latest  # Use the latest macOS runner
+    runs-on: macOS-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # Checkout your repository code
+        uses: actions/checkout@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8.8  # Replace with your Python version
-      
-      - name: GET GitHub token
-        run: |
-            GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
-
+    
       - name: Install dependencies
         run: |
           pip install pyinstaller dmgbuild Pillow
@@ -99,17 +95,13 @@ jobs:
             const releases = await github.rest.repos.listReleases({ owner, repo })
             const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
             return preRelease.upload_url
-     
-      - name: Print upload_url
-        run: |
-          echo "Upload URL: ${{ steps.get_release.outputs.result }}"
 
       - name: Upload DMG to Release
-        uses: actions/upload-release-asset@v1
+        uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          upload_url: ${{ steps.get_release.outputs.result }}
-          asset_path: ./dist/YoutubetoPremiere.dmg
-          asset_name: YoutubetoPremiere.dmg
-          asset_content_type: application/x-diskcopy
+          draft: ${{ github.ref == 'refs/heads/main' }}
+          prerelease: ${{ github.ref != 'refs/heads/main' }}
+          tag_name: ${{ steps.package-json.outputs.version }}
+          files: ./dist/YoutubetoPremiere.dmg
