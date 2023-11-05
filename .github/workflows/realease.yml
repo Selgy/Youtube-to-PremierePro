@@ -103,12 +103,14 @@ jobs:
             const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
             return preRelease.upload_url
 
-      - name: Upload DMG to Release
+      - name: Upload executables to asset
+        id: upload-release-asset
         uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+              GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          draft: false  
-          prerelease: true 
-          tag_name: V1.1
-          files: ./dist/YoutubetoPremiere.dmg
+              draft: ${{ github.ref == 'refs/heads/master' }}
+              prerelease: ${{ github.ref != 'refs/heads/master' }}
+              tag_name: ${{ steps.package-json.outputs.version }}
+              files: |
+                 ./dist/*
