@@ -34,7 +34,7 @@ jobs:
 
       - name: Build Application with PyInstaller
         run: |
-          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
+            pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
 
       - name: Create settings.py
         run: |
@@ -60,10 +60,10 @@ jobs:
         run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
 
       
-      - name: Print working directory
+      - name: Debug - Show current directory and contents
         run: |
-            pwd
-            ls -al
+          pwd
+          ls -al
         
       - name: Get the release
         id: get_release
