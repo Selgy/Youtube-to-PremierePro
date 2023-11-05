@@ -20,8 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller
-          npm install -g create-dmg
+          pip install pyinstaller dmgbuild
 
       - name: Install Pillow
         run: pip install Pillow
@@ -33,14 +32,33 @@ jobs:
           mv ffmpeg ffmpeg-darwin-x86_64
           chmod +x ffmpeg-darwin-x86_64
 
-
       - name: Build Application with PyInstaller
         run: |
-            pyinstaller --clean --windowed --distpath=. --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
-        
-      - name: Create DMG
+          pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
+
+      - name: Create settings.py
         run: |
-              dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
+          echo '''
+          # settings.py
+
+          # Basic settings
+          title = "YoutubetoPremiere"  # The title of the DMG window and the name of the resulting disk image
+          volume_icon = "icon.icns"  # The icon for the disk image
+          format = "UDBZ"  # The format of the disk image (UDRW, UDRO, UDCO, UDTO, UFBI, UDZO, UDBZ, ULFO)
+          size = None  # The size of the disk image (None for automatic sizing)
+          files = ["YoutubetoPremiere.app"]  # The files to include in the disk image
+          symlinks = {"Applications": "/Applications"}  # The symbolic links to include in the disk image
+
+          # Appearance
+          window_rect = ((400, 400), (500, 300))  # The size and position of the DMG window
+          default_view = "icon-view"  # The default view style for the DMG window (icon-view or list-view)
+          icon_size = 128  # The size of the icons in the DMG window
+          text_size = 16  # The size of the text in the DMG window
+          ''' > settings.py
+
+      - name: Create DMG
+        run: dmgbuild -s settings.py "YoutubetoPremiere" YoutubetoPremiere.dmg
+
       
       - name: Print working directory
         run: |
