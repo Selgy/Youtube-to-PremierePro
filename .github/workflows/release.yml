@@ -176,11 +176,11 @@ jobs:
                 --hidden-import=engineio.async_drivers.threading \
                 --hidden-import=pygame.freetype \
                 --hidden-import=encodings.utf_16_le \
-                --add-binary "ffmpeg\ffmpeg-6.0-full_build\bin\ffmpeg.exe;." \
-                --add-data "icon.png;." \
-                --add-data "notification_sound.mp3;." \                
-                --icon=icon.ico \
-                --distpath=. \
+                --add-binary "./ffmpeg/ffmpeg-6.0-full_build/bin/ffmpeg.exe;./" \
+                --add-data "./icon.png;./" \
+                --add-data "./notification_sound.mp3;./" \                
+                --icon="./icon.ico" \
+                --distpath="./" \
                 YoutubetoPremiere.py
 
 
