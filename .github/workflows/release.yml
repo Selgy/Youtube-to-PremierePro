@@ -155,6 +155,17 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
 
+    - name: Find icon.png
+      shell: pwsh
+      run: |
+        Get-ChildItem -Recurse -Filter icon.png | Format-Table FullName
+
+    - name: Find notification_sound.mp3
+      shell: pwsh
+      run: |
+        Get-ChildItem -Recurse -Filter notification_sound.mp3 | Format-Table FullName
+
+
     - name: Move FFmpeg executable
       shell: pwsh
       run: |
