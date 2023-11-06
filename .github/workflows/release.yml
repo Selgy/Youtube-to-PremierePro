@@ -165,15 +165,6 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter notification_sound.mp3 | Format-Table FullName
 
-
-    - name: Move FFmpeg executable
-      shell: pwsh
-      run: |
-          $sourcePath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\ffmpeg-6.0-full_build\bin\ffmpeg.exe"
-          $destinationPath = "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin\ffmpeg.exe"
-          New-Item -ItemType Directory -Path "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\bin" -Force
-          Move-Item -Path $sourcePath -Destination $destinationPath
-  
     - name: Build Application with PyInstaller
       run: |
                 pyinstaller --onefile --clean --windowed \
@@ -185,13 +176,14 @@ jobs:
                 --hidden-import=engineio.async_drivers.threading \
                 --hidden-import=pygame.freetype \
                 --hidden-import=encodings.utf_16_le \
-                --add-binary "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\ffmpeg.exe;." \
-                --add-data "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\icon.png;." \
-                --add-data "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\notification_sound.mp3;." \
+                --add-binary "ffmpeg\ffmpeg-6.0-full_build\bin\ffmpeg.exe;." \
+                --add-data "icon.png;." \
+                --add-data "notification_sound.mp3;." \
                 --icon=icon.ico \
                 --distpath=. \
                 YoutubetoPremiere.py
-        
+
+
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
       env:
             pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
