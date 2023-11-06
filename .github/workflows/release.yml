@@ -172,7 +172,6 @@ jobs:
             pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
     
         
-        
     - name: Install NSIS
       run: choco install nsis
 
