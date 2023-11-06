@@ -175,8 +175,8 @@ jobs:
                 --hidden-import=pygame.freetype \
                 --hidden-import=encodings.utf_16_le \
                 --add-binary "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\ffmpeg\ffmpeg.exe;." \
-                --add-data "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\icon.png;." \
-                --add-data "D:\a\Youtube-to-PremierePro\Youtube-to-PremierePro\notification_sound.mp3;." \
+                --add-data "D:\a\Youtube-to-PremierePro\icon.png;." \
+                --add-data "D:\a\Youtube-to-PremierePro\notification_sound.mp3;." \
                 --icon=icon.ico \
                 --distpath=. \
                 YoutubetoPremiere.py
