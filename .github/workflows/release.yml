@@ -191,6 +191,11 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter notification_sound.mp3 | Format-Table FullName
 
+    - name: List files
+      run: |
+          pwd
+          ls -la
+
     - name: Build Application with PyInstaller
       run: |
           pyinstaller --onefile --clean --windowed \

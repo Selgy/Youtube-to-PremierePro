@@ -18,9 +18,6 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 
-
-import os
-
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
