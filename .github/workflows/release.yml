@@ -154,6 +154,12 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter icon.png | Format-Table FullName
       
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+      
+    - name: List installed packages
+      run: pip list
+
     - name: Find pyinstaller
       shell: pwsh
       run: |
