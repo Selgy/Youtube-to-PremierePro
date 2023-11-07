@@ -178,8 +178,8 @@ jobs:
       run: pip list
  
 
-    - name: check version python
-      run: pip show pyinstaller
+    - name: check version pyinstaller
+      run: pyinstaller -v
 
     - name: Find pyinstaller
       shell: pwsh
