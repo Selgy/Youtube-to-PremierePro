@@ -16,8 +16,17 @@ import re
 import psutil
 import tkinter as tk
 from tkinter import messagebox
+import platform
 
-appdata_path = os.environ['APPDATA']
+
+if platform.system() == 'Windows':
+    appdata_path = os.environ['APPDATA']
+elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
+    appdata_path = os.path.expanduser('~/Library/Application Support')
+else:
+    # Handle other operating systems or raise an exception
+    raise Exception("Unsupported operating system")
+
 settings_path = os.path.join(appdata_path, 'YoutubetoPremiere', 'settings.json')
 
 
