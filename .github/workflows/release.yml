@@ -25,9 +25,6 @@ jobs:
         run: |
             pip install --upgrade pip
 
-      - name: Install dependencies
-        run: |
-          pip install 
 
       - name: Install dependencies
         run: pip install -r requirements.txt 
@@ -164,21 +161,7 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-        pyinstaller --onefile --clean --windowed \
-        --hidden-import=engineio.async_drivers.eventlet \
-        --hidden-import=engineio.async_drivers.gevent_uwsgi \
-        --hidden-import=engineio.async_drivers.gevent \
-        --hidden-import=engineio.async_drivers \
-        --hidden-import=gevent \
-        --hidden-import=engineio.async_drivers.threading \
-        --hidden-import=pygame.freetype \
-        --hidden-import=encodings.utf_16_le \
-        --add-binary "./ffmpeg/ffmpeg-6.0-full_build/bin/ffmpeg.exe:./" \
-        --add-data "./icon.png:./" \
-        --add-data "./notification_sound.mp3:./" \                
-        --icon="./icon.ico" \
-        --distpath="./" \
-        YoutubetoPremiere.py
+        pyinstaller YoutubetoPremiere.py
 
 
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
