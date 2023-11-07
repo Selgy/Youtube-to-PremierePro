@@ -181,10 +181,10 @@ jobs:
     - name: check version pyinstaller
       run: pyinstaller -v
 
-    - name: Find pyinstaller
+    - name: Find YoutubetoPremiere.py
       shell: pwsh
       run: |
-          Get-ChildItem -Recurse -Filter pyinstaller | Format-Table FullName
+          Get-ChildItem -Recurse -Filter YoutubetoPremiere.py | Format-Table FullName
 
     - name: Find notification_sound.mp3
       shell: pwsh
