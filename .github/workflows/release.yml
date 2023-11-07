@@ -191,9 +191,10 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter notification_sound.mp3 | Format-Table FullName
 
-    - name: List files
-      run: |
-          pwd
+    - name: List files in the repository root
+      run: Get-ChildItem -Path .
+      shell: pwsh
+      
 
     - name: Build Application with PyInstaller
       run: |
