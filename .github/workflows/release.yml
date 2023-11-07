@@ -27,10 +27,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pyinstaller dmgbuild Pillow
+          pip install 
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install -r requirements.txt 
 
       - name: Cache pip
         uses: actions/cache@v2
@@ -134,13 +134,10 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8.8  # Replace with your Python version
+        python-version: 3.8.8 
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip
-
-    - name: Install dependencies
-      run: pip install pyinstaller Pillow pyinstaller
 
     - name: Install dependencies
       run: pip install -r requirements.txt
@@ -167,21 +164,21 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-                pyinstaller --onefile --clean --windowed \
-                --hidden-import=engineio.async_drivers.eventlet \
-                --hidden-import=engineio.async_drivers.gevent_uwsgi \
-                --hidden-import=engineio.async_drivers.gevent \
-                --hidden-import=engineio.async_drivers \
-                --hidden-import=gevent \
-                --hidden-import=engineio.async_drivers.threading \
-                --hidden-import=pygame.freetype \
-                --hidden-import=encodings.utf_16_le \
-                --add-binary "./ffmpeg/ffmpeg-6.0-full_build/bin/ffmpeg.exe:./" \
-                --add-data "./icon.png:./" \
-                --add-data "./notification_sound.mp3:./" \                
-                --icon="./icon.ico" \
-                --distpath="./" \
-                YoutubetoPremiere.py
+        pyinstaller --onefile --clean --windowed \
+        --hidden-import=engineio.async_drivers.eventlet \
+        --hidden-import=engineio.async_drivers.gevent_uwsgi \
+        --hidden-import=engineio.async_drivers.gevent \
+        --hidden-import=engineio.async_drivers \
+        --hidden-import=gevent \
+        --hidden-import=engineio.async_drivers.threading \
+        --hidden-import=pygame.freetype \
+        --hidden-import=encodings.utf_16_le \
+        --add-binary "./ffmpeg/ffmpeg-6.0-full_build/bin/ffmpeg.exe:./" \
+        --add-data "./icon.png:./" \
+        --add-data "./notification_sound.mp3:./" \                
+        --icon="./icon.ico" \
+        --distpath="./" \
+        YoutubetoPremiere.py
 
 
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
