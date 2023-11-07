@@ -19,15 +19,20 @@ from tkinter import messagebox
 import platform
 
 
+import os
+
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     appdata_path = os.path.expanduser('~/Library/Application Support')
+elif platform.system() == 'Linux':
+    appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
 
 settings_path = os.path.join(appdata_path, 'YoutubetoPremiere', 'settings.json')
+
 
 
 settings_dir = os.path.dirname(settings_path)
