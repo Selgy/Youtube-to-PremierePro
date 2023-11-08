@@ -223,7 +223,7 @@ jobs:
       run: |
         echo "!include MUI2.nsh" > installer.nsi
         echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
-        echo "Outfile 'YoutubetoPremiere-WinInstaller.exe'" >> installer.nsi
+        echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
         echo "InstallDir $PROGRAMFILES\YoutubetoPremiere" >> installer.nsi
         echo '!define MUI_DIRECTORYPAGE_TEXT_TOP "Select the destination folder where Youtube to Premiere should be installed."' >> installer.nsi
         echo '!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Destination Folder:"' >> installer.nsi
