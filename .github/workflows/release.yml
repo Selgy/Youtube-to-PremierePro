@@ -138,7 +138,7 @@ jobs:
 
     - name: Activate virtual environment
       shell: pwsh
-      run: ./venv/Scripts/Activate.ps1 
+      run: .\venv\Scripts\Activate.ps1 
 
 
     - name: Upgrade pip
@@ -155,7 +155,7 @@ jobs:
     - name: Cache pip
       uses: actions/cache@v2
       with:
-        path: ~/AppData/Local/pip/Cache
+        path: ~\AppData\Local\pip\Cache
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
@@ -252,15 +252,15 @@ jobs:
         echo 'File requirements.txt' >> installer.nsi
         echo 'File /r node_modules' >> installer.nsi
         echo 'File /r ffmpeg' >> installer.nsi
-        echo "File 'dist/YoutubetoPremiere.exe'" >> installer.nsi
+        echo "File 'dist\YoutubetoPremiere.exe'" >> installer.nsi
         echo 'ExecWait "extension_installer.bat" $0' >> installer.nsi
         echo '${If} $0 != 0' >> installer.nsi
         echo '    MessageBox MB_ICONSTOP|MB_OK "There was an error while executing extension_installer.bat."' >> installer.nsi
         echo '${EndIf}' >> installer.nsi
-        echo 'CreateShortcut "$SMSTARTUP/YoutubeToPremiere.lnk" "$INSTDIR/YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'CreateDirectory $SMPROGRAMS/YoutubetoPremiere' >> installer.nsi
-        echo 'CreateShortcut "$SMPROGRAMS/YoutubetoPremiere/Youtube to Premiere.lnk" "$INSTDIR/YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'CreateShortcut "$DESKTOP/Youtube to Premiere.lnk" "$INSTDIR/YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'CreateShortcut "$SMSTARTUP\YoutubeToPremiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'CreateDirectory $SMPROGRAMS\YoutubetoPremiere' >> installer.nsi
+        echo 'CreateShortcut "$SMPROGRAMS\YoutubetoPremiere\Youtube to Premiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+        echo 'CreateShortcut "$DESKTOP\Youtube to Premiere.lnk" "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi
         makensis installer.nsi
 
