@@ -19,6 +19,14 @@ from tkinter import messagebox
 import platform
 import subprocess
 
+if getattr(sys, 'frozen', False):
+    script_dir = os.path.dirname(sys.executable)
+else:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'ffmpeg-6.0-full_build', 'bin', 'ffmpeg.exe')
+
+
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
@@ -30,7 +38,6 @@ else:
     raise Exception("Unsupported operating system")
 
 settings_path = os.path.join(appdata_path, 'YoutubetoPremiere', 'settings.json')
-
 
 
 settings_dir = os.path.dirname(settings_path)
@@ -186,34 +193,32 @@ def get_default_ydl_opts():
         'nooverwrites': False,
     }
 
+def convert_to_wav(m4a_path, wav_path):
+    ffmpeg_command = [ffmpeg_path, '-y', '-i', m4a_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', wav_path]
+    try:
+        subprocess.call(ffmpeg_command)
+        logging.info(f'Converted {m4a_path} to {wav_path}')
+    except Exception as e:
+        logging.error(f'Error converting {m4a_path} to WAV: {e}', exc_info=True)
+
+
 def download_video(video_url, resolution, framerate, download_path, download_mp3):
     ydl_opts = get_default_ydl_opts()
     logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
-    
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    download_path = os.path.join(download_path, '')
+
+    with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
         info_dict = ydl.extract_info(video_url, download=False)
-        video_title = sanitize_title(info_dict['title'])
     
     video_title = sanitize_title(info_dict['title'])
 
-    # Ensure the download path ends with a separator
-    download_path = os.path.join(download_path, '')
+    sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
 
     file_extension = "wav" if download_mp3 else "mp4"
-    sanitized_output_template = f'{video_title}.{file_extension}'
-    full_download_path = os.path.join(download_path, sanitized_output_template)
+    video_title = sanitize_title(info_dict['title'])
 
-
-
-    if getattr(sys, 'frozen', False):
-        script_dir = os.path.dirname(sys.executable)
-    else:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
-    
     ydl_opts = {
-        'outtmpl': f'{download_path}{sanitized_output_template}',
+        'outtmpl': sanitized_output_template,
         'ffmpeg_location': ffmpeg_path,
         'progress_hooks': [progress_hook],
         'writesubtitles': False,
@@ -222,10 +227,10 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
         'nooverwrites': False,
     }
 
-    if download_mp3:  
+    if download_mp3:  # change this to something like download_audio
         ydl_opts.update({
             'format': f'bestaudio[ext=m4a]/best',
-            'outtmpl': f'{download_path}{sanitized_output_template}',
+            'outtmpl': sanitized_output_template,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'writesubtitles': False,
@@ -236,7 +241,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     else:
         ydl_opts.update({
             'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': f'{download_path}{sanitized_output_template}',
+            'outtmpl': f'{download_path}{sanitized_output_template}.%(ext)s',
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'writesubtitles': False,
@@ -245,45 +250,53 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
             'nooverwrites': False,
         })
 
-    file_extension = "m4a" if download_mp3 else "mp4"
-    video_title = sanitize_title(info_dict['title'])
-    video_filename = full_download_path  # Define video_filename here
+    sanitized_output_template = f'{download_path}{video_title}.{file_extension}'
+    ydl_opts['outtmpl'] = sanitized_output_template
+
 
     logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
     logging.info(f'ydl_opts before download: {ydl_opts}') 
     print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
-
-
+    
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
-
-    # After download, convert to wav if download_mp3 is True
-    if download_mp3 and result == 0:
-        mp3_path = f"{full_download_path.rsplit('.', 1)[0]}.m4a"
-        wav_path = f"{full_download_path.rsplit('.', 1)[0]}.wav"
-        ffmpeg_command = [ffmpeg_path, '-i', mp3_path, wav_path]
-        subprocess.run(ffmpeg_command)
-        # Now, the video_filename should be the path to the .wav file
-        video_filename = wav_path
     logging.info(f'download_mp3: {download_mp3}')
 
-    if result == 0:
-        video_title = sanitize_title(info_dict['title'])
-        file_extension = "m4a" if download_mp3 else "mp4"
-        video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")  # Define video_filename here
-        import_video_to_premiere(video_filename)
-        socketio.emit('download-complete')  # Emit the 'download-complete' event here
-        play_notification_sound()
-    else:
-        logging.error(f'Failed to download video from {video_url}')
-    
-    if os.path.exists(video_filename):
-        time.sleep(2)
-        logging.info(f'Download and import completed successfully for {video_url}')
-    else:
-        logging.error("Video download failed.")
+    if result == 0 and download_mp3:
+        # Since FFmpegExtractAudio is used, there should already be a .wav file.
+        # The filename would be the same as the video title sanitized, plus the .wav extension.
+        wav_filename = os.path.join(download_path, f"{video_title}.wav")
 
-def play_notification_sound(volume=0.4):  # Default volume set to 50%
+        # Check if the .wav file exists before trying to import it to Premiere.
+        if os.path.exists(wav_filename):
+            # Import the WAV file into Premiere
+            import_video_to_premiere(wav_filename)
+            socketio.emit('download-complete')  # Notify the frontend of completion if you're using a frontend
+            play_notification_sound()  # Play a sound to notify the user if needed
+        else:
+            logging.error("Expected WAV file not found after download and conversion.")
+            # Handle the error appropriately, maybe notify the user or retry the download.
+
+    elif result == 0 and not download_mp3:
+        # If the download_mp3 is False, then we expect a video file.
+        # The filename would be the same as the video title sanitized, with the correct video extension.
+        mp4_filename = os.path.join(download_path, f"{video_title}.mp4")
+
+        # Check if the .mp4 file exists before trying to import it to Premiere.
+        if os.path.exists(mp4_filename):
+            # Import the MP4 file into Premiere
+            import_video_to_premiere(mp4_filename)
+            socketio.emit('download-complete')  # Notify the frontend of completion if you're using a frontend
+            play_notification_sound()  # Play a sound to notify the user if needed
+        else:
+            logging.error("Expected MP4 file not found after download.")
+            # Handle the error appropriately, maybe notify the user or retry the download.
+
+    else:
+        logging.error("Download failed with youtube_dl.")
+        # Handle the error appropriately, maybe notify the u
+
+def play_notification_sound(volume=0.5):  # Default volume set to 50%
     pygame.mixer.init()
     pygame.mixer.music.load("notification_sound.mp3")  # Load your notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
@@ -301,6 +314,7 @@ def load_settings():
         return settings
     logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
+
 
 def main():
     logging.info('Script starting...')  # Log the starting of the script
