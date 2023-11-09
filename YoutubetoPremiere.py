@@ -17,6 +17,7 @@ import psutil
 import tkinter as tk
 from tkinter import messagebox
 import platform
+import subprocess
 
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
@@ -188,14 +189,20 @@ def get_default_ydl_opts():
 def download_video(video_url, resolution, framerate, download_path, download_mp3):
     ydl_opts = get_default_ydl_opts()
     logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
-    download_path = os.path.join(download_path, '')
-
-    with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
+    
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(video_url, download=False)
+        video_title = sanitize_title(info_dict['title'])
     
     video_title = sanitize_title(info_dict['title'])
 
-    sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
+    # Ensure the download path ends with a separator
+    download_path = os.path.join(download_path, '')
+
+    file_extension = "wav" if download_mp3 else "mp4"
+    sanitized_output_template = f'{video_title}.{file_extension}'
+    full_download_path = os.path.join(download_path, sanitized_output_template)
+
 
 
     if getattr(sys, 'frozen', False):
@@ -206,7 +213,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
     
     ydl_opts = {
-        'outtmpl': sanitized_output_template,
+        'outtmpl': f'{download_path}{sanitized_output_template}',
         'ffmpeg_location': ffmpeg_path,
         'progress_hooks': [progress_hook],
         'writesubtitles': False,
@@ -215,10 +222,10 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
         'nooverwrites': False,
     }
 
-    if download_mp3:  # change this to something like download_audio
+    if download_mp3:  
         ydl_opts.update({
             'format': f'bestaudio[ext=m4a]/best',
-            'outtmpl': sanitized_output_template,
+            'outtmpl': f'{download_path}{sanitized_output_template}',
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'writesubtitles': False,
@@ -229,7 +236,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     else:
         ydl_opts.update({
             'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': f'{download_path}{sanitized_output_template}.%(ext)s',
+            'outtmpl': f'{download_path}{sanitized_output_template}',
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'writesubtitles': False,
@@ -240,17 +247,24 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
 
     file_extension = "m4a" if download_mp3 else "mp4"
     video_title = sanitize_title(info_dict['title'])
-    video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")  # Define video_filename here
+    video_filename = full_download_path  # Define video_filename here
 
     logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
     logging.info(f'ydl_opts before download: {ydl_opts}') 
     print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
-    
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([video_url])
+
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
 
+    # After download, convert to wav if download_mp3 is True
+    if download_mp3 and result == 0:
+        mp3_path = f"{full_download_path.rsplit('.', 1)[0]}.m4a"
+        wav_path = f"{full_download_path.rsplit('.', 1)[0]}.wav"
+        ffmpeg_command = [ffmpeg_path, '-i', mp3_path, wav_path]
+        subprocess.run(ffmpeg_command)
+        # Now, the video_filename should be the path to the .wav file
+        video_filename = wav_path
     logging.info(f'download_mp3: {download_mp3}')
 
     if result == 0:
@@ -269,7 +283,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     else:
         logging.error("Video download failed.")
 
-def play_notification_sound(volume=0.5):  # Default volume set to 50%
+def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
     pygame.mixer.music.load("notification_sound.mp3")  # Load your notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
