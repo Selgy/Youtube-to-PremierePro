@@ -241,7 +241,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
     else:
         ydl_opts.update({
             'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': f'{download_path}{sanitized_output_template}.%(ext)s',
+            'outtmpl': sanitized_output_template,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'writesubtitles': False,

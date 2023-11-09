@@ -83,7 +83,7 @@ function tryModifyMenu() {
             }
         } else {
             // If the top level buttons div isn't available yet, try again in a moment
-            setTimeout(tryModifyMenu, 1000);  // Increased delay to 1000 milliseconds (1 second)
+            setTimeout(tryModifyMenu, 200);  // Increased delay to 1000 milliseconds (1 second)
         }
     }
 }
@@ -134,57 +134,25 @@ function checkUrlChange() {
 setInterval(checkUrlChange, 500);
 
 function addPremiereButton() {
-    if (document.getElementById('send-to-premiere-button')) return;
-    if (isVideoPage()) {
-        const topLevelButtons = document.querySelector('#top-level-buttons-computed');
-        if (topLevelButtons && !document.getElementById('send-to-premiere-button')) {  // Check if the button already exists
-            const premiereButton = createButton();
-            topLevelButtons.appendChild(premiereButton);  // Append the button at the end of the toolbar
+    const likeButton = document.querySelector('ytd-menu-renderer yt-icon-button#button');
+    if (likeButton && !document.getElementById('send-to-premiere-button')) {
+        const premiereButton = createButton();
+        likeButton.parentNode.insertBefore(premiereButton, likeButton);
+        console.log('Premiere button added.');
+    }
+}
+
+// Initial call to add the button if the page is already loaded
+addPremiereButton();
+
+// Set up a MutationObserver to monitor for changes if the button isn't added yet
+const observer = new MutationObserver((mutations, observer) => {
+    for (const mutation of mutations) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            addPremiereButton();
         }
     }
-    updateVideoUrl();
-}
+});
 
-
-window.onload = function() {
-    setTimeout(function(){
-        // Start the first attempt to modify the menu
-        tryModifyMenu();
-
-        // Start observing the document
-        const observer = new MutationObserver((mutationsList, observer) => {
-            for (let mutation of mutationsList) {
-                console.log('Mutation observed:', mutation);  
-                if (mutation.target.id !== 'some-specific-element') continue;
-                if (mutation.type === 'childList') {
-                    debouncedAddPremiereButton();
-                }
-            }
-        });
-    
-        
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-        
-        const debouncedAddPremiereButton = debounce(addPremiereButton, 300);  // 300ms delay
-        
-        // Use debounced function in your MutationObserver callback
-            
-
-        document.addEventListener('DOMContentLoaded', (event) => {
-            console.log('DOM fully loaded and parsed');
-            tryModifyMenu();
-            const targetNode = document.querySelector('#container');  // You might need to find a more specific container
-            observer.observe(targetNode, { childList: true, subtree: true });    
-            console.log('tryModifyMenu called');  // Log when the function is called
-            
-            addPremiereButton();
-        });
-        addPremiereButton();
-    }, 1000);  
-}
+// Start observing the document body for changes
+observer.observe(document.body, { childList: true, subtree: true });
