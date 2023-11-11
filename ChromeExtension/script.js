@@ -4,8 +4,16 @@ document.addEventListener('DOMContentLoaded', (event) => {
     if (settings) {
         document.getElementById('resolution').value = settings.resolution || '1080p';
         document.getElementById('framerate').value = settings.framerate || '30';
-        document.getElementById('download-path').value = settings.downloadPath || 'TEST';
-        document.getElementById('download-mp3').checked = settings.downloadMP3 || false;  // New line
+        
+        // Only set the download path if it's not empty
+        const downloadPathInput = document.getElementById('download-path');
+        if (settings.downloadPath && settings.downloadPath.trim() !== '') {
+            downloadPathInput.value = settings.downloadPath;
+        } else {
+            downloadPathInput.value = '';
+        }
+
+        document.getElementById('download-mp3').checked = settings.downloadMP3 || false;
     }
 
     const button = document.getElementById('save-settings');

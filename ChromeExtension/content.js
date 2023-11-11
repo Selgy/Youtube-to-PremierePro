@@ -37,32 +37,34 @@ console.log(topLevelButtons);
 function sendURL() {
     const videoId = new URLSearchParams(window.location.search).get('v');
     if (videoId) {
-        const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;  // Construct the video URL
-        const serverUrl = 'http://localhost:3001/handle-video-url';  // Updated to your local server
+        const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const serverUrl = 'http://localhost:3001/handle-video-url';
 
         fetch(serverUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ videoUrl: currentVideoUrl }),  // Sends the video URL in the request body
+            body: JSON.stringify({ videoUrl: currentVideoUrl }),
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.text();  // Use text() instead of json() if the response is plain text
-        })
-        .then(data => {
-            console.log('Success:', data);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-
+        .then(handleResponse)
+        .catch(handleError);
     } else {
         console.error('No video URL found.');
     }
+}
+
+function handleResponse(response) {
+    if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+    }
+    return response.text().then(data => {
+        console.log('Success:', data);
+    });
+}
+
+function handleError(error) {
+    console.error('Error:', error);
 }
 
 

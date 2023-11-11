@@ -19,6 +19,9 @@ from tkinter import messagebox
 import platform
 import subprocess
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 if getattr(sys, 'frozen', False):
     script_dir = os.path.dirname(sys.executable)
 else:
@@ -115,19 +118,18 @@ def handle_video_url():
     global video_url_global
     data = request.get_json()
     video_url_global = data.get('videoUrl')
-    logging.info(f'Video URL received: {video_url_global}')
 
-    # Ensure settings have been received before attempting to download the video
+    # Load settings and get the values
     settings = load_settings()
     if settings is None:
         logging.error("Settings not received from the extension.")
         return jsonify(error="Settings not received"), 500 
 
-    # Get the settings values
-    resolution = settings['resolution']
-    framerate = settings['framerate']
-    download_path = settings['downloadPath']
-    download_mp3 = settings['downloadMP3'] 
+    # Extract settings values and user-provided download path
+    resolution = settings.get('resolution')
+    framerate = settings.get('framerate')
+    user_specified_path = data.get('downloadPath')  # Corrected this line
+    download_mp3 = settings.get('downloadMP3') 
 
     # Check if Adobe Premiere Pro is running
     if not is_premiere_running():
@@ -136,12 +138,14 @@ def handle_video_url():
         messagebox.showerror("Error", "Adobe Premiere Pro is not running")
         return jsonify(error="Adobe Premiere Pro is not running"), 400
 
-    # Initiate the download of the video
-    download_video(video_url_global, resolution, framerate, download_path, download_mp3) 
+    download_path = user_specified_path if user_specified_path else settings.get('downloadPath').strip()
 
+    # Initiate the download of the video
+    download_video(video_url_global, resolution, framerate, download_path, download_mp3)
     response = jsonify(success=True)
     response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
     return response, 200
+
 
 def read_settings_from_local():
     global settings_global
@@ -201,21 +205,50 @@ def convert_to_wav(m4a_path, wav_path):
     except Exception as e:
         logging.error(f'Error converting {m4a_path} to WAV: {e}', exc_info=True)
 
+def get_current_project_path():
+    try:
+        proj = pymiere.objects.app.project
+        if proj and proj.path:
+            project_file_path = proj.path
+            project_dir_path = os.path.dirname(project_file_path)
+            logging.info(f"Project directory path: {project_dir_path}")
+            return project_dir_path
+        else:
+            logging.warning("No active project found in Premiere Pro")
+            return None
+    except Exception as e:
+        logging.error(f'Error getting project path: {e}', exc_info=True)
+        return None
 
-def download_video(video_url, resolution, framerate, download_path, download_mp3):
-    ydl_opts = get_default_ydl_opts()
-    logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
-    download_path = os.path.join(download_path, '')
+    
+def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+    # Determine the final download path
+    if user_download_path.strip():
+        # Use the user-specified path if it's provided
+        final_download_path = user_download_path
+    else:
+        # Get the directory of the current Premiere Pro project
+        project_dir_path = get_current_project_path()
+        if project_dir_path:
+            # Create 'YoutubeToPremiere_download' directory next to the project file
+            final_download_path = os.path.join(project_dir_path, 'YoutubeToPremiere_download')
+            if not os.path.exists(final_download_path):
+                os.makedirs(final_download_path)
+        else:
+            logging.error("Premiere Pro project path not found.")
+            return
+
 
     with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
         info_dict = ydl.extract_info(video_url, download=False)
-    
+
     video_title = sanitize_title(info_dict['title'])
-
-    sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
-
     file_extension = "wav" if download_mp3 else "mp4"
-    video_title = sanitize_title(info_dict['title'])
+
+    sanitized_output_template = os.path.join(final_download_path, f"{video_title}.{file_extension}")
+
+    ydl_opts = get_default_ydl_opts()
+    ydl_opts.update({'outtmpl': sanitized_output_template, 'ffmpeg_location': ffmpeg_path})
 
     ydl_opts = {
         'outtmpl': sanitized_output_template,
@@ -250,7 +283,7 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
             'nooverwrites': False,
         })
 
-    sanitized_output_template = f'{download_path}{video_title}.{file_extension}'
+    sanitized_output_template = os.path.join(final_download_path, f"{video_title}.{file_extension}")
     ydl_opts['outtmpl'] = sanitized_output_template
 
 
@@ -262,10 +295,10 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
         result = ydl.download([video_url])
     logging.info(f'download_mp3: {download_mp3}')
 
+
     if result == 0 and download_mp3:
-        # Since FFmpegExtractAudio is used, there should already be a .wav file.
-        # The filename would be the same as the video title sanitized, plus the .wav extension.
-        wav_filename = os.path.join(download_path, f"{video_title}.wav")
+        wav_filename = os.path.join(final_download_path, f"{video_title}.wav")
+       
 
         # Check if the .wav file exists before trying to import it to Premiere.
         if os.path.exists(wav_filename):
@@ -278,9 +311,8 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
             # Handle the error appropriately, maybe notify the user or retry the download.
 
     elif result == 0 and not download_mp3:
-        # If the download_mp3 is False, then we expect a video file.
-        # The filename would be the same as the video title sanitized, with the correct video extension.
-        mp4_filename = os.path.join(download_path, f"{video_title}.mp4")
+        mp4_filename = os.path.join(final_download_path, f"{video_title}.mp4")
+
 
         # Check if the .mp4 file exists before trying to import it to Premiere.
         if os.path.exists(mp4_filename):
