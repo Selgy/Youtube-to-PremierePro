@@ -160,9 +160,12 @@ jobs:
       
     - name: Rename Extracted FFmpeg Folder
       run: |
-          # Replace 'ffmpeg-6.1-full_build' with the actual name of the extracted folder
-          # You might need to adjust this based on the actual structure of the extracted archive
-          move ffmpeg-6.0-full_build ffmpeg
+            if (Test-Path -Path "ffmpeg") {
+                # Remove or rename the existing 'ffmpeg' directory/file
+                Remove-Item -Recurse -Force "ffmpeg"
+            }
+            Move-Item -Path "ffmpeg-6.0-full_build" -Destination "ffmpeg"
+      shell: pwsh
 
     - name: Cache pip
       uses: actions/cache@v2
