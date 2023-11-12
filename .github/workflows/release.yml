@@ -154,8 +154,8 @@ jobs:
         7z x ffmpeg.7z -offmpeg
         mkdir ffmpeg/bin
     
-        - name: Extract FFmpeg
-        run: |
+    - name: Extract FFmpeg
+      run: |
           7z x ffmpeg.7z
       
     - name: Rename Extracted FFmpeg Folder
