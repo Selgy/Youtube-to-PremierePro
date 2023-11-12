@@ -38,12 +38,12 @@ jobs:
   
       - name: Download FFmpeg
         run: |
-          curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
-          unzip ffmpeg.zip
-          mkdir -p ffmpeg/bin            # Ensure the directory structure is correct
-          mv ffmpeg ffmpeg/bin/          # Move the ffmpeg file into the bin directory
-          chmod +x ffmpeg/bin/ffmpeg     
-
+          curl -L https://evermeet.cx/ffmpeg/ffmpeg-6.1.7z -o ffmpeg.zip
+          mkdir -p ffmpeg_dir           # Create a new directory for FFmpeg
+          unzip ffmpeg.zip -d ffmpeg_dir  # Extract the zip file into ffmpeg_dir
+          mkdir -p ffmpeg/bin           # Create the desired directory structure
+          mv ffmpeg_dir/ffmpeg ffmpeg/bin/  # Move and rename the ffmpeg file
+          chmod +x ffmpeg/bin/ffmpeg 
 
       - name: Build Application with PyInstaller
         run: |
