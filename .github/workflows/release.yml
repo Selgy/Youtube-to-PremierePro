@@ -40,14 +40,14 @@ jobs:
         run: |
           curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
           unzip ffmpeg.zip
-          mv ffmpeg ffmpeg-darwin-x86_64
-          chmod +x ffmpeg-darwin-x86_64
+          mkdir -p ffmpeg/bin
+          mv ffmpeg ffmpeg/bin/ffmpeg-darwin-x86_64
+          chmod +x ffmpeg/bin/ffmpeg-darwin-x86_64
 
       - name: Build Application with PyInstaller
         run: |
-            pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
-
-
+            pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg/bin/ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
+        
 
       - name: List directory contents
         run: |
@@ -151,6 +151,9 @@ jobs:
       run: |
         curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
         7z x ffmpeg.7z -offmpeg
+        mkdir ffmpeg/bin
+        move ffmpeg/bin ffmpeg.exe
+    
 
     - name: Cache pip
       uses: actions/cache@v2
@@ -207,14 +210,12 @@ jobs:
             --hidden-import=engineio.async_drivers.threading `
             --hidden-import=pygame.freetype `
             --hidden-import=encodings.utf_16_le `
-            --add-binary "./ffmpeg/ffmpeg-6.0-full_build/bin/ffmpeg.exe;." `
+            --add-binary "./ffmpeg/bin/ffmpeg.exe;." `
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
             --distpath "./dist" `
-            YoutubetoPremiere.py
-    
-    
+            YoutubetoPremiere.py    
         
     - name: Install NSIS
       run: choco install nsis
