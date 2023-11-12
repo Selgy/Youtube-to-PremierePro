@@ -150,10 +150,19 @@ jobs:
 
     - name: Download FFmpeg
       run: |
-        curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
+        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
         7z x ffmpeg.7z -offmpeg
         mkdir ffmpeg/bin
-        move ffmpeg/ffmpeg.exe ffmpeg/bin
+    
+        - name: Extract FFmpeg
+        run: |
+          7z x ffmpeg.7z
+      
+    - name: Rename Extracted FFmpeg Folder
+      run: |
+          # Replace 'ffmpeg-6.1-full_build' with the actual name of the extracted folder
+          # You might need to adjust this based on the actual structure of the extracted archive
+          move ffmpeg-6.0-full_build ffmpeg
 
     - name: Cache pip
       uses: actions/cache@v2
