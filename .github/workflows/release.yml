@@ -153,8 +153,7 @@ jobs:
         curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
         7z x ffmpeg.7z -offmpeg
         mkdir ffmpeg/bin
-        move ffmpeg/bin ffmpeg.exe
-    
+        move ffmpeg/ffmpeg.exe ffmpeg/bin
 
     - name: Cache pip
       uses: actions/cache@v2
