@@ -27,7 +27,7 @@ if getattr(sys, 'frozen', False):
 else:
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    
+        
 if platform.system() == 'Windows':
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg.exe')
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
