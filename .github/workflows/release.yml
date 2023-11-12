@@ -75,7 +75,7 @@ jobs:
   
   
       - name: Remove standalone executable
-        run: rm ./dist/YoutubetoPremiere
+        run: rm -rf ./dist/YoutubetoPremiere
 
       - name: List dist directory contents again
         run: |
