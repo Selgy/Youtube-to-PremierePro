@@ -38,7 +38,7 @@ jobs:
   
       - name: Download FFmpeg
         run: |
-          curl -L https://evermeet.cx/ffmpeg/ffmpeg-6.1.7z -o ffmpeg.zip
+          curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
           mkdir -p ffmpeg_dir           # Create a new directory for FFmpeg
           unzip ffmpeg.zip -d ffmpeg_dir  # Extract the zip file into ffmpeg_dir
           mkdir -p ffmpeg/bin           # Create the desired directory structure
