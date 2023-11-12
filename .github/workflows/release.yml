@@ -47,7 +47,8 @@ jobs:
 
       - name: Build Application with PyInstaller
         run: |
-            pyinstaller --onefile --clean --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg/bin:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
+          pyinstaller --clean --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg/bin/ffmpeg:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns --windowed YoutubetoPremiere.py
+
         
 
       - name: List directory contents
@@ -61,6 +62,7 @@ jobs:
         run: |
               pwd
               ls -al
+        
     
       - name: Find YoutubetoPremiere.app
         run: find . -name "YoutubetoPremiere.app" -print
