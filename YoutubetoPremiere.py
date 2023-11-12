@@ -176,8 +176,8 @@ def sanitize_title(title):
                              .replace("：", " -")  
                              .replace("｜", "-")
                              .replace('*', '#')
-                             .replace('?', '#'))
-    
+                             .replace('?', '#')
+                             .replace('/', '#'))
     return sanitized_title
 
 def progress_hook(d):
