@@ -40,13 +40,14 @@ jobs:
         run: |
           curl -L https://evermeet.cx/ffmpeg/ffmpeg-4.4.zip -o ffmpeg.zip
           unzip ffmpeg.zip
-          mkdir -p ffmpeg/bin
-          mv ffmpeg ffmpeg/bin/ffmpeg-darwin-x86_64
-          chmod +x ffmpeg/bin/ffmpeg-darwin-x86_64
+          mkdir -p ffmpeg/bin            # Ensure the directory structure is correct
+          mv ffmpeg ffmpeg/bin/          # Move the ffmpeg file into the bin directory
+          chmod +x ffmpeg/bin/ffmpeg     
+
 
       - name: Build Application with PyInstaller
         run: |
-            pyinstaller --onefile --clean --windowed --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg/bin/ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
+            pyinstaller --onefile --clean --hidden-import=engineio.async_drivers.eventlet --hidden-import=engineio.async_drivers.gevent_uwsgi --hidden-import=engineio.async_drivers.gevent --hidden-import=engineio.async_drivers --hidden-import=gevent --hidden-import=engineio.async_drivers.threading --hidden-import=pygame.freetype --hidden-import=encodings.utf_16_le --add-binary "ffmpeg/bin/ffmpeg-darwin-x86_64:." --add-data "icon.png:." --add-data "notification_sound.mp3:." --icon=icon.icns YoutubetoPremiere.py
         
 
       - name: List directory contents
