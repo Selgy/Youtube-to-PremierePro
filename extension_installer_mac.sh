@@ -36,4 +36,5 @@ echo "Unmount ExManCmd DMG"
 hdiutil detach "$mount_path"
 rm -rf "$tempdir"
 
+echo "Opening Chrome extension page..."
 open https://chrome.google.com/webstore/detail/your-extension-id
