@@ -5,6 +5,13 @@
     <key>Label</key>
     <string>com.youtubetopremiere.YoutubetoPremiere</string>
     <key>ProgramArguments</key>
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>This app requires access to the Desktop folder to save and manage video files.</string>
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>This app requires access to the Documents folder to read and store project files.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>This app requires access to the Downloads folder to handle downloaded media files.</string>
+
     <array>
         <string>/Applications/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere</string>
     </array>
