@@ -182,12 +182,12 @@ def import_video_to_premiere(video_path):
 
 def sanitize_title(title):
     # Replace known problematic characters
-    sanitized_title = (title.replace(":", " -")
-                             .replace("：", " -")  
-                             .replace("｜", "-")
-                             .replace('*', '#')
-                             .replace('?', '#')
-                             .replace('/', '#'))
+    sanitized_title = (title.replace(":", " ")
+                             .replace("：", " ")  
+                             .replace("｜", " ")
+                             .replace("*", " ")
+                             .replace("?", " ")
+                             .replace("/", " "))
     return sanitized_title
 
 def progress_hook(d):
@@ -307,13 +307,13 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
 
 
     if result == 0 and download_mp3:
-        wav_filename = os.path.join(final_download_path, f"{video_title}.wav")
+        sanitized_output_template = os.path.join(final_download_path, f"{video_title}.wav")
        
 
         # Check if the .wav file exists before trying to import it to Premiere.
-        if os.path.exists(wav_filename):
+        if os.path.exists(sanitized_output_template):
             # Import the WAV file into Premiere
-            import_video_to_premiere(wav_filename)
+            import_video_to_premiere(sanitized_output_template)
             socketio.emit('download-complete')  # Notify the frontend of completion if you're using a frontend
             play_notification_sound()  # Play a sound to notify the user if needed
         else:
