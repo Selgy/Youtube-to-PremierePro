@@ -77,9 +77,7 @@ jobs:
         run: |
                 cp extension_installer_mac.sh dist/YoutubetoPremiere.app/
   
-  
-      - name: Remove standalone executable
-        run: rm -rf ./dist/YoutubetoPremiere
+
 
       - name: List dist directory contents again
         run: |
@@ -106,7 +104,9 @@ jobs:
               prerelease: ${{ github.ref != 'refs/heads/master' }}
               tag_name: V1.1
               files: |
-                 ./dist/*
+                ./dist/YoutubetoPremiere.dmg
+                ./dist/YoutubetoPremiere.app
+          
 
   win-build:
     runs-on: windows-latest
