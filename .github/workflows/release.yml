@@ -191,7 +191,10 @@ jobs:
             --icon "./icon.ico" `
             YoutubetoPremiere.py    
         
-
+    - name: Find YoutubetoPremiere.exe
+      shell: pwsh
+      run: |
+        Get-ChildItem -Recurse -Filter YoutubetoPremiere.exe | Format-Table FullName
 
     - name: List directory contents
       run: dir
