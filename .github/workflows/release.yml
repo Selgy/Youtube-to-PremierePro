@@ -196,7 +196,7 @@ jobs:
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
 
-    - name: List directory contents
+    - name: List directory contents dist
       run: dir dist
 
     - name: Get the release
