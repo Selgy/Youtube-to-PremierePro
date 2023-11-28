@@ -52,8 +52,8 @@ jobs:
       
         
     
-      - name: Find YoutubetoPremiere
-        run: find . -name "YoutubetoPremiere" -print
+      - name: Find YoutubetoPremiere.app
+        run: find . -name "YoutubetoPremiere.app" -print
             
 
   
@@ -77,7 +77,7 @@ jobs:
               prerelease: ${{ github.ref != 'refs/heads/master' }}
               tag_name: V1.1
               files: |
-                dist/YoutubetoPremiere
+                dist/YoutubetoPremiere.app
 
   win-build:
     runs-on: windows-latest
