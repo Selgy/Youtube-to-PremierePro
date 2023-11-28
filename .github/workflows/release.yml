@@ -197,7 +197,7 @@ jobs:
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
 
     - name: List directory contents
-      run: dir
+      run: dir dist
 
     - name: Get the release
       id: get_release
