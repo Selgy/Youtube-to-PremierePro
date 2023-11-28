@@ -377,27 +377,27 @@ def main():
         # Stop the server when done
         server_thread.join()
 
-def create_image():
+ #def create_image():
     # Check if running as a bundled application
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        # Bundled application, icon is in the temp directory
-        icon_path = os.path.join(sys._MEIPASS, 'icon.png')
-    else:
-        # Not bundled, icon is in the script directory
-        icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
-    print(f'Icon path: {icon_path}')  # Add this line
-    image = Image.open(icon_path)
-    return image
+    #if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    #    # Bundled application, icon is in the temp directory
+    #    icon_path = os.path.join(sys._MEIPASS, 'icon.png')
+    #else:
+    #    # Not bundled, icon is in the script directory
+    #    icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
+    #print(f'Icon path: {icon_path}')  # Add this line
+    #image = Image.open(icon_path)
+    #return image
+ ##
 
+#def exit_action(icon, item):
+   # icon.stop()
+   # os._exit(0) 
 
-def exit_action(icon, item):
-    icon.stop()
-    os._exit(0) 
-
-def run_tray_icon():
-    image = create_image()
-    icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
-    icon.run()
+#def run_tray_icon():
+   # image = create_image()
+  #  icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
+   # icon.run()
 
 if __name__ == "__main__":
     logging.info('Script starting...')
@@ -409,7 +409,7 @@ if __name__ == "__main__":
         server_thread.start()
 
         # Call run_tray_icon directly on the main thread
-        run_tray_icon()
+       # run_tray_icon()
     except Exception as e:
         logging.exception(f'An unhandled exception occurred: {e}')
     finally:
