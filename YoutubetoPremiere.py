@@ -22,23 +22,22 @@ import subprocess
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-# Determine if the application is bundled in an executable
 if getattr(sys, 'frozen', False):
     script_dir = os.path.dirname(sys.executable)
 else:
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-# Construct the path to ffmpeg based on the operating system
+        
 if platform.system() == 'Windows':
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg.exe')
-elif platform.system() == 'Darwin':  # macOS
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg.exe')
+elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
+    # Assuming the ffmpeg binary is in the same relative path within your application
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
 elif platform.system() == 'Linux':
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
 else:
+    # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
-
-
 
 
 if platform.system() == 'Windows':
