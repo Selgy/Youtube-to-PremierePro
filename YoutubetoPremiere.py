@@ -357,6 +357,20 @@ def load_settings():
     logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
 
+def is_premiere_running():
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
+            return True
+    return False
+
+def monitor_premiere_and_shutdown():
+    while True:
+        time.sleep(30)  # Check every 5 seconds
+        if not is_premiere_running():
+            print("Adobe Premiere Pro is not running. Shutting down the application.")
+            socketio.stop()  # Stop the Flask-SocketIO server
+            sys.exit(0)  # Exit the script
+
 
 def main():
     logging.info('Script starting...')  # Log the starting of the script
@@ -408,9 +422,12 @@ if __name__ == "__main__":
         server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
         server_thread.start()
 
-        # Call run_tray_icon directly on the main thread
-       # run_tray_icon()
+        # Start the Premiere Pro monitoring thread
+        premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
+        premiere_monitor_thread.start()
+
     except Exception as e:
         logging.exception(f'An unhandled exception occurred: {e}')
     finally:
         server_thread.join()
+        premiere_monitor_thread.join()
