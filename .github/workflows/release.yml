@@ -219,4 +219,4 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-                YoutubetoPremiere.exe
+                ./dist/YoutubetoPremiere.exe
