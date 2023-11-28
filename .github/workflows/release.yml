@@ -78,7 +78,6 @@ jobs:
                 cp extension_installer_mac.sh dist/YoutubetoPremiere.app/
   
 
-
       - name: List dist directory contents again
         run: |
              echo "Listing contents of dist directory again:"
@@ -104,9 +103,7 @@ jobs:
               prerelease: ${{ github.ref != 'refs/heads/master' }}
               tag_name: V1.1
               files: |
-                ./dist/YoutubetoPremiere.dmg
-                ./dist/YoutubetoPremiere.app
-          
+                 ./dist/*
 
   win-build:
     runs-on: windows-latest
