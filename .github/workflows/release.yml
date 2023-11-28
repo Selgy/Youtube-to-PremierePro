@@ -194,8 +194,8 @@ jobs:
             --icon "./icon.ico" `
             YoutubetoPremiere.py 
         
-            - name: Install NSIS
-            run: choco install nsis
+    - name: Install NSIS
+      run: choco install nsis
       
     - name: Create Installer with NSIS
       run: |
