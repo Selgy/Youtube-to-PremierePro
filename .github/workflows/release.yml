@@ -177,10 +177,9 @@ jobs:
       run: Get-ChildItem -Path .
       shell: pwsh
       
-
     - name: Build Application with PyInstaller
       run: |
-            pyinstaller --onefile --clean --debug all `
+            pyinstaller --onefile --clean --windowed --debug all `
             --hidden-import=engineio.async_drivers.eventlet `
             --hidden-import=engineio.async_drivers.gevent_uwsgi `
             --hidden-import=engineio.async_drivers.gevent `
@@ -189,16 +188,49 @@ jobs:
             --hidden-import=engineio.async_drivers.threading `
             --hidden-import=pygame.freetype `
             --hidden-import=encodings.utf_16_le `
-            --add-data "ffmpeg/bin/ffmpeg.exe;." `
+            --add-binary "./ffmpeg/bin/ffmpeg.exe;." `
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
-            YoutubetoPremiere.py
+            YoutubetoPremiere.py 
         
-    - name: Find ffmpeg.exe
-      shell: pwsh
+            - name: Install NSIS
+            run: choco install nsis
+      
+    - name: Create Installer with NSIS
       run: |
-        Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
+              echo "!include MUI2.nsh" > installer.nsi
+              echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
+              echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+              echo 'InstallDir "$PROGRAMFILES\YoutubetoPremiere"' >> installer.nsi
+              echo '!define MUI_DIRECTORYPAGE_TEXT_TOP "Select the destination folder where Youtube to Premiere should be installed."' >> installer.nsi
+              echo '!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Destination Folder:"' >> installer.nsi
+              echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
+              echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
+              echo '!insertmacro MUI_PAGE_DIRECTORY' >> installer.nsi
+              echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
+              echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
+              echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
+              echo '!insertmacro MUI_UNPAGE_INSTFILES' >> installer.nsi
+              echo 'Icon "icon.ico"' >> installer.nsi
+              echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
+              echo 'SetOutPath "$INSTDIR"' >> installer.nsi
+              echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
+              echo 'File "icon.png"' >> installer.nsi
+              echo 'File "notification_sound.mp3"' >> installer.nsi
+              echo 'CreateDirectory "$INSTDIR\exec"' >> installer.nsi
+              echo 'CopyFiles /SILENT "ffmpeg\*.*" "$INSTDIR\exec\ffmpeg"' >> installer.nsi
+              echo 'CopyFiles /SILENT "venv\*.*" "$INSTDIR\exec\venv"' >> installer.nsi
+              echo 'CopyFiles /SILENT "node_modules\*.*" "$INSTDIR\exec\node_modules"' >> installer.nsi
+              echo 'SectionEnd' >> installer.nsi
+              makensis installer.nsi
 
     - name: List directory contents dist
       run: dir dist
