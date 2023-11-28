@@ -189,7 +189,7 @@ jobs:
             --hidden-import=engineio.async_drivers.threading `
             --hidden-import=pygame.freetype `
             --hidden-import=encodings.utf_16_le `
-            --add-binary "ffmpeg/bin/ffmpeg.exe; ." `
+            --add-binary "ffmpeg/bin/ffmpeg.exe;." `
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
