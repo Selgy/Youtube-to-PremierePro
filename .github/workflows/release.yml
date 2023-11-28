@@ -189,7 +189,6 @@ jobs:
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
-            --distpath "./dist" `
             YoutubetoPremiere.py    
         
 
