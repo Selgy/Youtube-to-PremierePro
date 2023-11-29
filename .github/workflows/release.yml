@@ -196,6 +196,18 @@ jobs:
         
     - name: Install NSIS
       run: choco install nsis
+
+    - name: Install NSIS Plugins
+      run: |
+          # Download and install nsisdl plugin
+          curl -L [nsisdl_Plugin_Download_URL] -o nsisdl.dll
+          mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+          mv nsisdl.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+
+          # Download and install nsExec plugin
+          curl -L [nsExec_Plugin_Download_URL] -o nsExec.dll
+          mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+
       
     - name: Create Installer with NSIS
       run: |
