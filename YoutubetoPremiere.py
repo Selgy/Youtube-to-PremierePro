@@ -19,6 +19,8 @@ from tkinter import messagebox
 import platform
 import subprocess
 
+should_shutdown = False
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
@@ -67,11 +69,11 @@ SETTINGS_FILE = settings_path
 #logging.getLogger().addHandler(log_handler)
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-video_url_global = None  # Define a global variable to store the video URL
-settings_global = None  # Define a global variable to store the settings
+video_url_global = None  # Global variable to store the video URL
+settings_global = None  # Global variable to store the settings
 
 @app.after_request
 def add_security_headers(response):
@@ -163,6 +165,19 @@ def read_settings_from_local():
         logging.error("Settings not received from the extension.")
         sys.exit(1)
     return settings_global
+
+LOCK_FILE_PATH = os.path.join(script_dir, 'script.lock')
+
+def is_already_running():
+    return os.path.exists(LOCK_FILE_PATH)
+
+def create_lock_file():
+    with open(LOCK_FILE_PATH, 'w') as lock_file:
+        lock_file.write("")
+
+def delete_lock_file():
+    if os.path.exists(LOCK_FILE_PATH):
+        os.remove(LOCK_FILE_PATH)
 
 
 def import_video_to_premiere(video_path):
@@ -357,6 +372,7 @@ def load_settings():
     logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
     return None
 
+
 def is_premiere_running():
     for process in psutil.process_iter(['pid', 'name']):
         if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
@@ -364,13 +380,13 @@ def is_premiere_running():
     return False
 
 def monitor_premiere_and_shutdown():
+    global should_shutdown
     while True:
-        time.sleep(30)  # Check every 5 seconds
+        time.sleep(5)
         if not is_premiere_running():
-            print("Adobe Premiere Pro is not running. Shutting down the application.")
-            socketio.stop()  # Stop the Flask-SocketIO server
-            sys.exit(0)  # Exit the script
-
+            print("Adobe Premiere Pro is not running. Preparing to shut down the application.")
+            should_shutdown = True
+            break
 
 def main():
     logging.info('Script starting...')  # Log the starting of the script
@@ -417,14 +433,19 @@ if __name__ == "__main__":
     logging.info('Script starting...')
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
+    
     try:
-        # Start the Flask server in a separate thread
         server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
         server_thread.start()
 
-        # Start the Premiere Pro monitoring thread
         premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
         premiere_monitor_thread.start()
+
+        while not should_shutdown:
+            time.sleep(1)  # Wait for the shutdown signal
+
+        print("Shutting down the application.")
+        # Perform any necessary cleanup here
 
     except Exception as e:
         logging.exception(f'An unhandled exception occurred: {e}')
