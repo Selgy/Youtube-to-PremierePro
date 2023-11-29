@@ -223,7 +223,7 @@ jobs:
         
         echo 'Section "Copy PymiereLink Extension" SEC01' >> installer.nsi
         echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"' >> installer.nsi
-        echo 'File "PymiereLink\*.*"' >> installer.nsi
+        echo 'File "Pymiere Link\*.*"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi
         
         echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
