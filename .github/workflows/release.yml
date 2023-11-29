@@ -226,9 +226,9 @@ jobs:
               echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
               echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
               echo '!insertmacro MUI_UNPAGE_INSTFILES' >> installer.nsi
+              echo 'Icon "icon.ico"' >> installer.nsi
               echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
               echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\YoutubetoPremiere"' >> installer.nsi
-              echo 'Icon "icon.ico"' >> installer.nsi
               echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
               echo 'File "icon.png"' >> installer.nsi
               echo 'File "notification_sound.mp3"' >> installer.nsi
