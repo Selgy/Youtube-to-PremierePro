@@ -209,9 +209,6 @@ jobs:
               echo "!include MUI2.nsh" > installer.nsi
               echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
               echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-              echo 'InstallDir "$PROGRAMFILES\YoutubetoPremiere"' >> installer.nsi
-              echo '!define MUI_DIRECTORYPAGE_TEXT_TOP "Select the destination folder where Youtube to Premiere should be installed."' >> installer.nsi
-              echo '!define MUI_DIRECTORYPAGE_TEXT_DESTINATION "Destination Folder:"' >> installer.nsi
               echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
               echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
@@ -221,7 +218,6 @@ jobs:
               echo '!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
-              echo '!insertmacro MUI_PAGE_DIRECTORY' >> installer.nsi
               echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
               echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
               echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
