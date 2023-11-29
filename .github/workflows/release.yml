@@ -188,7 +188,7 @@ jobs:
             --hidden-import=engineio.async_drivers.threading `
             --hidden-import=pygame.freetype `
             --hidden-import=encodings.utf_16_le `
-            --add-binary "./ffmpeg/bin/ffmpeg.exe;." `
+            --add-binary "./ffmpeg/bin/ffmpeg.exe;./ffmpeg/bin/" `
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
@@ -222,14 +222,14 @@ jobs:
         echo 'Icon "icon.ico"' >> installer.nsi
         
         echo 'Section "Copy PymiereLink Extension" SEC01' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"' >> installer.nsi
-        echo 'File "Pymiere Link\*.*"' >> installer.nsi
+        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link"' >> installer.nsi
+        echo 'File /r "Pymiere Link\*.*"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi
         
         echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec"' >> installer.nsi
+        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec"' >> installer.nsi
         echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'File "ffmpeg\*.*"' >> installer.nsi
+        echo 'File /r "ffmpeg\*.*"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi
         
         makensis installer.nsi
