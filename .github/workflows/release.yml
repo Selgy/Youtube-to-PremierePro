@@ -215,7 +215,6 @@ jobs:
               echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
               echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
               echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
