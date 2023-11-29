@@ -382,11 +382,29 @@ def is_premiere_running():
 def monitor_premiere_and_shutdown():
     global should_shutdown
     while True:
-        time.sleep(5)
+        time.sleep(5)  # Check every 5 seconds
         if not is_premiere_running():
             print("Adobe Premiere Pro is not running. Preparing to shut down the application.")
             should_shutdown = True
+            try:
+                socketio.stop()  # Attempt to stop the Flask-SocketIO server
+            except Exception as e:
+                logging.error(f'Error stopping Flask-SocketIO server: {e}')
+            
+            try:
+                if platform.system() == 'Windows':
+                    # Terminate YoutubetoPremiere.exe on Windows
+                    os.system('taskkill /f /im YoutubetoPremiere.exe')
+                elif platform.system() == 'Darwin' or platform.system() == 'Linux':
+                    # Terminate YoutubetoPremiere.exe on macOS or Linux
+                    os.system('pkill -f YoutubetoPremiere')
+                logging.info('YoutubetoPremiere.exe process terminated.')
+            except Exception as e:
+                logging.error(f'Error terminating YoutubetoPremiere.exe: {e}')
             break
+
+    # Perform cleanup here if necessary
+    print("Application shutdown complete.")
 
 def main():
     logging.info('Script starting...')  # Log the starting of the script
