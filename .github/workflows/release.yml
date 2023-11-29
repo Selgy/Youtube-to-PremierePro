@@ -206,39 +206,30 @@ jobs:
       
     - name: Create Installer with NSIS
       run: |
-              echo "!include MUI2.nsh" > installer.nsi
-              echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
-              echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-              echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
-              echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
-              echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
-              echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
-              echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
-              echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
-              echo '!insertmacro MUI_UNPAGE_INSTFILES' >> installer.nsi
-              echo 'Icon "icon.ico"' >> installer.nsi
-              echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
-              echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\YoutubetoPremiere"' >> installer.nsi
-              echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-              echo 'File "icon.png"' >> installer.nsi
-              echo 'File "notification_sound.mp3"' >> installer.nsi
-              echo 'CreateDirectory "$INSTDIR\exec"' >> installer.nsi
-              echo 'CopyFiles /SILENT "ffmpeg\*.*" "$INSTDIR\exec\ffmpeg"' >> installer.nsi
-              echo 'CopyFiles /SILENT "venv\*.*" "$INSTDIR\exec\venv"' >> installer.nsi
-              echo 'CopyFiles /SILENT "node_modules\*.*" "$INSTDIR\exec\node_modules"' >> installer.nsi
-              echo 'SectionEnd' >> installer.nsi
-              echo 'Section "Download and Install PymiereLink Extension" SEC02' >> installer.nsi
-              echo 'nsisdl::download "http://download.macromedia.com/pub/extensionmanager/ExManCmd_win.zip" "$TEMP\ExManCmd_win.zip"' >> installer.nsi
-              echo 'nsisdl::download "https://raw.githubusercontent.com/qmasingarbe/pymiere/master/pymiere_link.zxp" "$TEMP\pymiere_link.zxp"' >> installer.nsi
-              echo 'nsExec::ExecToLog "powershell Expand-Archive $TEMP\ExManCmd_win.zip -DestinationPath $TEMP\ExManCmd_win -Force"' >> installer.nsi
-              echo 'nsExec::ExecToLog "$TEMP\ExManCmd_win\ExManCmd.exe /install $TEMP\pymiere_link.zxp"' >> installer.nsi
-              echo 'SectionEnd' >> installer.nsi
-              makensis installer.nsi
+            echo "!include MUI2.nsh" > installer.nsi
+            echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
+            echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+            echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
+            echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
+            echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
+            echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
+            echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
+            echo 'Icon "icon.ico"' >> installer.nsi
+            echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
+            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec"' >> installer.nsi
+            echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
+            echo 'File "ffmpeg\*.*"' >> installer.nsi
+            echo 'SectionEnd' >> installer.nsi
+            echo 'Section "Copy PymiereLink Extension" SEC02' >> installer.nsi
+            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"' >> installer.nsi
+            echo 'File "PymiereLink\*.*"' >> installer.nsi
+            echo 'SectionEnd' >> installer.nsi
+            makensis installer.nsi
 
     - name: List directory contents dist
       run: dir dist

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="6.0" ExtensionBundleId="com.qmasingarbe.PymiereLink" ExtensionBundleVersion="1.0" ExtensionBundleName="Pymiere Link" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<ExtensionManifest Version="6.0" ExtensionBundleId="com.qmasingarbe.YoutubetoPremiere" ExtensionBundleVersion="1.0" ExtensionBundleName="Pymiere Link" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <ExtensionList>
-        <Extension Id="com.qmasingarbe.PymiereLink" Version="1.0.0" />
+        <Extension Id="com.qmasingarbe.YoutubetoPremiere" Version="1.0.0" />
     </ExtensionList>
     <ExecutionEnvironment>
         <HostList>
@@ -16,7 +16,7 @@
     </ExecutionEnvironment>
 
     <DispatchInfoList>
-        <Extension Id="com.qmasingarbe.PymiereLink">
+        <Extension Id="com.qmasingarbe.YoutubetoPremiere">
             <DispatchInfo >
                 <Resources>
                     <MainPath>./index.html</MainPath>
