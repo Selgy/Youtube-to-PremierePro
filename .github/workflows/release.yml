@@ -229,8 +229,8 @@ jobs:
         echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
         echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec"' >> installer.nsi
         echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'CreateDirectory "$INSTDIR\ffmpeg"' >> installer.nsi
-        echo 'SetOutPath "$INSTDIR\ffmpeg"' >> installer.nsi
+        echo 'CreateDirectory "$INSTDIR\exec\ffmpeg"' >> installer.nsi
+        echo 'SetOutPath "$INSTDIR\exec\ffmpeg"' >> installer.nsi
         echo 'File /r "ffmpeg\*.*"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi
         
