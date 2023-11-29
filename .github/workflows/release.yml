@@ -219,9 +219,9 @@ jobs:
               echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
               echo '!insertmacro MUI_UNPAGE_CONFIRM' >> installer.nsi
               echo '!insertmacro MUI_UNPAGE_INSTFILES' >> installer.nsi
-              echo 'Icon "icon.ico"' >> installer.nsi
+              echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\YoutubetoPremiere"' >> installer.nsi
               echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
-              echo 'SetOutPath "$INSTDIR"' >> installer.nsi
+              echo 'Icon "icon.ico"' >> installer.nsi
               echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
               echo 'File "icon.png"' >> installer.nsi
               echo 'File "notification_sound.mp3"' >> installer.nsi
@@ -229,6 +229,12 @@ jobs:
               echo 'CopyFiles /SILENT "ffmpeg\*.*" "$INSTDIR\exec\ffmpeg"' >> installer.nsi
               echo 'CopyFiles /SILENT "venv\*.*" "$INSTDIR\exec\venv"' >> installer.nsi
               echo 'CopyFiles /SILENT "node_modules\*.*" "$INSTDIR\exec\node_modules"' >> installer.nsi
+              echo 'SectionEnd' >> installer.nsi
+              echo 'Section "Download and Install PymiereLink Extension" SEC02' >> installer.nsi
+              echo 'nsisdl::download "http://download.macromedia.com/pub/extensionmanager/ExManCmd_win.zip" "$TEMP\ExManCmd_win.zip"' >> installer.nsi
+              echo 'nsisdl::download "https://raw.githubusercontent.com/qmasingarbe/pymiere/master/pymiere_link.zxp" "$TEMP\pymiere_link.zxp"' >> installer.nsi
+              echo 'nsExec::ExecToLog "powershell Expand-Archive $TEMP\ExManCmd_win.zip -DestinationPath $TEMP\ExManCmd_win -Force"' >> installer.nsi
+              echo 'nsExec::ExecToLog "$TEMP\ExManCmd_win\ExManCmd.exe /install $TEMP\pymiere_link.zxp"' >> installer.nsi
               echo 'SectionEnd' >> installer.nsi
               makensis installer.nsi
 
