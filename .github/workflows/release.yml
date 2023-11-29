@@ -269,3 +269,4 @@ jobs:
             tag_name: V1.1
             files: |
                 ./dist/YoutubetoPremiere.exe
+                YoutubetoPremiereInstaller.exe
