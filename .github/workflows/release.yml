@@ -56,8 +56,6 @@ jobs:
         # Create the required directory structure
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
         
-        # Move the FFmpeg folder to the exec folder
-        mv "./ffmpeg" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
         
         # Move the executable to the exec folder
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
@@ -72,8 +70,10 @@ jobs:
         if [ ! -d "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec" ]; then
           mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
 
-        # Move FFmpeg to the exec folder
-        mv "./ffmpeg" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+    - name: Move FFmpeg to the exec folder
+      run: |
+            mv "./ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/"
+
 
     - name: Create macOS Package
       run: |
