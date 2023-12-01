@@ -79,11 +79,23 @@ jobs:
           exit 1
         fi
 
+    - name: Prepare FFmpeg directory
+      run: |
+          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
+          echo "Listing contents of temp ffmpeg directory:"
+          ls -la "./temp/ffmpeg"
+        
     - name: Move FFmpeg to the exec folder
       run: |
-            mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR"
-            mv "./temp/ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR/"
-    
+          if [ -d "./temp/ffmpeg" ] && [ "$(ls -A ./temp/ffmpeg)" ]; then
+            mv "./temp/ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC/"
+          else
+            echo "FFmpeg directory is empty or does not exist."
+            exit 1
+          fi
+      env:
+          FFMPEG_DIR_MAC: ffmpeg_mac
+
 
     - name: Create macOS Package
       run: |
