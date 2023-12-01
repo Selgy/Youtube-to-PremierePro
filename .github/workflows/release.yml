@@ -68,6 +68,11 @@ jobs:
         --icon "./icon.icns" \
         YoutubetoPremiere.py
 
+        # Create the required directory structure
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+
+        # Move the executable to the exec folder
+        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
 
         
         # Move the executable to the exec folder
@@ -84,7 +89,7 @@ jobs:
         # Create the required directory structure
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
 
-        
+
         # Create a symlink to install Pymiere where Premiere Pro extensions are located
         ln -s "./dist/YoutubetoPremiere.app/Contents/Resources" "/Library/Application Support/Adobe/CEP/extensions/Pymiere Link"
 
