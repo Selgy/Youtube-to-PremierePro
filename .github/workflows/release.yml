@@ -72,31 +72,12 @@ jobs:
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
 
         # Move the executable to the exec folder
-        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-
-        
-        # Move the executable to the exec folder
-        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-        
-        # Check if Pymiere Link directory already exists and clear it if it does
-        if [ -d "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link" ]; then
-          rm -rf "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link"
+        if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
+          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+        else
+          echo "Executable not found. Check PyInstaller build process."
+          exit 1
         fi
-
-        # Move the contents of your "Pymiere Link" folder
-        mv "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources"
-        
-        # Create the required directory structure
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-
-
-        # Create a symlink to install Pymiere where Premiere Pro extensions are located
-        ln -s "./dist/YoutubetoPremiere.app/Contents/Resources" "/Library/Application Support/Adobe/CEP/extensions/Pymiere Link"
-
-        # Ensure the directory structure exists before moving FFmpeg
-        if [ ! -d "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec" ]; then
-          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-
 
     - name: Move FFmpeg to the exec folder
       run: |
