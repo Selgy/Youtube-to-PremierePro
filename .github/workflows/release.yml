@@ -68,8 +68,7 @@ jobs:
         --icon "./icon.icns" \
         YoutubetoPremiere.py
 
-        # Create the required directory structure
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+
         
         # Move the executable to the exec folder
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
@@ -81,6 +80,10 @@ jobs:
 
         # Move the contents of your "Pymiere Link" folder
         mv "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources"
+        
+        # Create the required directory structure
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+
         
         # Create a symlink to install Pymiere where Premiere Pro extensions are located
         ln -s "./dist/YoutubetoPremiere.app/Contents/Resources" "/Library/Application Support/Adobe/CEP/extensions/Pymiere Link"
@@ -151,6 +154,7 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+
     - name: Download FFmpeg
       run: |
         mkdir ${{ env.FFMPEG_DIR_WIN }}
@@ -160,10 +164,13 @@ jobs:
       run: |
         7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }} -aoa
 
+    # Remove the following section if the extraction directly puts the files in the correct directory
     - name: Move Extracted FFmpeg Folder
       run: |
         $extractedDir = (Get-ChildItem -Path ${{ env.FFMPEG_DIR_WIN }} -Directory).FullName
-        Move-Item -Path "$extractedDir\*" -Destination ${{ env.FFMPEG_DIR_WIN }}
+        if (Test-Path -Path $extractedDir) {
+            Move-Item -Path "$extractedDir\*" -Destination ${{ env.FFMPEG_DIR_WIN }}
+        }
       shell: pwsh
 
 
