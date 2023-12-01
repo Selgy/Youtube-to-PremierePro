@@ -36,7 +36,6 @@ jobs:
       run: pip install -r requirements.txt
 
 
-
     - name: Check FFmpeg installation
       run: |
         FFMPEG_DIR=${{ env.FFMPEG_DIR_MAC }}
@@ -90,7 +89,7 @@ jobs:
       run: |
           mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
           echo "Listing contents of temp ffmpeg directory:"
-          ls -la "./temp/ffmpeg"
+          ls -la "./ffmpeg"
       env:
           FFMPEG_DIR_MAC: ffmpeg_mac
       
