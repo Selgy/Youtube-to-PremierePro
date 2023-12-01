@@ -5,6 +5,10 @@ on:
     branches:
       - Pre-released
 
+env:
+  FFMPEG_DIR_MAC: ffmpeg_mac
+  FFMPEG_DIR_WIN: ffmpeg_win
+
 
 jobs:
   mac-build:
@@ -31,16 +35,18 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+
+
     - name: Check FFmpeg installation
       run: |
+        FFMPEG_DIR=${{ env.FFMPEG_DIR_MAC }}
         if brew list --versions ffmpeg > /dev/null; then
           echo "FFmpeg is already installed."
           echo "Checking for updates..."
           brew outdated ffmpeg || brew upgrade ffmpeg
         else
           echo "FFmpeg is not installed. Installing it now..."
-          mkdir -p ~/temp/ffmpeg
-          brew install ffmpeg --prefix=~/temp/ffmpeg
+          brew install ffmpeg
         fi
 
     - name: Install PyInstaller
@@ -80,8 +86,9 @@ jobs:
 
     - name: Move FFmpeg to the exec folder
       run: |
-            mv "./temp/ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/"
-
+            mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR"
+            mv "./temp/ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR/"
+    
 
     - name: Create macOS Package
       run: |
@@ -140,10 +147,10 @@ jobs:
 
     - name: Download FFmpeg
       run: |
+        mkdir ${{ env.FFMPEG_DIR_WIN }}
         curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
-        7z x ffmpeg.7z -offmpeg
-        mkdir ffmpeg/bin
-    
+        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }}
+
     - name: Extract FFmpeg
       run: |
           7z x ffmpeg.7z
@@ -170,6 +177,7 @@ jobs:
       shell: pwsh
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
+      
 
     - name: Find icon.png
       shell: pwsh
@@ -215,7 +223,9 @@ jobs:
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
+            --add-binary "./${{ env.FFMPEG_DIR_WIN }}/bin/ffmpeg.exe;./${{ env.FFMPEG_DIR_WIN }}/bin/" `
             YoutubetoPremiere.py 
+    
         
     - name: Install NSIS
       run: choco install nsis
@@ -252,9 +262,9 @@ jobs:
         echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
         echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec"' >> installer.nsi
         echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec\ffmpeg"' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec\ffmpeg"' >> installer.nsi
-        echo 'File /r "ffmpeg\*.*"' >> installer.nsi
+        echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec\${{ env.FFMPEG_DIR_WIN }}"' >> installer.nsi
+        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec\${{ env.FFMPEG_DIR_WIN }}"' >> installer.nsi
+        echo 'File /r "${{ env.FFMPEG_DIR_WIN }}\*.*"' >> installer.nsi
         echo 'SectionEnd' >> installer.nsi        
         
         makensis installer.nsi
