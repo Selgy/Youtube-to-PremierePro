@@ -159,7 +159,8 @@ jobs:
 
     - name: Extract FFmpeg
       run: |
-          7z x ffmpeg.7z
+        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }}
+        Move-Item -Path "ffmpeg-6.0-full_build" -Destination "${{ env.FFMPEG_DIR_WIN }}"
       
     - name: Rename Extracted FFmpeg Folder
       run: |
