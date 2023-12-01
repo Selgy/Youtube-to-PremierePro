@@ -87,10 +87,10 @@ jobs:
       
     - name: Move FFmpeg to the exec folder
       run: |
-            mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
-            mv "/usr/local/Cellar/ffmpeg/6.0_1/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC/"
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
+        mv "/usr/local/Cellar/ffmpeg/6.0_1/"* "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC/"
       env:
-          FFMPEG_DIR_MAC: ffmpeg_mac
+        FFMPEG_DIR_MAC: ffmpeg_mac
       
 
     - name: Create macOS Package
