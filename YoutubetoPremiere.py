@@ -21,7 +21,9 @@ import subprocess
 
 should_shutdown = False
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
 
 
 if getattr(sys, 'frozen', False):
@@ -181,18 +183,26 @@ def delete_lock_file():
 
 
 def import_video_to_premiere(video_path):
-    if os.path.exists(video_path):
-        logging.info(f'File already exists: {video_path}. Overwriting...')
+    if not os.path.exists(video_path):
+        logging.error(f'File does not exist: {video_path}')
+        return
+
     try:
         logging.info('Attempting to import video to Premiere...')
         proj = pymiere.objects.app.project
-        logging.info('Got project object: %s', proj)
         root_bin = proj.rootItem
-        logging.info('Got root bin: %s', root_bin)
+
+        # Import file
         proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
         logging.info(f'Video imported to Premiere successfully: {video_path}')
+
+        # Open clip in source monitor
+        pymiere.objects.app.sourceMonitor.openFilePath(video_path)
+        logging.info('Clip opened in source monitor.')
+
     except Exception as e:
-        logging.error(f'Error importing video: {e}', exc_info=True)
+        logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
+
 
 
 def sanitize_title(title):
@@ -382,48 +392,43 @@ def is_premiere_running():
 def monitor_premiere_and_shutdown():
     global should_shutdown
     while True:
-        time.sleep(5)  # Check every 5 seconds
+        time.sleep(5)
         if not is_premiere_running():
-            print("Adobe Premiere Pro is not running. Preparing to shut down the application.")
+            logging.info("Adobe Premiere Pro is not running. Initiating shutdown.")
             should_shutdown = True
-            try:
-                socketio.stop()  # Attempt to stop the Flask-SocketIO server
-            except Exception as e:
-                logging.error(f'Error stopping Flask-SocketIO server: {e}')
-            
-            try:
-                if platform.system() == 'Windows':
-                    # Terminate YoutubetoPremiere.exe on Windows
-                    os.system('taskkill /f /im YoutubetoPremiere.exe')
-                elif platform.system() == 'Darwin' or platform.system() == 'Linux':
-                    # Terminate YoutubetoPremiere.exe on macOS or Linux
-                    os.system('pkill -f YoutubetoPremiere')
-                logging.info('YoutubetoPremiere.exe process terminated.')
-            except Exception as e:
-                logging.error(f'Error terminating YoutubetoPremiere.exe: {e}')
             break
 
-    # Perform cleanup here if necessary
-    print("Application shutdown complete.")
+def run_server():
+    with app.app_context():
+        while not should_shutdown:
+            socketio.sleep(1)  # Allows the server to check for the shutdown flag
+        logging.info("Stopping the Flask-SocketIO server.")
+        socketio.stop()
+
+
 
 def main():
-    logging.info('Script starting...')  # Log the starting of the script
+    logging.info(f'Starting script execution. PID: {os.getpid()}')
     global settings_global
     settings_global = load_settings()  # Load settings from file
-    logging.info('Settings loaded: %s', settings_global)  # Log the loaded settings
-    try:
-        # Start the Flask server in a separate thread
-        from threading import Thread
-        logging.info('Starting server thread...')  # Log before starting the server thread
-        server_thread = Thread(target=lambda: socketio.run(app, host='localhost', port=3001))
-        server_thread.start()
-        logging.info('Server thread started')  # Log after starting the server thread
-    except Exception as e:
-        logging.exception(f'An error occurred: {e}')
+    logging.info('Settings loaded: %s', settings_global)
+    
+    server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
+    server_thread.start()
 
-    else:
-        # Stop the server when done
-        server_thread.join()
+    premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
+    premiere_monitor_thread.start()
+
+    while not should_shutdown:
+        time.sleep(1)  # Wait for the shutdown signal
+
+
+    print("Shutting down the application.")
+    os._exit(0)
+
+if __name__ == "__main__":
+    main()
+
 
  #def create_image():
     # Check if running as a bundled application
@@ -447,26 +452,3 @@ def main():
   #  icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
    # icon.run()
 
-if __name__ == "__main__":
-    logging.info('Script starting...')
-    settings_global = load_settings()  # Load settings from file
-    logging.info('Settings loaded: %s', settings_global)
-    
-    try:
-        server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
-        server_thread.start()
-
-        premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
-        premiere_monitor_thread.start()
-
-        while not should_shutdown:
-            time.sleep(1)  # Wait for the shutdown signal
-
-        print("Shutting down the application.")
-        # Perform any necessary cleanup here
-
-    except Exception as e:
-        logging.exception(f'An unhandled exception occurred: {e}')
-    finally:
-        server_thread.join()
-        premiere_monitor_thread.join()

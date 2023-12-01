@@ -1,4 +1,3 @@
-// CSS for the button
 const buttonStyles = `
     padding: 9px 18px;
     font-family: "Roboto","Arial",sans-serif;
@@ -12,7 +11,10 @@ const buttonStyles = `
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
     margin-left: 5px;
+    width: 120px; /* Fixed width */
+    text-align: center; /* Center the text inside the button */
 `;
+
 
 // Function to create the button
 function createButton() {
@@ -35,10 +37,16 @@ console.log(topLevelButtons);
 
 // Function to send the video URL to your server
 function sendURL() {
+    const button = document.getElementById('send-to-premiere-button');
+    if (!button) return;
+
     const videoId = new URLSearchParams(window.location.search).get('v');
     if (videoId) {
         const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
         const serverUrl = 'http://localhost:3001/handle-video-url';
+
+        // Set button text to "Loading..." when clicked
+        button.innerText = 'Loading...';
 
         fetch(serverUrl, {
             method: 'POST',
@@ -93,20 +101,22 @@ function tryModifyMenu() {
 const socket = io.connect('http://localhost:3001');
 
 
-socket.on('percentage', (data) => {  
-    console.log(data);  // Add this line
+socket.on('percentage', (data) => {
+    console.log(data);
     const button = document.getElementById('send-to-premiere-button');
     if (button) {
-        button.innerText = `Download ${data.percentage}`;  // update the button text
+        // Update button text with the percentage
+        button.innerText = `Download ${data.percentage}`;
     }
 });
 
 socket.on('download-complete', () => {
     const button = document.getElementById('send-to-premiere-button');
     if (button) {
-        button.innerText = 'Premiere Pro';  // reset the button text
+        button.innerText = 'Premiere Pro';  // Reset the button text
     }
 });
+
 socket.on('connect', () => {
     console.log('Connected to server');
 });
@@ -136,11 +146,18 @@ function checkUrlChange() {
 setInterval(checkUrlChange, 500);
 
 function addPremiereButton() {
-    const likeButton = document.querySelector('ytd-menu-renderer yt-icon-button#button');
-    if (likeButton && !document.getElementById('send-to-premiere-button')) {
+    if (document.getElementById('send-to-premiere-button')) {
+        return; // Button already exists
+    }
+
+    const ownerContainer = document.querySelector('#owner');
+    if (ownerContainer) {
         const premiereButton = createButton();
-        likeButton.parentNode.insertBefore(premiereButton, likeButton);
+        ownerContainer.appendChild(premiereButton); // Append button to the owner container
         console.log('Premiere button added.');
+    } else {
+        console.log('Owner container not found, retrying...');
+        setTimeout(addPremiereButton, 1000); // Retry after a delay
     }
 }
 

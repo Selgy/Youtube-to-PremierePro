@@ -24,27 +24,27 @@ document.addEventListener('DOMContentLoaded', (event) => {
             resolution: document.getElementById('resolution').value,
             framerate: document.getElementById('framerate').value,
             downloadPath: document.getElementById('download-path').value,
-            downloadMP3: document.getElementById('download-mp3').checked  // New line
+            downloadMP3: document.getElementById('download-mp3').checked
         };
-        sendSettingsToServer(settings); 
-    
+        
+        sendSettingsToServer(settings); // Call the function only once here
 
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.log('Settings saved');
+        localStorage.setItem('settings', JSON.stringify(settings));
+        console.log('Settings saved');
 
-    // Show the "Settings saved" message
-    message.style.display = 'block';  // Show message
-    setTimeout(() => {
-        message.style.opacity = '1';
+        // Show the "Settings saved" message
+        message.style.display = 'block';  // Show message
         setTimeout(() => {
-            message.style.opacity = '0';
+            message.style.opacity = '1';
             setTimeout(() => {
-                message.style.display = 'none';  // Hide message
-            }, 500);
-        }, 2000);  // Display for 2 seconds
-    }, 10);
+                message.style.opacity = '0';
+                setTimeout(() => {
+                    message.style.display = 'none';  // Hide message
+                }, 500);
+            }, 2000);  // Display for 2 seconds
+        }, 10);
+    });
 });
-
 
 async function sendSettingsToServer(settings) {
     try {
@@ -61,10 +61,4 @@ async function sendSettingsToServer(settings) {
     } catch (error) {
         console.error('Error:', error);
     }
-}    
-});
-
-
-
-
-
+}
