@@ -155,13 +155,18 @@ jobs:
       run: |
         mkdir ${{ env.FFMPEG_DIR_WIN }}
         curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
-        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }}
 
     - name: Extract FFmpeg
       run: |
-        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }}
-        Move-Item -Path "ffmpeg-6.0-full_build" -Destination "${{ env.FFMPEG_DIR_WIN }}"
-      
+        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }} -aoa
+
+    - name: Move Extracted FFmpeg Folder
+      run: |
+        $extractedDir = (Get-ChildItem -Path ${{ env.FFMPEG_DIR_WIN }} -Directory).FullName
+        Move-Item -Path "$extractedDir\*" -Destination ${{ env.FFMPEG_DIR_WIN }}
+      shell: pwsh
+
+
     - name: Rename Extracted FFmpeg Folder
       run: |
             if (Test-Path -Path "ffmpeg") {
