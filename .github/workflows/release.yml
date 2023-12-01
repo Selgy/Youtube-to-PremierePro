@@ -80,18 +80,15 @@ jobs:
 
     - name: Debugging current directory
       run: |
-          echo "Current directory:"
-          pwd
-          echo "Contents of current directory:"
-          ls -la
+            echo "Contents of FFmpeg directory:"
+            ls -la "/usr/local/Cellar/ffmpeg/6.0_1"
       env:
             FFMPEG_DIR_MAC: ffmpeg_mac
       
-    - name: Prepare FFmpeg directory
+    - name: Move FFmpeg to the exec folder
       run: |
-          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
-          echo "Listing contents of ffmpeg directory:"
-          ls -la "./ffmpeg"
+            mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
+            mv "/usr/local/Cellar/ffmpeg/6.0_1/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC/"
       env:
           FFMPEG_DIR_MAC: ffmpeg_mac
       
