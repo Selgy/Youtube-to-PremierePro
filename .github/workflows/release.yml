@@ -71,7 +71,6 @@ jobs:
         # Ensure the directory structure exists before moving FFmpeg
         if [ ! -d "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec" ]; then
           mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-        fi
 
         # Move FFmpeg to the exec folder
         mv "./ffmpeg" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
