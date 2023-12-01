@@ -32,7 +32,9 @@ jobs:
       run: pip install -r requirements.txt
 
     - name: Install FFmpeg
-      run: brew install ffmpeg
+      run: |
+        mkdir -p ~/temp/ffmpeg
+        brew install ffmpeg --prefix=~/temp/ffmpeg
 
     - name: Install PyInstaller
       run: pip install pyinstaller
@@ -56,7 +58,6 @@ jobs:
         # Create the required directory structure
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
         
-        
         # Move the executable to the exec folder
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
         
@@ -72,7 +73,7 @@ jobs:
 
     - name: Move FFmpeg to the exec folder
       run: |
-            mv "./ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/"
+            mv "./temp/ffmpeg/*" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/"
 
 
     - name: Create macOS Package
