@@ -92,11 +92,10 @@ jobs:
       env:
         FFMPEG_DIR_MAC: ffmpeg_mac
       
-
     - name: Create macOS Package
       run: |
-        npm install -g create-dmg
-        create-dmg 'dist/YoutubetoPremiere.app' --overwrite
+          npm install -g create-dmg
+          create-dmg 'dist/YoutubetoPremiere.app' --overwrite
 
     - name: Get the release
       id: get_release
@@ -118,7 +117,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere.dmg
+              YoutubetoPremiere.pkg
 
   win-build:
     runs-on: windows-latest
