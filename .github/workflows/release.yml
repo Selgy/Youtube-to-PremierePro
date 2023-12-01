@@ -31,10 +31,17 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Install FFmpeg
+    - name: Check FFmpeg installation
       run: |
-        mkdir -p ~/temp/ffmpeg
-        brew install ffmpeg --prefix=~/temp/ffmpeg
+        if brew list --versions ffmpeg > /dev/null; then
+          echo "FFmpeg is already installed."
+          echo "Checking for updates..."
+          brew outdated ffmpeg || brew upgrade ffmpeg
+        else
+          echo "FFmpeg is not installed. Installing it now..."
+          mkdir -p ~/temp/ffmpeg
+          brew install ffmpeg --prefix=~/temp/ffmpeg
+        fi
 
     - name: Install PyInstaller
       run: pip install pyinstaller
