@@ -201,7 +201,7 @@ jobs:
     - name: Create Installer with NSIS
       run: |
         echo "!include 'MUI2.nsh'" > installer.nsi
-        echo "!include 'nsProcess.nsh'" >> installer.nsi
+
         echo "Name 'YoutubetoPremiere Installer'" >> installer.nsi
         echo "OutFile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
         echo "!define MUI_ABORTWARNING" >> installer.nsi
