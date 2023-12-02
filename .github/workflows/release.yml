@@ -81,12 +81,12 @@ jobs:
       run: |
             cd PymiereLink
             zip -r ../YoutubetoPremiere_Mac.zip ./
-            mv YoutubetoPremiere_Mac.zip YoutubetoPremiere_Mac.zxp
+            #mv YoutubetoPremiere_Mac.zip YoutubetoPremiere_Mac.zxp
             cd ..
           
 
     - name: Find YoutubetoPremiere_Mac.zxp
-      run: find . -name "YoutubetoPremiere_Mac.zxp"
+      run: find . -name "YoutubetoPremiere_Mac.zip"
       
     - name: List directory contents
       run: ls -R ./dist/YoutubetoPremiere.app/Contents/Resources/
