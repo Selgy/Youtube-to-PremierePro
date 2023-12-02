@@ -109,7 +109,7 @@ jobs:
         prerelease: ${{ github.ref != 'refs/heads/master' }}
         tag_name: V1.1
         files: |
-          ./archive/YoutubetoPremiere.zxp
+          ./YoutubetoPremiere.zxp
 
   win-build:
     needs: mac-build
