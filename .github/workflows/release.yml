@@ -78,8 +78,11 @@ jobs:
           # Copy the "PymiereLink" folder from the root to the extension folder
           cp -R "./PymiereLink" "./YoutubetoPremiere/"
 
-          # Move ffmpeg_mac to the exec folder
-          mv "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg_mac" "./YoutubetoPremiere/PymiereLink/exec"
+          # Create the destination directory if it does not exist
+          mkdir -p ./YoutubetoPremiere/PymiereLink/exec/ffmpeg
+        
+          # Move and rename the FFmpeg folder
+          mv /usr/local/Cellar/ffmpeg/6.0_1 ./YoutubetoPremiere/PymiereLink/exec/ffmpe
         
           # Move the executable inside .app to the exec folder
           mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./YoutubetoPremiere/PymiereLink/exec"
