@@ -72,7 +72,7 @@ jobs:
       env:
           FFMPEG_DIR_MAC: ffmpeg_mac
   
-    - name: Create ZXP Installer
+    - name: move stuff
       run: |
       
           # Copy the "PymiereLink" folder from the root to the extension folder
