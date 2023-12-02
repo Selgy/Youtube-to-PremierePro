@@ -80,19 +80,28 @@ jobs:
       env:
           FFMPEG_DIR_MAC: ffmpeg_mac
   
-    - name: Copy the "PymiereLink" folder from the root to the extension folder
+    - name: Prepare PymiereLink folder
       run: |
-        cp -R "./PymiereLink" "./YoutubetoPremiere/"
-        mkdir -p ./YoutubetoPremiere/PymiereLink/exec/ffmpeg
-        mv /usr/local/Cellar/ffmpeg/6.0_1 ./YoutubetoPremiere/PymiereLink/exec/ffmpeg
-        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./YoutubetoPremiere/PymiereLink/exec"
+        # Copy the PymiereLink folder to a new directory for packaging
+        cp -R "./PymiereLink" "./PackageContents/"
+        
+        # Create exec folder inside PackageContents/PymiereLink
+        mkdir -p ./PackageContents/PymiereLink/exec
+
+        # Move the built YoutubetoPremiere.app to the exec folder
+        mv "./dist/YoutubetoPremiere.app" "./PackageContents/PymiereLink/exec/"
+
+        # Copy the FFmpeg directory to the exec folder
+        cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
+
+    - name: Package ZXP Installer
+      run: |
+        # Create a ZXP package from the PackageContents directory
+        create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0
+    
     
     - name: List directory contents
       run: ls -R ./dist/YoutubetoPremiere.app/Contents/Resources/
-
-    - name: Create ZXP Installer
-      run: |
-          create-zxp ./YoutubetoPremiere --name YoutubetoPremiere --version 1.1.0
         
     - name: Get the release
       id: get_release
@@ -110,12 +119,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
       with:
-        draft: ${{ github.ref == 'refs/heads/master' }}
-        prerelease: ${{ github.ref != 'refs/heads/master' }}
-        tag_name: V1.1
-        files: |
-          ./archive/YoutubetoPremiere.zxp
-
+            draft: ${{ github.ref == 'refs/heads/master' }}
+            prerelease: ${{ github.ref != 'refs/heads/master' }}
+            tag_name: V1.1
+            files: |
+              ./archive/YoutubetoPremiere.zxp
   win-build:
     runs-on: windows-latest
 
