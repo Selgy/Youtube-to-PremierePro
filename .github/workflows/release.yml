@@ -69,10 +69,11 @@ jobs:
             --icon "./icon.icns" \
             YoutubetoPremiere.py
 
-  
+
     - name: Prepare PymiereLink folder
       run: |
-              mkdir -p ./PackageContents/PymiereLink/exec
+              mkdir -p ./PymiereLink/
+              mkdir -p ./PymiereLink/exec
               mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PymiereLink/exec/"
               cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PymiereLink/exec/ffmpeg"
       
@@ -190,9 +191,9 @@ jobs:
         mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
         mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
 
-      
-        - name: Create Installer with NSIS
-        run: |
+        
+    - name: Create Installer with NSIS
+      run: |
           echo "!include MUI2.nsh" > installer.nsi
           echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
           echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
