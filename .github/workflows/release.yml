@@ -89,7 +89,7 @@ jobs:
         mkdir -p ./PackageContents/PymiereLink/exec
 
         # Move the built YoutubetoPremiere.app to the exec folder
-        mv "./dist/YoutubetoPremiere.app" "./PackageContents/PymiereLink/exec/"
+        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PackageContents/PymiereLink/exec/"
 
         # Copy the FFmpeg directory to the exec folder
         cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
