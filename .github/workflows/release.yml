@@ -53,19 +53,7 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-        # Create the required directory structure
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
-    
-        # Move the executable to the exec folder
-        if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
-          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-        else
-          echo "Executable not found. Check PyInstaller build process."
-          exit 1
-        fi
-    
-        # Copy the "Pymiere Link" folder from the root to Resources
-        cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
+
     
         # Continue with PyInstaller
         pyinstaller --onefile --clean --windowed --debug all \
@@ -79,10 +67,22 @@ jobs:
           --hidden-import=encodings.utf_16_le \
           --add-data "./icon.png:." \
           --add-data "./notification_sound.mp3:." \
-          --add-data "./Pymiere Link:./Pymiere Link" \
           --icon "./icon.icns" \
           YoutubetoPremiere.py
 
+                  # Create the required directory structure
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
+    
+        # Move the executable to the exec folder
+        if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
+          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+        else
+          echo "Executable not found. Check PyInstaller build process."
+          exit 1
+        fi
+    
+        # Copy the "Pymiere Link" folder from the root to Resources
+        cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
       env:
         FFMPEG_DIR_MAC: ffmpeg_mac
 
