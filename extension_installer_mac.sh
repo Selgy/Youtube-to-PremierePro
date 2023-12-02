@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 # Auto install PymiereLink extension to Premiere on mac
-PythonExePath="$(dirname "$0")/YoutubetoPremiere.dmg"
-# Get temp path
 
+# Get temp path
 tempdir=$(mktemp -d)
 
 # Download zxp (extension) file
 echo "Download .zxp file"
-url="https://raw.githubusercontent.com/qmasingarbe/pymiere/master/pymiere_link.zxp"
+url="https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac.zxp"
 fname_zxp=$(basename "$url")
 path_zxp="$tempdir/$fname_zxp"
 curl "$url" --output "$path_zxp"
