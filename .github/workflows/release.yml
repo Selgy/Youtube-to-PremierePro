@@ -67,6 +67,7 @@ jobs:
             --hidden-import=encodings.utf_16_le \
             --add-data "./icon.png:." \
             --add-data "./notification_sound.mp3:." \
+            --add-data "./PymiereLink:./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
             --icon "./icon.icns" \
             YoutubetoPremiere.py
       env:
