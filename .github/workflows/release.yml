@@ -194,67 +194,49 @@ jobs:
         mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
         mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
 
-        
+    
     - name: Create Installer with NSIS
       run: |
-            !include "MUI2.nsh"
-            !include "nsProcess.nsh"
-            
-            # UI Configuration
-            !define MUI_ABORTWARNING
-            !define MUI_ICON "icon.ico"
-            
-            # Installer Pages
-            !insertmacro MUI_PAGE_WELCOME
-            !insertmacro MUI_PAGE_DIRECTORY
-            !insertmacro MUI_PAGE_INSTFILES
-            !insertmacro MUI_PAGE_FINISH
-            
-            # Installer Language
-            !insertmacro MUI_LANGUAGE "English"
-            
-            # Installer Sections
-            Section "PreInstall" SEC_PRE
-                # Close YoutubetoPremiere.exe if it's running
-                nsProcess::KillProcess "YoutubetoPremiere.exe"
-                Pop $0  # Get the result
-            
-                # Delete existing YoutubetoPremiere.exe
-                IfFileExists "C:\Program Files (x86)\YoutubetoPremiere\YoutubetoPremiere.exe" 0 +2
-                Delete "C:\Program Files (x86)\YoutubetoPremiere\YoutubetoPremiere.exe"
-            SectionEnd
-
-            Function .onInit
-                StrCpy $INSTDIR "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"
-            FunctionEnd
-
-            Section "MainSection" SEC01
-                SetOutPath "$INSTDIR"
-            
-                # Copy the PymiereLink extension
-                SetOutPath "$INSTDIR\PymiereLink"
-                File /r "PymiereLink\*.*"
-            
-                # Install YoutubetoPremiere
-                SetOutPath "$INSTDIR\PymiereLink\exec"
-                File "dist\YoutubetoPremiere.exe"
-            
-                # Install FFmpeg
-                CreateDirectory "$INSTDIR\PymiereLink\exec\ffmpeg_win"
-                SetOutPath "$INSTDIR\PymiereLink\exec\ffmpeg_win"
-                File /r "ffmpeg\ffmpeg_win\*.*"
-            SectionEnd
-            
-            
-            # Installer configuration
-            Name "YoutubetoPremiere Installer"
-            OutFile "YoutubetoPremiereInstaller.exe"
-            ShowInstDetails show
-            ShowUnInstDetails show
-
-    - name: Run NSIS to Create Installer
-      run: |
-          makensis installer.nsi
+        echo "!include 'MUI2.nsh'" > installer.nsi
+        echo "!include 'nsProcess.nsh'" >> installer.nsi
+        echo "Name 'YoutubetoPremiere Installer'" >> installer.nsi
+        echo "OutFile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+        echo "!define MUI_ABORTWARNING" >> installer.nsi
+        echo "!define MUI_ICON 'icon.ico'" >> installer.nsi
+    
+        echo "!insertmacro MUI_PAGE_WELCOME" >> installer.nsi
+        echo "!insertmacro MUI_PAGE_DIRECTORY" >> installer.nsi
+        echo "!insertmacro MUI_PAGE_INSTFILES" >> installer.nsi
+        echo "!insertmacro MUI_PAGE_FINISH" >> installer.nsi
+        echo "!insertmacro MUI_LANGUAGE 'English'" >> installer.nsi
+    
+        echo "Section 'PreInstall' SEC_PRE" >> installer.nsi
+        echo "nsProcess::KillProcess 'YoutubetoPremiere.exe'" >> installer.nsi
+        echo "Pop \$0" >> installer.nsi
+        echo "IfFileExists 'C:\\Program Files (x86)\\YoutubetoPremiere\\YoutubetoPremiere.exe' 0 +2" >> installer.nsi
+        echo "Delete 'C:\\Program Files (x86)\\YoutubetoPremiere\\YoutubetoPremiere.exe'" >> installer.nsi
+        echo "SectionEnd" >> installer.nsi
+    
+        echo "Function .onInit" >> installer.nsi
+        echo "StrCpy \$INSTDIR 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\PymiereLink'" >> installer.nsi
+        echo "FunctionEnd" >> installer.nsi
+    
+        echo "Section 'MainSection' SEC01" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\PymiereLink'" >> installer.nsi
+        echo "File /r 'PymiereLink\\*.*'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\PymiereLink\\exec'" >> installer.nsi
+        echo "File 'dist\\YoutubetoPremiere.exe'" >> installer.nsi
+        echo "CreateDirectory '\$INSTDIR\\PymiereLink\\exec\\ffmpeg_win'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\PymiereLink\\exec\\ffmpeg_win'" >> installer.nsi
+        echo "File /r 'ffmpeg\\ffmpeg_win\\*.*'" >> installer.nsi
+        echo "SectionEnd" >> installer.nsi
+    
+        echo "ShowInstDetails show" >> installer.nsi
+        echo "ShowUnInstDetails show" >> installer.nsi
+    
+        makensis installer.nsi
+      
 
     - name: List directory contents dist
       run: dir dist
