@@ -72,23 +72,16 @@ jobs:
   
     - name: Prepare PymiereLink folder
       run: |
-        cp -R "./PymiereLink" "./PackageContents/"
-        echo "Copied PymiereLink to PackageContents"
-        mkdir -p ./PackageContents/PymiereLink/exec
-        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PackageContents/PymiereLink/exec/"
-        cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
-
-    - name: List PackageContents directory
-      run: ls -R ./PackageContents/
-
-    - name: List exec directory
-      run: ls -R ./PackageContents/PymiereLink/exec/
-
-    - name: Package ZXP Installer and capture output
-      run: create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0 > zxp_output.log 2>&1
-    
-    - name: Display ZXP packaging output
-      run: cat zxp_output.log
+              cp -R "./PymiereLink" "./PackageContents/"
+              mkdir -p ./PackageContents/PymiereLink/exec
+              mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PackageContents/PymiereLink/exec/"
+              cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
+      
+    - name: Zip PackageContents folder
+      run: zip -r YoutubetoPremiere.zip ./PackageContents/
+          
+    - name: Rename zip to zxp
+      run: mv YoutubetoPremiere.zip YoutubetoPremiere.zxp
 
     - name: Find YoutubetoPremiere.zxp
       run: find . -name "YoutubetoPremiere.zxp"
