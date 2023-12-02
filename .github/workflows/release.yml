@@ -193,8 +193,10 @@ jobs:
         curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
         mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
         mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
-        curl -L https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip -o nsProcess.zip
+        curl -L https://nsis.sourceforge.io/mediawiki/images/7/79/NsProcess.zip -o nsProcess.zip
         7z x nsProcess.zip -o"$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+
+        mv "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/nsProcessW.dll" "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/nsProcess.dll"
 
 
     - name: Create Installer with NSIS
@@ -216,7 +218,7 @@ jobs:
         echo "nsProcess::KillProcess 'YoutubetoPremiere.exe'" >> installer.nsi
         echo "Pop \$0" >> installer.nsi
         echo "IfFileExists 'C:\\Program Files (x86)\\YoutubetoPremiere\\YoutubetoPremiere.exe' 0 +2" >> installer.nsi
-        echo "Delete 'C:\\Program Files (x86)\\YoutubetoPremiere\\YoutubetoPremiere.exe'" >> installer.nsi
+        echo "Delete 'C:\\Program Files (x86)\\YoutubetoPremiere'" >> installer.nsi
         echo "SectionEnd" >> installer.nsi
     
         echo "Function .onInit" >> installer.nsi
