@@ -5,49 +5,41 @@ on:
     branches:
       - Pre-released
 
-env:
-  FFMPEG_DIR_MAC: ffmpeg_mac
-  FFMPEG_DIR_WIN: ffmpeg_win
-
-
 jobs:
   mac-build:
     runs-on: macos-latest
-
+  
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+  
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.8.8
-
+  
     - name: Cache pip
       uses: actions/cache@v2
       with:
-          path: ~/Library/Caches/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-
+        path: ~/Library/Caches/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+  
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-            node-version: '14'
+        node-version: '14'
         
     - name: Install Adobe CEP ZXP Packager
       run: npm install -g create-zxp
-
-
+  
     - name: Upgrade pip
       run: python -m pip install --upgrade pip
-
+  
     - name: Install dependencies
       run: pip install -r requirements.txt
-
-
+  
     - name: Check FFmpeg installation
       run: |
-        FFMPEG_DIR=${{ env.FFMPEG_DIR_MAC }}
         if brew list --versions ffmpeg > /dev/null; then
           echo "FFmpeg is already installed."
           echo "Checking for updates..."
@@ -56,8 +48,7 @@ jobs:
           echo "FFmpeg is not installed. Installing it now..."
           brew install ffmpeg
         fi
-
-
+  
     - name: Install PyInstaller
       run: pip install pyinstaller
   
@@ -77,34 +68,24 @@ jobs:
             --add-data "./notification_sound.mp3:." \
             --icon "./icon.icns" \
             YoutubetoPremiere.py
-      env:
-          FFMPEG_DIR_MAC: ffmpeg_mac
+
   
     - name: Prepare PymiereLink folder
       run: |
-        # Copy the PymiereLink folder to a new directory for packaging
         cp -R "./PymiereLink" "./PackageContents/"
-        
-        # Create exec folder inside PackageContents/PymiereLink
         mkdir -p ./PackageContents/PymiereLink/exec
-
-        # Move the built YoutubetoPremiere.app to the exec folder
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PackageContents/PymiereLink/exec/"
-
-        # Copy the FFmpeg directory to the exec folder
         cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
 
     - name: Package ZXP Installer
-      run: |
-        # Create a ZXP package from the PackageContents directory
-        create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0
-    
+      run: create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0
+
     - name: Find YoutubetoPremiere.zxp
       run: find . -name "YoutubetoPremiere.zxp"
       
     - name: List directory contents
       run: ls -R ./dist/YoutubetoPremiere.app/Contents/Resources/
-        
+      
     - name: Get the release
       id: get_release
       uses: actions/github-script@v5
@@ -121,12 +102,14 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
       with:
-            draft: ${{ github.ref == 'refs/heads/master' }}
-            prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
-            files: |
-              ./archive/YoutubetoPremiere.zxp
+        draft: ${{ github.ref == 'refs/heads/master' }}
+        prerelease: ${{ github.ref != 'refs/heads/master' }}
+        tag_name: V1.1
+        files: |
+          ./archive/YoutubetoPremiere.zxp
+
   win-build:
+    needs: mac-build
     runs-on: windows-latest
 
     steps:
@@ -138,8 +121,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8.8  # Replace with your Python version
-    
+        python-version: 3.8.8
+      
     - name: Cache pip
       uses: actions/cache@v2
       with:
@@ -154,50 +137,20 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-
     - name: Download FFmpeg
       run: |
-        mkdir ${{ env.FFMPEG_DIR_WIN }}
+        mkdir ffmpeg
         curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
 
     - name: Extract FFmpeg
       run: |
-        7z x ffmpeg.7z -o${{ env.FFMPEG_DIR_WIN }} -aoa
-
-    # Remove the following section if the extraction directly puts the files in the correct directory
-    - name: Move Extracted FFmpeg Folder
-      run: |
-        $extractedDir = (Get-ChildItem -Path ${{ env.FFMPEG_DIR_WIN }} -Directory).FullName
-        if (Test-Path -Path $extractedDir) {
-            Move-Item -Path "$extractedDir\*" -Destination ${{ env.FFMPEG_DIR_WIN }}
-        }
-      shell: pwsh
-
-
-    - name: Rename Extracted FFmpeg Folder
-      run: |
-            if (Test-Path -Path "ffmpeg") {
-                # Remove or rename the existing 'ffmpeg' directory/file
-                Remove-Item -Recurse -Force "ffmpeg"
-            }
-            Move-Item -Path "ffmpeg-6.0-full_build" -Destination "ffmpeg"
-      shell: pwsh
-
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        path: ~\AppData\Local\pip\Cache
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-
+        7z x ffmpeg.7z -offmpeg -aoa
 
     - name: Find ffmpeg.exe
       shell: pwsh
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
       
-
     - name: Find icon.png
       shell: pwsh
       run: |
@@ -205,12 +158,11 @@ jobs:
       
     - name: Install PyInstaller
       run: pip install pyinstaller
-      
+
     - name: List installed packages
       run: pip list
- 
 
-    - name: check version pyinstaller
+    - name: Check version pyinstaller
       run: pyinstaller -v
 
     - name: Find YoutubetoPremiere.py
@@ -242,7 +194,6 @@ jobs:
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
-            --add-binary "./${{ env.FFMPEG_DIR_WIN }}/bin/ffmpeg.exe;./${{ env.FFMPEG_DIR_WIN }}/bin/" `
             YoutubetoPremiere.py 
     
         
@@ -256,60 +207,60 @@ jobs:
         mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
 
       
-    - name: Create Installer with NSIS
-      run: |
-        echo "!include MUI2.nsh" > installer.nsi
-        echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
-        echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-        echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
-        echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
-        echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
-        echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
-        echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
-        echo 'Icon "icon.ico"' >> installer.nsi
-        
-        echo 'Section "Copy PymiereLink Extension" SEC01' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"' >> installer.nsi
-        echo 'File /r "PymiereLink\*.*"' >> installer.nsi
-        echo 'SectionEnd' >> installer.nsi
-        
-        echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec"' >> installer.nsi
-        echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-        echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\${{ env.FFMPEG_DIR_WIN }}"' >> installer.nsi
-        echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\${{ env.FFMPEG_DIR_WIN }}"' >> installer.nsi
-        echo 'File /r "${{ env.FFMPEG_DIR_WIN }}\*.*"' >> installer.nsi
-        echo 'SectionEnd' >> installer.nsi        
-        
-        makensis installer.nsi
+        - name: Create Installer with NSIS
+        run: |
+          echo "!include MUI2.nsh" > installer.nsi
+          echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
+          echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+          echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
+          echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
+          echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
+          echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
+          echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
+          echo 'Icon "icon.ico"' >> installer.nsi
+          
+          echo 'Section "Copy PymiereLink Extension" SEC01' >> installer.nsi
+          echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"' >> installer.nsi
+          echo 'File /r "PymiereLink\*.*"' >> installer.nsi
+          echo 'SectionEnd' >> installer.nsi
+          
+          echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
+          echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec"' >> installer.nsi
+          echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
+          echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg"' >> installer.nsi
+          echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg"' >> installer.nsi
+          echo 'File /r "ffmpeg\*.*"' >> installer.nsi
+          echo 'SectionEnd' >> installer.nsi        
+          
+          makensis installer.nsi
       
 
     - name: List directory contents dist
       run: dir dist
-
+    
     - name: Get the release
       id: get_release
       uses: actions/github-script@v5
       with:
-        script: |
-          const { owner, repo } = context.repo
-          const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
-          return preRelease.upload_url
-
+          script: |
+            const { owner, repo } = context.repo
+            const releases = await github.rest.repos.listReleases({ owner, repo })
+            const preRelease = releases.data.find(release => release.prerelease and release.tag_name === 'V1.1')
+            return preRelease.upload_url
+    
     - name: Upload executables to asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v1
       env:
-            GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
       with:
-            draft: ${{ github.ref == 'refs/heads/master' }}
-            prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
-            files: |
-                YoutubetoPremiereInstaller.exe
+          draft: ${{ github.ref == 'refs/heads/master' }}
+          prerelease: ${{ github.ref != 'refs/heads/master' }}
+          tag_name: V1.1
+          files: |
+              YoutubetoPremiereInstaller.exe
