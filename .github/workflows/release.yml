@@ -67,19 +67,19 @@ jobs:
         --icon "./icon.icns" \
         YoutubetoPremiere.py
 
-        # Copy the "Pymiere Link" folder from the root to Resources
-        cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
-
+        # Create the required directory structure
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
 
         # Move the executable to the exec folder
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
-            mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-          else
-            echo "Executable not found. Check PyInstaller build process."
-            exit 1
-          fi
+          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+        else
+          echo "Executable not found. Check PyInstaller build process."
+          exit 1
+        fi
 
-
+        # Copy the "Pymiere Link" folder from the root to Resources
+        cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
 
     - name: Debugging current directory
       run: |
