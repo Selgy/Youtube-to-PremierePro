@@ -252,6 +252,11 @@ jobs:
             ShowInstDetails show
             ShowUnInstDetails show
 
+    - name: Run NSIS to Create Installer
+      run: |
+        makensis installer.nsi
+      shell: cmd
+
     - name: List directory contents dist
       run: dir dist
     
