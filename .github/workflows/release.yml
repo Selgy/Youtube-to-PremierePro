@@ -92,7 +92,7 @@ jobs:
 
     - name: Create ZXP Installer
       run: |
-          create-zxp ./YoutubetoPremiere
+          create-zxp ./YoutubetoPremiere --name YoutubetoPremiere --version 1.1.0
         
     - name: Get the release
       id: get_release
@@ -114,7 +114,7 @@ jobs:
         prerelease: ${{ github.ref != 'refs/heads/master' }}
         tag_name: V1.1
         files: |
-          YoutubetoPremiere.zxp
+          ./archive/YourDesiredName.zxp
 
   win-build:
     runs-on: windows-latest
