@@ -225,9 +225,8 @@ jobs:
             SectionEnd
 
             Function .onInit
-                # Set the installation directory
                 StrCpy $INSTDIR "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"
-             FunctionEnd
+            FunctionEnd
 
             Section "MainSection" SEC01
                 SetOutPath "$INSTDIR"
