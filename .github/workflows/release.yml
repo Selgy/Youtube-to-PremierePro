@@ -251,11 +251,11 @@ jobs:
             OutFile "YoutubetoPremiereInstaller.exe"
             ShowInstDetails show
             ShowUnInstDetails show
-            shell: bash
+      shell: bash
 
     - name: Run NSIS to Create Installer
       run: |
-                makensis installer.nsi
+          makensis installer.nsi
       shell: cmd
 
     - name: List directory contents dist
