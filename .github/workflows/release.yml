@@ -121,7 +121,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere.dmg
+              YoutubetoPremiere.pkg
 
   win-build:
     runs-on: windows-latest
