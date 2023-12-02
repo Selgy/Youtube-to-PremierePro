@@ -194,7 +194,13 @@ jobs:
         mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
         mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
 
-    
+    - name: Install NSIS Plugins
+      run: |
+        curl -L https://nsis.sourceforge.io/mediawiki/images/7/7e/NsProcess.zip -o nsProcess.zip
+        7z x nsProcess.zip -o"$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+      
+
+
     - name: Create Installer with NSIS
       run: |
         echo "!include 'MUI2.nsh'" > installer.nsi
