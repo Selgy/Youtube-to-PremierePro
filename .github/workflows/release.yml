@@ -37,8 +37,6 @@ jobs:
     - name: Install Adobe CEP ZXP Packager
       run: npm install -g create-zxp
 
-    - name: Update PATH
-      run: echo "$(npm bin -g):$PATH" >> $GITHUB_ENV
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip
