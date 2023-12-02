@@ -81,9 +81,10 @@ jobs:
       run: |
             cd PymiereLink
             zip -r ../YoutubetoPremiere_Mac.zip ./
-            #mv YoutubetoPremiere_Mac.zip YoutubetoPremiere_Mac.zxp
             cd ..
-          
+            
+    - name: Zip to ZXP
+      run: mv YoutubetoPremiere_Mac.zip YoutubetoPremiere_Mac.zxp      
 
     - name: Find YoutubetoPremiere_Mac.zxp
       run: find . -name "YoutubetoPremiere_Mac.zip"
@@ -111,7 +112,7 @@ jobs:
         prerelease: ${{ github.ref != 'refs/heads/master' }}
         tag_name: V1.1
         files: |
-          ./PymiereLink/YoutubetoPremiere_Mac.zxp
+          ./YoutubetoPremiere_Mac.zxp
 
   win-build:
     needs: mac-build
