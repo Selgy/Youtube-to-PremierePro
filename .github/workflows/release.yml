@@ -115,7 +115,7 @@ jobs:
           ./YoutubetoPremiere_Mac.zxp
 
   win-build:
-    needs: mac-build
+    #needs: mac-build
     runs-on: windows-latest
 
     steps:
@@ -223,7 +223,12 @@ jobs:
                 IfFileExists "C:\Program Files (x86)\YoutubetoPremiere\YoutubetoPremiere.exe" 0 +2
                 Delete "C:\Program Files (x86)\YoutubetoPremiere\YoutubetoPremiere.exe"
             SectionEnd
-            
+
+            Function .onInit
+                # Set the installation directory
+                StrCpy $INSTDIR "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"
+             FunctionEnd
+
             Section "MainSection" SEC01
                 SetOutPath "$INSTDIR"
             
@@ -241,10 +246,6 @@ jobs:
                 File /r "ffmpeg\ffmpeg_win\*.*"
             SectionEnd
             
-            Function .onInit
-                # Set the installation directory
-                StrCpy $INSTDIR "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink"
-            FunctionEnd
             
             # Installer configuration
             Name "YoutubetoPremiere Installer"
