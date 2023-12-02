@@ -78,13 +78,15 @@ jobs:
               cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PymiereLink/exec/ffmpeg"
       
     - name: Zip PackageContents folder
-      run: zip -r YoutubetoPremiere.zip ./PymiereLink/
+      run: |
+            cd PymiereLink
+            zip -r ../YoutubetoPremiere_Mac.zip ./
+            mv YoutubetoPremiere_Mac.zip YoutubetoPremiere_Mac.zxp
+            cd ..
           
-    - name: Rename zip to zxp
-      run: mv YoutubetoPremiere.zip YoutubetoPremiere.zxp
 
-    - name: Find YoutubetoPremiere.zxp
-      run: find . -name "YoutubetoPremiere.zxp"
+    - name: Find YoutubetoPremiere_Mac.zxp
+      run: find . -name "YoutubetoPremiere_Mac.zxp"
       
     - name: List directory contents
       run: ls -R ./dist/YoutubetoPremiere.app/Contents/Resources/
@@ -109,7 +111,7 @@ jobs:
         prerelease: ${{ github.ref != 'refs/heads/master' }}
         tag_name: V1.1
         files: |
-          ./YoutubetoPremiere.zxp
+          ./PymiereLink/YoutubetoPremiere_Mac.zxp
 
   win-build:
     needs: mac-build
