@@ -37,6 +37,7 @@ if platform.system() == 'Windows':
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     # Assuming the ffmpeg binary is in the same relative path within your application
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
+    os.chmod(ffmpeg_path, 0o755)
 elif platform.system() == 'Linux':
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
 else:
