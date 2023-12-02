@@ -53,23 +53,9 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-        pyinstaller --onefile --clean --windowed --debug all \
-        --hidden-import=engineio.async_drivers.eventlet \
-        --hidden-import=engineio.async_drivers.gevent_uwsgi \
-        --hidden-import=engineio.async_drivers.gevent \
-        --hidden-import=engineio.async_drivers \
-        --hidden-import=gevent \
-        --hidden-import=engineio.async_drivers.threading \
-        --hidden-import=pygame.freetype \
-        --hidden-import=encodings.utf_16_le \
-        --add-data "./icon.png:." \
-        --add-data "./notification_sound.mp3:." \
-        --icon "./icon.icns" \
-        YoutubetoPremiere.py
-
         # Create the required directory structure
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
-
+    
         # Move the executable to the exec folder
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
           mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
@@ -77,28 +63,43 @@ jobs:
           echo "Executable not found. Check PyInstaller build process."
           exit 1
         fi
-
+    
         # Copy the "Pymiere Link" folder from the root to Resources
         cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
+    
+        # Continue with PyInstaller
+        pyinstaller --onefile --clean --windowed --debug all \
+          --hidden-import=engineio.async_drivers.eventlet \
+          --hidden-import=engineio.async_drivers.gevent_uwsgi \
+          --hidden-import=engineio.async_drivers.gevent \
+          --hidden-import=engineio.async_drivers \
+          --hidden-import=gevent \
+          --hidden-import=engineio.async_drivers.threading \
+          --hidden-import=pygame.freetype \
+          --hidden-import=encodings.utf_16_le \
+          --add-data "./icon.png:." \
+          --add-data "./notification_sound.mp3:." \
+          --add-data "./Pymiere Link:./Pymiere Link" \
+          --icon "./icon.icns" \
+          YoutubetoPremiere.py
 
-    - name: Debugging current directory
-      run: |
-            echo "Contents of FFmpeg directory:"
-            ls -la "/usr/local/Cellar/ffmpeg/6.0_1"
-      env:
-            FFMPEG_DIR_MAC: ffmpeg_mac
-      
-    - name: Move FFmpeg to the exec folder
-      run: |
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC"
-        mv "/usr/local/Cellar/ffmpeg/6.0_1/"* "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec/$FFMPEG_DIR_MAC/"
       env:
         FFMPEG_DIR_MAC: ffmpeg_mac
 
-    - name: Create macOS Package
+    - name: Create PKG Installer
       run: |
-          npm install -g create-dmg
-          create-dmg 'dist/YoutubetoPremiere.app' --overwrite --unsigned
+                pkgbuild --root "./dist/YoutubetoPremiere.app" \
+                --install-location "/Applications" \
+                --identifier "com.yourcompany.YoutubetoPremiere" \
+                --version "1.0" \
+                "./YoutubetoPremiere.pkg"
+
+    - name: Package PKG Installer
+      run: |
+            productbuild --distribution "./Distribution.xml" \
+                    --resources "./Resources" \
+                    --package-path "./" \
+                    "./YoutubetoPremiereInstaller.pkg"
 
     - name: Get the release
       id: get_release
@@ -120,7 +121,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere.pkg
+              YoutubetoPremiere.dmg
 
   win-build:
     runs-on: windows-latest
