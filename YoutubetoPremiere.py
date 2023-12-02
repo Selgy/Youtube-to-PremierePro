@@ -38,8 +38,6 @@ elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     # Assuming the ffmpeg binary is in the same relative path within your application
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
     os.chmod(ffmpeg_path, 0o755)
-elif platform.system() == 'Linux':
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
 else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
@@ -49,6 +47,7 @@ if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     appdata_path = os.path.expanduser('~/Library/Application Support')
+    os.chmod(appdata_path, 0o755)
 elif platform.system() == 'Linux':
     appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 else:
