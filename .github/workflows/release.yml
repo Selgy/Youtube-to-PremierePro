@@ -72,13 +72,12 @@ jobs:
   
     - name: Prepare PymiereLink folder
       run: |
-              cp -R "./PymiereLink" "./PackageContents/"
               mkdir -p ./PackageContents/PymiereLink/exec
-              mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PackageContents/PymiereLink/exec/"
-              cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PackageContents/PymiereLink/exec/ffmpeg"
+              mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./PymiereLink/exec/"
+              cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./PymiereLink/exec/ffmpeg"
       
     - name: Zip PackageContents folder
-      run: zip -r YoutubetoPremiere.zip ./PackageContents/
+      run: zip -r YoutubetoPremiere.zip ./PymiereLink/
           
     - name: Rename zip to zxp
       run: mv YoutubetoPremiere.zip YoutubetoPremiere.zxp
@@ -149,39 +148,21 @@ jobs:
       run: |
         7z x ffmpeg.7z -offmpeg -aoa
 
+    - name: Rename FFmpeg Folder
+      run: |
+        mv ./ffmpeg/ffmpeg-6.0-full_build ./ffmpeg/ffmpeg_win
+
     - name: Find ffmpeg.exe
       shell: pwsh
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
       
-    - name: Find icon.png
-      shell: pwsh
-      run: |
-        Get-ChildItem -Recurse -Filter icon.png | Format-Table FullName
       
     - name: Install PyInstaller
       run: pip install pyinstaller
 
-    - name: List installed packages
-      run: pip list
 
-    - name: Check version pyinstaller
-      run: pyinstaller -v
 
-    - name: Find YoutubetoPremiere.py
-      shell: pwsh
-      run: |
-          Get-ChildItem -Recurse -Filter YoutubetoPremiere.py | Format-Table FullName
-
-    - name: Find notification_sound.mp3
-      shell: pwsh
-      run: |
-        Get-ChildItem -Recurse -Filter notification_sound.mp3 | Format-Table FullName
-
-    - name: List files in the repository root
-      run: Get-ChildItem -Path .
-      shell: pwsh
-      
     - name: Build Application with PyInstaller
       run: |
             pyinstaller --onefile --clean --windowed --debug all `
@@ -193,7 +174,7 @@ jobs:
             --hidden-import=engineio.async_drivers.threading `
             --hidden-import=pygame.freetype `
             --hidden-import=encodings.utf_16_le `
-            --add-binary "./ffmpeg/bin/ffmpeg.exe;./ffmpeg/bin/" `
+            --add-binary "./ffmpeg/ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
             --add-data "./icon.png;." `
             --add-data "./notification_sound.mp3;." `
             --icon "./icon.ico" `
@@ -235,9 +216,9 @@ jobs:
           echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
           echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec"' >> installer.nsi
           echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-          echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg"' >> installer.nsi
-          echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg"' >> installer.nsi
-          echo 'File /r "ffmpeg\*.*"' >> installer.nsi
+          echo 'CreateDirectory "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg_win"' >> installer.nsi
+          echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\PymiereLink\exec\ffmpeg_win"' >> installer.nsi
+          echo 'File /r "ffmpeg_win\*.*"' >> installer.nsi
           echo 'SectionEnd' >> installer.nsi        
           
           makensis installer.nsi
