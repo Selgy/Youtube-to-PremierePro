@@ -84,10 +84,11 @@ jobs:
     - name: List exec directory
       run: ls -R ./PackageContents/PymiereLink/exec/
 
-    - name: Package ZXP Installer
-      run: |
-        create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0
-        echo "Ran create-zxp command"
+    - name: Package ZXP Installer and capture output
+      run: create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0 > zxp_output.log 2>&1
+    
+    - name: Display ZXP packaging output
+      run: cat zxp_output.log
 
     - name: Find YoutubetoPremiere.zxp
       run: find . -name "YoutubetoPremiere.zxp"
