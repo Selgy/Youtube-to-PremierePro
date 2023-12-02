@@ -67,16 +67,19 @@ jobs:
         --icon "./icon.icns" \
         YoutubetoPremiere.py
 
-        # Create the required directory structure
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+        # Copy the "Pymiere Link" folder from the root to Resources
+        cp -R "./Pymiere Link" "./dist/YoutubetoPremiere.app/Contents/Resources/"
+
 
         # Move the executable to the exec folder
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
-          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
-        else
-          echo "Executable not found. Check PyInstaller build process."
-          exit 1
-        fi
+            mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/Pymiere Link/exec"
+          else
+            echo "Executable not found. Check PyInstaller build process."
+            exit 1
+          fi
+
+
 
     - name: Debugging current directory
       run: |
@@ -95,7 +98,7 @@ jobs:
     - name: Create macOS Package
       run: |
           npm install -g create-dmg
-          create-dmg 'dist/YoutubetoPremiere.app' --overwrite
+          create-dmg 'dist/YoutubetoPremiere.app' --overwrite --unsigned
 
     - name: Get the release
       id: get_release
