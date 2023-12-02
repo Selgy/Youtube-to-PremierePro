@@ -238,7 +238,7 @@ jobs:
                 # Install FFmpeg
                 CreateDirectory "$INSTDIR\PymiereLink\exec\ffmpeg_win"
                 SetOutPath "$INSTDIR\PymiereLink\exec\ffmpeg_win"
-                File /r ".ffmpeg\ffmpeg_win\*.*"
+                File /r "ffmpeg\ffmpeg_win\*.*"
             SectionEnd
             
             Function .onInit
@@ -251,7 +251,6 @@ jobs:
             OutFile "YoutubetoPremiereInstaller.exe"
             ShowInstDetails show
             ShowUnInstDetails show
-      
 
     - name: List directory contents dist
       run: dir dist
