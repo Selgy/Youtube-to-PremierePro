@@ -99,7 +99,9 @@ jobs:
         # Create a ZXP package from the PackageContents directory
         create-zxp ./PackageContents --name YoutubetoPremiere --version 1.1.0
     
-    
+    - name: Find YoutubetoPremiere.zxp
+      run: find . -name "YoutubetoPremiere.zxp"
+      
     - name: List directory contents
       run: ls -R ./dist/YoutubetoPremiere.app/Contents/Resources/
         
