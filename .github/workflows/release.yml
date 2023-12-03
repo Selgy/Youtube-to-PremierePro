@@ -100,38 +100,33 @@ jobs:
           # Optional: List contents of the destination directory to verify
           ls -la $DEST_PATH
 
-    - name: Create and Sign macOS Package
+    - name: Import Certificate and Create Custom Keychain
+      env:
+            CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }} # The base64-encoded .p12 file
+            CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }} # The password for your .p12 certificate
+            KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }} # Password for the custom keychain
       run: |
-          INSTALL_LOCATION="/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
-          PACKAGE_ID="com.selgy.youtubetopremiere"
-          CERTIFICATE_FILE="certificate.p12"
-          CERTIFICATE_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD=${{ secrets.KEYCHAIN_PASSWORD }}
-  
-          # Decode and import the certificate
-          echo "${{ secrets.APPLE_CERTIFICATE }}" | base64 --decode > $CERTIFICATE_FILE
-          
-          # Create and unlock the keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          
-          # Import the certificate into the keychain
-          security import $CERTIFICATE_FILE -k build.keychain -P $CERTIFICATE_PASSWORD -T /usr/bin/pkgbuild            
-  
-          mkdir -p ./pkgroot"$INSTALL_LOCATION"
-  
-          # Copy files to the package root directory
-          cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
-  
-          # Build and sign the package
-          pkgbuild --root "./pkgroot" \
-                  --identifier "$PACKAGE_ID" \
-                  --install-location "$INSTALL_LOCATION" \
-                  --version "1.0" \
-                  --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
-                  --keychain $(pwd)/build.keychain \
-                  --ownership "recommended" \
-                  "YoutubetoPremiere.pkg"
+            echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+            security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+            security default-keychain -s build.keychain
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+            security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+    
+            mkdir -p ./pkgroot"$INSTALL_LOCATION"
+    
+            # Copy files to the package root directory
+            cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
+    
+            # Build and sign the package
+            pkgbuild --root "./pkgroot" \
+                    --identifier "$PACKAGE_ID" \
+                    --install-location "$INSTALL_LOCATION" \
+                    --version "1.0" \
+                    --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
+                    --keychain $(pwd)/build.keychain \
+                    --ownership "recommended" \
+                    "YoutubetoPremiere.pkg"
               
 
     - name: Get the release
