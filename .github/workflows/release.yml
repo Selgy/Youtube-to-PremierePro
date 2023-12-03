@@ -109,7 +109,7 @@ jobs:
         CERTIFICATE_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}
 
         # Decode and import the certificate
-        echo ${{ secrets.APPLE_CERTIFICATE }} | base64 --decode > $CERTIFICATE_FILE
+        echo "${{ secrets.APPLE_CERTIFICATE }}" | base64 --decode > $CERTIFICATE_FILE
         security create-keychain -p "" build.keychain
         security import $CERTIFICATE_FILE -k build.keychain -P $CERTIFICATE_PASSWORD -T /usr/bin/pkgbuild
 
