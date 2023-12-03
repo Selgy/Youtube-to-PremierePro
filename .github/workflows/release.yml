@@ -102,15 +102,19 @@ jobs:
 
     - name: Create and Sign macOS Package
       run: |
+        echo "Starting package creation and signing..."
+
         # Define installation location, package identifier, and certificate details
         INSTALL_LOCATION="/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
         PACKAGE_ID="com.selgy.youtubetopremiere"
         CERTIFICATE_FILE="certificate.p12"
+        echo "Defined installation location and package identifier."
 
         # Decode and import the certificate
+        echo "Decoding and importing the certificate..."
         echo "${{ secrets.APPLE_CERTIFICATE }}" | base64 --decode > $CERTIFICATE_FILE
         security create-keychain -p "" build.keychain
-        security import $CERTIFICATE_FILE -k build.keychain -T /usr/bin/pkgbuild
+        security import $CERTIFICATE_FILE -k build.keychain -T /usr
 
         # Create a temporary package root directory
         mkdir -p ./pkgroot"$INSTALL_LOCATION"
