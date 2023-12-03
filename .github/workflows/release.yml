@@ -105,6 +105,9 @@ jobs:
             CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }} # The base64-encoded .p12 file
             CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }} # The password for your .p12 certificate
             KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }} # Password for the custom keychain
+            INSTALL_LOCATION: "/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
+            PACKAGE_ID: "com.selgy.youtubetopremiere"
+
       run: |
             echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
             security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
