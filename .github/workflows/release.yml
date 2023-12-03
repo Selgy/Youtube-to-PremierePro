@@ -106,12 +106,11 @@ jobs:
         INSTALL_LOCATION="/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
         PACKAGE_ID="com.selgy.youtubetopremiere"
         CERTIFICATE_FILE="certificate.p12"
-        CERTIFICATE_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}
 
         # Decode and import the certificate
         echo "${{ secrets.APPLE_CERTIFICATE }}" | base64 --decode > $CERTIFICATE_FILE
         security create-keychain -p "" build.keychain
-        security import $CERTIFICATE_FILE -k build.keychain -P $CERTIFICATE_PASSWORD -T /usr/bin/pkgbuild
+        security import $CERTIFICATE_FILE -k build.keychain -T /usr/bin/pkgbuild
 
         # Create a temporary package root directory
         mkdir -p ./pkgroot"$INSTALL_LOCATION"
