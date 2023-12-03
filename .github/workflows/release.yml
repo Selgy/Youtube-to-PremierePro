@@ -69,12 +69,11 @@ jobs:
 
     - name: Prepare PymiereLink and Installation Script
       run: |
-
-        rm -f "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp "install_pymierelink.sh" "./dist/YoutubetoPremiere.app/Contents/Resources/"
-
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
           mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         else
@@ -82,6 +81,7 @@ jobs:
           exit 1
         fi
         ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
+        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
 
 
     - name: Prepare FFmpeg directory
@@ -143,7 +143,7 @@ jobs:
               YoutubetoPremiere.pkg
 
   win-build:
-    #needs: mac-build
+    needs: mac-build
     runs-on: windows-latest
 
     steps:
