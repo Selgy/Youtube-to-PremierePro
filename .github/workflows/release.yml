@@ -30,17 +30,27 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    - name: Check FFmpeg installation
+    - name: Check and Copy FFmpeg
       run: |
-        if brew list --versions ffmpeg > /dev/null; then
-          echo "FFmpeg is already installed."
-          echo "Checking for updates..."
-          brew outdated ffmpeg || brew upgrade ffmpeg
-        else
-          echo "FFmpeg is not installed. Installing it now..."
-          brew install ffmpeg
-        fi
+          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
+          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
+          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
+          # Install FFmpeg if not present
+          if ! brew list --versions ffmpeg > /dev/null; then
+            echo "Installing FFmpeg..."
+            brew install ffmpeg
+          else
+            echo "FFmpeg is already installed."
+          fi
 
+          # Define the destination path for FFmpeg
+          EXEC_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
+
+          # Create the exec directory if it doesn't exist
+          mkdir -p $EXEC_PATH
+
+          # Copy the FFmpeg binary to the exec folder
+          cp $(which ffmpeg) $EXEC_PATH/
 
     - name: Install PyInstaller
       run: pip install pyinstaller
@@ -65,9 +75,7 @@ jobs:
 
     - name: Prepare PymiereLink and Installation Script
       run: |
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
+
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp "install_pymierelink.sh" "./dist/YoutubetoPremiere.app/Contents/Resources/"
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
@@ -84,21 +92,7 @@ jobs:
       run: |
           Get-ChildItem -Recurse -Filter ffmpeg | Format-Table FullName
         
-    - name: Prepare FFmpeg directory
-      run: |
-          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
-          echo "Listing contents of temp ffmpeg directory:"
-          ls -la "./usr/local/Cellar/ffmpeg/6.0_1"
         
-    - name: Move FFmpeg to the exec folder
-      run: |
-          cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
-          else
-            echo "FFmpeg directory is empty or does not exist."
-            exit 1
-          fi
-
-
 
     - name: Create macOS Package
       run: |
