@@ -41,13 +41,8 @@ jobs:
           fi
 
           # Define the destination path for FFmpeg
-          EXEC_PATH="./ffmpeg"
+          EXEC_PATH="./"
 
-          # Create the exec directory if it doesn't exist
-          mkdir -p $EXEC_PATH
-
-          # Copy the FFmpeg binary to the exec folder
-          cp $(which ffmpeg) $EXEC_PATH/
 
     - name: Install PyInstaller
       run: pip install pyinstaller
@@ -88,8 +83,15 @@ jobs:
       shell: pwsh
       run: |
           Get-ChildItem -Recurse -Filter ffmpeg | Format-Table FullName
-        
-        
+
+    - name: Copy FFmpeg to Executable Path
+      run: |
+          # Define the destination path for FFmpeg
+          EXEC_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
+          
+          # Create the directory and copy FFmpeg
+          mkdir -p $EXEC_PATH
+          cp $(which ffmpeg) $EXEC_PATH/
 
     - name: Create macOS Package
       run: |
