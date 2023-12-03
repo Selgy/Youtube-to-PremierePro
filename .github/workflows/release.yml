@@ -69,7 +69,7 @@ jobs:
 
     - name: Prepare PymiereLink and Installation Script
       run: |
-        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
+
         rm -f "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
@@ -81,6 +81,7 @@ jobs:
           echo "Executable not found. Check PyInstaller build process."
           exit 1
         fi
+        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
 
 
     - name: Prepare FFmpeg directory
