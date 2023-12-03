@@ -100,6 +100,9 @@ jobs:
           # Optional: List contents of the destination directory to verify
           ls -la $DEST_PATH
 
+    - name: List Identities in Keychain
+      run: security find-identity -p basic -v build.keychain
+
     - name: Import Certificate and Create Custom Keychain
       env:
             CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }} # The base64-encoded .p12 file
@@ -121,15 +124,15 @@ jobs:
             # Copy files to the package root directory
             cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
     
-            # Build and sign the package
             pkgbuild --root "./pkgroot" \
-                    --identifier "$PACKAGE_ID" \
-                    --install-location "$INSTALL_LOCATION" \
-                    --version "1.0" \
-                    --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
-                    --keychain $(pwd)/build.keychain \
-                    --ownership "recommended" \
-                    "YoutubetoPremiere.pkg"
+            --identifier "$PACKAGE_ID" \
+            --install-location "$INSTALL_LOCATION" \
+            --version "1.0" \
+            --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
+            --keychain $(pwd)/build.keychain \
+            --ownership "recommended" \
+            -v \
+            "YoutubetoPremiere.pkg"
               
 
     - name: Get the release
