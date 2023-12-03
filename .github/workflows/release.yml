@@ -41,8 +41,11 @@ jobs:
           fi
 
           # Define the destination path for FFmpeg
-          EXEC_PATH="./"
+          EXEC_PATH="./ffmpeg"
 
+          # Create the directory at the root and copy the entire FFmpeg installation
+          mkdir -p $EXEC_PATH
+          cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
 
     - name: Install PyInstaller
       run: pip install pyinstaller
@@ -84,16 +87,18 @@ jobs:
       run: |
           Get-ChildItem -Recurse -Filter ffmpeg | Format-Table FullName
 
-    - name: Copy FFmpeg to Executable Path
+    - name: Copy FFmpeg to PymiereLink Path
       run: |
-          # Define the destination path for FFmpeg
-          EXEC_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin"
-          
-          # Create the directory and copy FFmpeg
-          mkdir -p $EXEC_PATH
-          cp $(which ffmpeg) $EXEC_PATH/
-          ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
-          ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin"
+          # Define the FFmpeg installation path and the destination path
+          FFMPEG_INSTALL_PATH=$(brew --prefix ffmpeg)
+          DEST_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg"
+
+          # Create the destination directory and copy the entire FFmpeg installation
+          mkdir -p $DEST_PATH
+          cp -R $FFMPEG_INSTALL_PATH/. $DEST_PATH/
+
+          # Optional: List contents of the destination directory to verify
+          ls -la $DEST_PATH
 
     - name: Create macOS Package
       run: |
