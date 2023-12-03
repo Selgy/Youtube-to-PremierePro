@@ -69,6 +69,8 @@ jobs:
 
     - name: Prepare PymiereLink and Installation Script
       run: |
+        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
+        rm -f "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp "install_pymierelink.sh" "./dist/YoutubetoPremiere.app/Contents/Resources/"
