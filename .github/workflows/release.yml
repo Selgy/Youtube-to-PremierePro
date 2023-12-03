@@ -108,7 +108,7 @@ jobs:
             CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }} # The base64-encoded .p12 file
             CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }} # The password for your .p12 certificate
             KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }} # Password for the custom keychain
-            INSTALL_LOCATION: "/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
+            INSTALL_LOCATION: "~/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
             PACKAGE_ID: "com.selgy.youtubetopremiere"
 
       run: |
@@ -118,7 +118,8 @@ jobs:
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
             security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-    
+            security find-identity -p codesigning -v build.keychain
+            
             mkdir -p ./pkgroot"$INSTALL_LOCATION"
     
             # Copy files to the package root directory
