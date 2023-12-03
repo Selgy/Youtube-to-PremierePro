@@ -41,10 +41,6 @@ jobs:
           brew install ffmpeg
         fi
 
-    - name: Find ffmpeg
-      run: |
-        find ./ -name "ffmpeg" -type f -exec echo "Found ffmpeg at: {}" \;
-
 
     - name: Install PyInstaller
       run: pip install pyinstaller
@@ -83,7 +79,11 @@ jobs:
         ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
         ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
 
-
+    - name: Find ffmpeg.exe
+      shell: pwsh
+      run: |
+          Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
+        
     - name: Prepare FFmpeg directory
       run: |
           mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
