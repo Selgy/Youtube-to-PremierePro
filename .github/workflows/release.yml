@@ -82,13 +82,13 @@ jobs:
 
     - name: Prepare FFmpeg directory
       run: |
-          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
+          mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
           echo "Listing contents of temp ffmpeg directory:"
-          ls -la "./ffmpeg"
+          ls -la "./usr/local/Cellar/ffmpeg/6.0_1"
         
     - name: Move FFmpeg to the exec folder
       run: |
-          mv "./ffmpeg" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
+          cp -R /usr/local/Cellar/ffmpeg/6.0_1 "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
           else
             echo "FFmpeg directory is empty or does not exist."
             exit 1
