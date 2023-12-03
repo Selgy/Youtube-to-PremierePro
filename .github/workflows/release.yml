@@ -100,11 +100,18 @@ jobs:
           # Optional: List contents of the destination directory to verify
           ls -la $DEST_PATH
 
-    - name: Create macOS Package
+    - name: Create and Sign macOS Package
       run: |
-        # Define installation location and package identifier
+        # Define installation location, package identifier, and certificate details
         INSTALL_LOCATION="/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
         PACKAGE_ID="com.selgy.youtubetopremiere"
+        CERTIFICATE_FILE="certificate.p12"
+        CERTIFICATE_PASSWORD=${{ secrets.CERTIFICATE_PASSWORD }}
+
+        # Decode and import the certificate
+        echo ${{ secrets.APPLE_CERTIFICATE }} | base64 --decode > $CERTIFICATE_FILE
+        security create-keychain -p "" build.keychain
+        security import $CERTIFICATE_FILE -k build.keychain -P $CERTIFICATE_PASSWORD -T /usr/bin/pkgbuild
 
         # Create a temporary package root directory
         mkdir -p ./pkgroot"$INSTALL_LOCATION"
@@ -112,13 +119,15 @@ jobs:
         # Copy files to the package root directory
         cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
 
-        # Build the package
+        # Build and sign the package
         pkgbuild --root "./pkgroot" \
                 --identifier "$PACKAGE_ID" \
                 --install-location "$INSTALL_LOCATION" \
-                --version "1.0" \
-                --ownership "recommended" \
-                "YoutubetoPremiere.pkg"
+            --version "1.0" \
+            --sign "Developer ID Installer: Mickael Ducatez (9H8DB46V75)" \
+            --keychain build.keychain \
+            --ownership "recommended" \
+            "YoutubetoPremiere.pkg"
 
     - name: Get the release
       id: get_release
