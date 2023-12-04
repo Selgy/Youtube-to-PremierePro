@@ -100,8 +100,6 @@ jobs:
           # Optional: List contents of the destination directory to verify
           ls -la $DEST_PATH
 
-    - name: List Identities in Keychain
-      run: security find-identity -p codesigning -v build.keychain
     
     - name: List keychains
       run: |
@@ -111,6 +109,11 @@ jobs:
         echo "Listing system keychains:"
         ls /Library/Keychains
 
+
+    - name: Find ffmpeg
+      shell: pwsh
+      run: |
+            ls ./dist/YoutubetoPremiere.app/Contents/MacOS
 
     - name: Sign macOS Executables
       run: |
