@@ -122,7 +122,7 @@ jobs:
       env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
           MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.CERTIFICATE_PASSWORD }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
           echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
