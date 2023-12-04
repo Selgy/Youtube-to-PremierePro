@@ -101,7 +101,7 @@ jobs:
           ls -la $DEST_PATH
 
     - name: List Identities in Keychain
-      run: security find-identity -p basic -v build.keychain
+      run: security find-identity -p codesigning -v build.keychain
 
     - name: Import Certificate and Create Custom Keychain
       env:
@@ -112,18 +112,30 @@ jobs:
         PACKAGE_ID: ${{ secrets.PACKAGE_ID }}
     
       run: |
-            # Note: Avoid echoing sensitive information such as certificates or passwords
-            echo "Current Working Directory: $(pwd)"
-            echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+            # Create and setup keychain
             KEYCHAIN_PATH=$(pwd)/build.keychain
             security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
             security default-keychain -s "$KEYCHAIN_PATH"
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            # Import the certificate
+            echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
             security import certificate.p12 -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+
+            # Set key partition list
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+            # List the identities to check if the import was successful
             security find-identity -p codesigning -v "$KEYCHAIN_PATH"
-            security find-generic-password -ga "Mac Developer ID Installer: mickael ducatez" build.keychain
-    
+
+            # Inspect the Keychain - Dump contents
+            echo "Inspecting the Keychain:"
+            security dump-keychain "$KEYCHAIN_PATH"
+
+            # Inspect the imported certificate details
+            echo "Inspecting the imported certificate details:"
+            security find-certificate -p -c "Mac Developer ID Installer: mickael ducatez" "$KEYCHAIN_PATH" | openssl x509 -text -noout
+
             mkdir -p ./pkgroot"$INSTALL_LOCATION"
             # Copy files to the package root directory
             ls -la ./dist
@@ -137,7 +149,7 @@ jobs:
             --identifier "$PACKAGE_ID" \
             --install-location "$INSTALL_LOCATION" \
             --version "1.1" \
-            --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
+            --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" \
             --keychain "$KEYCHAIN_PATH" \
             --ownership "recommended" \
             -v \
