@@ -140,23 +140,25 @@ jobs:
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
       
 
-    - name: Notarize the Application
+    - name: Store Notarization Credentials
       env:
-              APPLE_ID: ${{ secrets.APPLE_ID }}
-              APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
-              # Create a ZIP file of the .app for notarization
-              ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
-              
-              # Submit the app for notarization
-              xcrun altool --notarize-app -t osx -f "YoutubetoPremiere.zip" --primary-bundle-id "${{ secrets.PACKAGE_ID }}" -u "$APPLE_ID" -p "$APP_SPECIFIC_PASSWORD" --output-format xml
-          
-              # Poll for notarization status until it is complete
-              # This step may need a script to check periodically for the status
-              # Example: xcrun altool --notarization-info <notarization-request-uuid> -u "$APPLE_ID" -p "$APP_SPECIFIC_PASSWORD"
-          
-              # Once notarization is complete, staple the ticket to the executable
-              xcrun stapler staple "./dist/YoutubetoPremiere.app"
+           xcrun notarytool store-credentials "notarytool-profile" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APP_SPECIFIC_PASSWORD"
+      
+    - name: Notarize the Application using notarytool
+      run: |
+        # Create a ZIP file of the .app for notarization
+        ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
+
+        # Submit the app for notarization using notarytool
+        xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait
+
+        # Once notarization is complete, staple the ticket to the executable
+        xcrun stapler staple "./dist/YoutubetoPremiere.app"
+
 
     - name: Create PKG
       run: |
