@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Select Xcode Version
-      run: sudo xcode-select -switch /Applications/Xcode_15.0.app
+      run: sudo xcode-select -switch /Applications/Xcode_13.1.app
 
     - name: Checkout code
       uses: actions/checkout@v2
@@ -160,9 +160,9 @@ jobs:
         xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait
 
         # Check the status of the notarization
-        NOTARIZATION_ID=$(xcrun notarytool list --keychain-profile "notarytool-profile" | grep -o 'ID:[a-z0-9-]*' | awk -F':' '{print $2}' | head -n 1)
+        NOTARIZATION_ID=$(xcrun notarytool list  "notarytool-profile" | grep -o 'ID:[a-z0-9-]*' | awk -F':' '{print $2}' | head -n 1)
         echo "Notarization ID: $NOTARIZATION_ID"
-        xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+        xcrun notarytool info $NOTARIZATION_ID  "notarytool-profile"
 
         # Once notarization is complete, staple the ticket to the executable
         xcrun stapler staple "./dist/YoutubetoPremiere.app"
