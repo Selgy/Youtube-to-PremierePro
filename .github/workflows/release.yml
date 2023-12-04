@@ -119,8 +119,8 @@ jobs:
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
             # Import the certificate
-            echo "$CERTIFICATE_BASE64" | base64 --decode > Certificates.p12
-            security import Certificates.p12 -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            echo "$CERTIFICATE_BASE64" | base64 --decode > Certificate.p12
+            security import Certificate.p12 -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
 
             # Set key partition list
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
@@ -149,7 +149,7 @@ jobs:
             --identifier "$PACKAGE_ID" \
             --install-location "$INSTALL_LOCATION" \
             --version "1.1" \
-            --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" \
+            --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
             --keychain "$KEYCHAIN_PATH" \
             --ownership "recommended" \
             -v \
