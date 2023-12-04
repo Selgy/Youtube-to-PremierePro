@@ -151,21 +151,35 @@ jobs:
       run: |
            xcrun notarytool store-credentials "notarytool-profile" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APP_SPECIFIC_PASSWORD"
       
-    - name: Notarize the Application using notarytool
+    - name: Notarize the Application
       run: |
-        # Create a ZIP file of the .app for notarization
-        ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
+             # Create a ZIP file of the .app for notarization
+             ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
+         
+             # Submit the app for notarization using notarytool
+             NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --wait)
+             echo "$NOTARIZATION_OUTPUT"
+             
+             # Extract Notarization ID
+             NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | grep -o 'RequestUUID = "[^"]*"' | cut -d '"' -f 2)
+             echo "Notarization ID: $NOTARIZATION_ID"
+         
+             # Check the status of the notarization
+             if [ -n "$NOTARIZATION_ID" ]; then
+                 NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID)
+                 echo "$NOTARIZATION_INFO"
+                 # Check if notarization was successful and staple the ticket
+                 if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
+                     xcrun stapler staple "./dist/YoutubetoPremiere.app"
+                 else
+                     echo "Notarization failed."
+                     exit 1
+                 fi
+             else
+                 echo "Failed to retrieve Notarization ID."
+                 exit 1
+             fi
 
-        # Submit the app for notarization using notarytool
-        xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait
-
-        # Check the status of the notarization
-        NOTARIZATION_ID=$(xcrun notarytool list  "notarytool-profile" | grep -o 'ID:[a-z0-9-]*' | awk -F':' '{print $2}' | head -n 1)
-        echo "Notarization ID: $NOTARIZATION_ID"
-        xcrun notarytool info $NOTARIZATION_ID  "notarytool-profile"
-
-        # Once notarization is complete, staple the ticket to the executable
-        xcrun stapler staple "./dist/YoutubetoPremiere.app"
 
     - name: Create PKG
       run: |
