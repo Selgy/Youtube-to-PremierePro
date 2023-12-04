@@ -67,7 +67,6 @@ jobs:
         YoutubetoPremiere.py
 
 
-
     - name: Prepare PymiereLink and Installation Script
       run: |
 
@@ -111,11 +110,8 @@ jobs:
 
 
     - name: list exec
-      shell: pwsh
       run: |
-            ls ./dist/YoutubetoPremiere.app/
-            ls ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
-            ls ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec
+            ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
 
     - name: Sign macOS Executables
       run: |
