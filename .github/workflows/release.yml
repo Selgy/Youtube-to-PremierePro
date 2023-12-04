@@ -110,15 +110,15 @@ jobs:
         ls /Library/Keychains
 
 
-    - name: Find ffmpeg
+    - name: list exec
       shell: pwsh
       run: |
-            ls ./dist/YoutubetoPremiere.app/Contents/MacOS
+            ls ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec
 
     - name: Sign macOS Executables
       run: |
           chmod +x ./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere
-          /usr/bin/codesign --force -s - ./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere -v
+          /usr/bin/codesign --force -s - ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/YoutubetoPremiere -v
   
     - name: Codesign App Bundle
       env:
