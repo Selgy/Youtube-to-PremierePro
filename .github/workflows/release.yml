@@ -156,9 +156,13 @@ jobs:
         # Submit the app for notarization using notarytool
         xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait
 
+        # Check the status of the notarization
+        NOTARIZATION_ID=$(xcrun notarytool list --keychain-profile "notarytool-profile" | grep -o 'ID:[a-z0-9-]*' | awk -F':' '{print $2}' | head -n 1)
+        echo "Notarization ID: $NOTARIZATION_ID"
+        xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+
         # Once notarization is complete, staple the ticket to the executable
         xcrun stapler staple "./dist/YoutubetoPremiere.app"
-
 
     - name: Create PKG
       run: |
