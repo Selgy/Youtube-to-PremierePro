@@ -7,7 +7,7 @@ on:
 
 jobs:
   mac-build:
-    runs-on: macos-12
+    runs-on: macos-12-xcode-14.2.0
 
     steps:
     - name: Checkout code
