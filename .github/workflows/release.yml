@@ -102,6 +102,14 @@ jobs:
 
     - name: List Identities in Keychain
       run: security find-identity -p codesigning -v build.keychain
+    
+    - name: List keychains
+      run: |
+        echo "Listing user keychains:"
+        ls ~/Library/Keychains
+
+        echo "Listing system keychains:"
+        ls /Library/Keychains
 
     - name: Import Certificate and Create Custom Keychain
       env:
