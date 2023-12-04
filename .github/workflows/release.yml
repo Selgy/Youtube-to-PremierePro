@@ -134,7 +134,7 @@ jobs:
 
             # Inspect the imported certificate details
             echo "Inspecting the imported certificate details:"
-            security find-certificate -p -c "Mac Developer ID Installer: mickael ducatez" "$KEYCHAIN_PATH" | openssl x509 -text -noout
+            security find-certificate -p -c "Developer ID Application: mickael ducatez" "$KEYCHAIN_PATH" | openssl x509 -inform der -text -noout
 
             mkdir -p ./pkgroot"$INSTALL_LOCATION"
             # Copy files to the package root directory
