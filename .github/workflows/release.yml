@@ -148,7 +148,7 @@ jobs:
             pkgbuild --root "./pkgroot" \
             --identifier "$PACKAGE_ID" \
             --install-location "$INSTALL_LOCATION" \
-            --version "1.1" \
+            --version "1.0" \
             --sign "Developer ID Installer: mickael ducatez (9H8DB46V75)" \
             --keychain "$KEYCHAIN_PATH" \
             --ownership "recommended" \
