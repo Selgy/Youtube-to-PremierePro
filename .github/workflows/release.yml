@@ -124,10 +124,8 @@ jobs:
             security find-identity -p codesigning -v "$KEYCHAIN_PATH"
     
             mkdir -p ./pkgroot"$INSTALL_LOCATION"
-    
             # Copy files to the package root directory
             cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
-    
             echo "Listing contents of ./pkgroot directory:"
             ls -la ./pkgroot
     
