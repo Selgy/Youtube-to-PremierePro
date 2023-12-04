@@ -105,11 +105,12 @@ jobs:
 
     - name: Import Certificate and Create Custom Keychain
       env:
-            CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }} # The base64-encoded .p12 file
-            CERTIFICATE_PASSWORD: ${{ secrets.CERTIFICATE_PASSWORD }} # The password for your .p12 certificate
-            KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }} # Password for the custom keychain
-            INSTALL_LOCATION: "~/Library/Application Support/Adobe/CEP/extensions/PymiereLink"
-            PACKAGE_ID: "com.selgy.youtubetopremiere"
+          echo "Certificate Base64: $CERTIFICATE_BASE64"
+          echo "Certificate Password: $CERTIFICATE_PASSWORD"
+          echo "Keychain Password: $KEYCHAIN_PASSWORD"
+          echo "Install Location: $INSTALL_LOCATION"
+          echo "Package ID: $PACKAGE_ID"
+          echo "Current Working Directory: $(pwd)"
 
       run: |
             echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
@@ -125,6 +126,15 @@ jobs:
             # Copy files to the package root directory
             cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
     
+            echo "Listing contents of ./pkgroot directory:"
+            ls -la ./pkgroot
+
+            echo "Listing contents of ./dist directory:"
+            ls -la ./dist
+            
+            echo "Running pkgbuild with the following command:"
+            echo "pkgbuild --root \"./pkgroot\" --identifier \"$PACKAGE_ID\" --install-location \"$INSTALL_LOCATION\" --version \"1.1\" --sign \"Developer ID Installer: mickael ducatez (9H8DB46V75)\" --keychain $(pwd)/build.keychain --ownership \"recommended\" -v \"YoutubetoPremiere.pkg\""
+            
             pkgbuild --root "./pkgroot" \
             --identifier "$PACKAGE_ID" \
             --install-location "$INSTALL_LOCATION" \
