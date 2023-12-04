@@ -119,7 +119,7 @@ jobs:
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
             # Import the certificate
-            echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
+            echo "$CERTIFICATE_BASE64" | base64 --decode > Certificates.p12
             security import certificate.p12 -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
 
             # Set key partition list
