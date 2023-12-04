@@ -143,7 +143,8 @@ jobs:
     - name: Notarize the Application
       env:
                 APPLE_ID: ${{ secrets.APPLE_ID }}
-                APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }} # if using two-factor authentication
+                APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }} 
+                APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }} 
       run: |
                 # Create a ZIP file of the .app for notarization
                 ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
