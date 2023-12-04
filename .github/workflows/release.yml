@@ -122,16 +122,14 @@ jobs:
             security import certificate.p12 -k "$KEYCHAIN_PATH" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
             security find-identity -p codesigning -v "$KEYCHAIN_PATH"
+            security find-generic-password -ga "Mac Developer ID Installer: mickael ducatez" build.keychain
     
             mkdir -p ./pkgroot"$INSTALL_LOCATION"
             # Copy files to the package root directory
+            ls -la ./dist
             cp -R "./dist/YoutubetoPremiere.app" "./pkgroot$INSTALL_LOCATION"
             echo "Listing contents of ./pkgroot directory:"
-            ls -la ./pkgroot
-    
-            echo "Listing contents of ./dist directory:"
-            ls -la ./dist
-    
+            ls -la "./pkgroot$INSTALL_LOCATION"
             echo "Running pkgbuild with the following command:"
             echo "pkgbuild --root \"./pkgroot\" --identifier \"$PACKAGE_ID\" --install-location \"$INSTALL_LOCATION\" --version \"1.1\" --sign \"Developer ID Installer: mickael ducatez (9H8DB46V75)\" --keychain \"$KEYCHAIN_PATH\" --ownership \"recommended\" -v \"YoutubetoPremiere.pkg\""
             
