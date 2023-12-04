@@ -114,7 +114,8 @@ jobs:
 
       run: |
             echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
-            security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+            KEYCHAIN_PATH=$(pwd)/build.keychain
+            security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
             security default-keychain -s build.keychain
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
             security import certificate.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
@@ -131,7 +132,7 @@ jobs:
 
             echo "Listing contents of ./dist directory:"
             ls -la ./dist
-            
+
             echo "Running pkgbuild with the following command:"
             echo "pkgbuild --root \"./pkgroot\" --identifier \"$PACKAGE_ID\" --install-location \"$INSTALL_LOCATION\" --version \"1.1\" --sign \"Developer ID Installer: mickael ducatez (9H8DB46V75)\" --keychain $(pwd)/build.keychain --ownership \"recommended\" -v \"YoutubetoPremiere.pkg\""
             
