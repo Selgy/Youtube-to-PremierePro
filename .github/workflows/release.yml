@@ -104,15 +104,13 @@ jobs:
       run: security find-identity -p basic -v build.keychain
 
     - name: Import Certificate and Create Custom Keychain
-      env:
-          echo "Certificate Base64: $CERTIFICATE_BASE64"
-          echo "Certificate Password: $CERTIFICATE_PASSWORD"
-          echo "Keychain Password: $KEYCHAIN_PASSWORD"
-          echo "Install Location: $INSTALL_LOCATION"
-          echo "Package ID: $PACKAGE_ID"
-          echo "Current Working Directory: $(pwd)"
-
       run: |
+            echo "Certificate Base64: $CERTIFICATE_BASE64"
+            echo "Certificate Password: $CERTIFICATE_PASSWORD"
+            echo "Keychain Password: $KEYCHAIN_PASSWORD"
+            echo "Install Location: $INSTALL_LOCATION"
+            echo "Package ID: $PACKAGE_ID"
+            echo "Current Working Directory: $(pwd)"
             echo "$CERTIFICATE_BASE64" | base64 --decode > certificate.p12
             KEYCHAIN_PATH=$(pwd)/build.keychain
             security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
