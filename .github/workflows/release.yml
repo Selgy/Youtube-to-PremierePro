@@ -141,35 +141,38 @@ jobs:
         
             # Set key partition list
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-      
+  
+    - name: Install jq
+      run: brew install jq
+          
 
     - name: Store Notarization Credentials
       run: |
             xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
-    
+
     - name: Notarize the Application
       run: |
               # Create a ZIP file of the .app for notarization
               ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
-          
-              # Submit the app for notarization using notarytool
-              NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait --output-format xml)
+            
+              # Submit the app for notarization using notarytool with JSON output format
+              NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
               echo "Notarization Output: $NOTARIZATION_OUTPUT"
-              
-              # Extract Notarization ID
-              NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | xmllint --xpath "string(//dict/key[text()='RequestUUID']/following-sibling::string[1])" -)
+            
+              # Extract Notarization ID from JSON output
+              NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.RequestUUID')
               echo "Notarization ID: $NOTARIZATION_ID"
-          
+            
               # Check if Notarization ID was extracted
               if [ -z "$NOTARIZATION_ID" ]; then
                   echo "Failed to retrieve Notarization ID."
                   exit 1
               fi
-      
+            
               # Fetch Notarization Info
-              NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format xml)
+              NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format json)
               echo "Notarization Info: $NOTARIZATION_INFO"
-      
+            
               # Check if notarization was successful and staple the ticket
               if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
                   xcrun stapler staple "./dist/YoutubetoPremiere.app"
@@ -177,6 +180,10 @@ jobs:
                   echo "Notarization failed."
                   exit 1
               fi
+      shell: /bin/bash -e {0}
+      env:
+        pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
+          
       
     - name: Fetch Notarization Log
       if: env.NOTARIZATION_ID != ''
