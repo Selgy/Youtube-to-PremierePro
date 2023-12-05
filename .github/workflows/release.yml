@@ -129,12 +129,13 @@ jobs:
 
     - name: Sign the Application
       run: |
-          codesign --deep --force --verify --verbose --sign "Mac Developer ID installer: mickael ducatez" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
+          codesign --deep --force --verify --verbose --sign "Mac Developer ID Installer: mickael ducatez" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
 
+          
     - name: List Executable
       run: |
           ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
-          
+
     - name: Install jq
       run: brew install jq
           
