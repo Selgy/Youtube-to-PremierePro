@@ -103,15 +103,17 @@ jobs:
           ls -la $DEST_PATH
 
     
-    - name: List keychains
+    - name: List Certificates in Keychain
       run: |
-        echo "Listing user keychains:"
-        ls ~/Library/Keychains
+            security find-identity -p codesigning -v ~/Library/Keychains/build.keychain-db
 
-        echo "Listing system keychains:"
-        ls /Library/Keychains
-
-
+    - name: Unlock Keychain
+      env:
+              MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+              security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD ~/Library/Keychains/build.keychain-db
+          
+            
     - name: list exec
       run: |
             ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
