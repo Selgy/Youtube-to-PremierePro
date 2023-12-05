@@ -117,6 +117,18 @@ jobs:
             security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
             security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+
+
+    - name: Verify Keychain Contents
+      run: |
+          security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db
+
+          
+    - name: Check Keychain Settings
+      run: |
+        security show-keychain-info /Users/runner/Library/Keychains/build.keychain-db
+
+        
         
     - name: Unlock Keychain
       env:
