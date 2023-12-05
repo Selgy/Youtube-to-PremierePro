@@ -152,34 +152,41 @@ jobs:
 
     - name: Notarize the Application
       run: |
-              # Create a ZIP file of the .app for notarization
-              ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
-            
-              # Submit the app for notarization using notarytool with JSON output format
-              NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
-              echo "Notarization Output: $NOTARIZATION_OUTPUT"
-            
-              # Extract Notarization ID from JSON output
-              NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.RequestUUID')
-              echo "Notarization ID: $NOTARIZATION_ID"
-            
-              # Check if Notarization ID was extracted
-              if [ -z "$NOTARIZATION_ID" ]; then
-                  echo "Failed to retrieve Notarization ID."
-                  exit 1
-              fi
-            
-              # Fetch Notarization Info
-              NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format json)
-              echo "Notarization Info: $NOTARIZATION_INFO"
-            
-              # Check if notarization was successful and staple the ticket
-              if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
-                  xcrun stapler staple "./dist/YoutubetoPremiere.app"
-              else
-                  echo "Notarization failed."
-                  exit 1
-              fi
+        # Create a ZIP file of the .app for notarization
+        ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
+      
+        # Submit the app for notarization using notarytool with JSON output format
+        NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
+        echo "Notarization Output: $NOTARIZATION_OUTPUT"
+        
+        # Check if submission was successful
+        if [[ $NOTARIZATION_OUTPUT == *"\"status\":\"Invalid\""* ]]; then
+            echo "Notarization submission failed."
+            echo "Output: $NOTARIZATION_OUTPUT"
+            exit 1
+        fi
+
+        # Extract Notarization ID from JSON output
+        NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.RequestUUID')
+        echo "Notarization ID: $NOTARIZATION_ID"
+
+        # Check if Notarization ID was extracted
+        if [ -z "$NOTARIZATION_ID" ] || [ "$NOTARIZATION_ID" == "null" ]; then
+            echo "Failed to retrieve Notarization ID."
+            exit 1
+        fi
+
+        # Fetch Notarization Info
+        NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format json)
+        echo "Notarization Info: $NOTARIZATION_INFO"
+      
+        # Check if notarization was successful and staple the ticket
+        if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
+            xcrun stapler staple "./dist/YoutubetoPremiere.app"
+        else
+            echo "Notarization failed."
+            exit 1
+        fi
       shell: /bin/bash -e {0}
       env:
         pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
