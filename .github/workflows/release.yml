@@ -144,41 +144,37 @@ jobs:
       
 
     - name: Store Notarization Credentials
-      env:
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APP_SPECIFIC_PASSWORD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
-           xcrun notarytool store-credentials "notarytool-profile" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APP_SPECIFIC_PASSWORD"
-      
+            xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+    
     - name: Notarize the Application
       run: |
-             # Create a ZIP file of the .app for notarization
-             ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
-         
-             # Submit the app for notarization using notarytool
-             NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --wait)
-             echo "$NOTARIZATION_OUTPUT"
-             
-             # Extract Notarization ID
-             NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | grep -o 'RequestUUID = "[^"]*"' | cut -d '"' -f 2)
-             echo "Notarization ID: $NOTARIZATION_ID"
-         
-             # Check the status of the notarization
-             if [ -n "$NOTARIZATION_ID" ]; then
-                 NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID)
-                 echo "$NOTARIZATION_INFO"
-                 # Check if notarization was successful and staple the ticket
-                 if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
-                     xcrun stapler staple "./dist/YoutubetoPremiere.app"
-                 else
-                     echo "Notarization failed."
-                     exit 1
-                 fi
-             else
-                 echo "Failed to retrieve Notarization ID."
-                 exit 1
-             fi
+        # Create a ZIP file of the .app for notarization
+        ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
+    
+        # Submit the app for notarization using notarytool
+        NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait)
+        echo "$NOTARIZATION_OUTPUT"
+        
+        # Extract Notarization ID
+        NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | grep -o 'RequestUUID = "[^"]*"' | cut -d '"' -f 2)
+        echo "Notarization ID: $NOTARIZATION_ID"
+    
+        # Check the status of the notarization
+        if [ -n "$NOTARIZATION_ID" ]; then
+            NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile")
+            echo "$NOTARIZATION_INFO"
+            # Check if notarization was successful and staple the ticket
+            if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
+                xcrun stapler staple "./dist/YoutubetoPremiere.app"
+            else
+                echo "Notarization failed."
+                exit 1
+            fi
+        else
+            echo "Failed to retrieve Notarization ID."
+            exit 1
+        fi
 
 
     - name: Create PKG
