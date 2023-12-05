@@ -118,11 +118,9 @@ jobs:
       run: |
             ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
 
-    - name: Sign macOS Executables
+    - name: Sign the Application
       run: |
-        security find-identity -p codesigning -v
-        codesign --deep --force --verify --verbose --sign "$MACOS_CERTIFICATE_NAME" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
-
+              codesign --deep --force --options runtime --entitlements ./entitlements.plist --sign "Developer ID Application: Your Developer ID" dist/YoutubetoPremiere.app
 
     - name: Codesign App Bundle
       env:
