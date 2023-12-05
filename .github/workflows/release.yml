@@ -104,6 +104,7 @@ jobs:
 
     
 
+
     - name: Create and Configure Keychain
       env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
@@ -116,25 +117,27 @@ jobs:
             security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
             security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-
+        
     - name: Unlock Keychain
       env:
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
           security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD ~/Library/Keychains/build.keychain-db
-
+    
     - name: List Certificates in Keychain
       run: |
           security find-identity -p codesigning -v /Users/runner/Library/Keychains/build.keychain-db
-
+    
     # Use the correct certificate name from the output of the above command
     - name: Sign the Application
       run: |
           codesign --deep --force --verify --verbose --sign "Exact Certificate Name" --keychain /Users/runner/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
-
+    
     - name: List Executable
       run: |
           ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
+        
+        
 
     - name: Install jq
       run: brew install jq
