@@ -147,8 +147,8 @@ jobs:
       run: |
             xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
     
-            - name: Notarize the Application
-            run: |
+    - name: Notarize the Application
+      run: |
               # Create a ZIP file of the .app for notarization
               ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
           
