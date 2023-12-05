@@ -119,11 +119,15 @@ jobs:
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
 
 
+    - name: Unlock Keychain Again
+      run: |
+         security unlock-keychain -p ${{ secrets.MACOS_CI_KEYCHAIN_PWD }} /Users/runner/Library/Keychains/build.keychain-db
+
     - name: Verify Keychain Contents
       run: |
           security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db
 
-          
+
     - name: Check Keychain Settings
       run: |
         security show-keychain-info /Users/runner/Library/Keychains/build.keychain-db
