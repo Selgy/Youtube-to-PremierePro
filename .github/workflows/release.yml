@@ -125,12 +125,12 @@ jobs:
 
     - name: List Certificates in Keychain
       run: |
-          security find-identity -p codesigning -v ~/Library/Keychains/build.keychain-db
+          security find-identity -p codesigning -v /Users/runner/Library/Keychains/build.keychain-db
 
     # Use the correct certificate name from the output of the above command
     - name: Sign the Application
       run: |
-          codesign --deep --force --verify --verbose --sign "Exact Certificate Name" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
+          codesign --deep --force --verify --verbose --sign "Exact Certificate Name" --keychain /Users/runner/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
 
     - name: List Executable
       run: |
