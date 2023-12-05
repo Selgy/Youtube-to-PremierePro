@@ -208,11 +208,16 @@ def import_video_to_premiere(video_path):
 def sanitize_title(title):
     # Replace known problematic characters
     sanitized_title = (title.replace(":", " ")
-                             .replace("：", " ")  
+                             .replace("|", " ")  # Added replacement for '|'
                              .replace("｜", " ")
                              .replace("*", " ")
                              .replace("?", " ")
-                             .replace("/", " "))
+                             .replace("/", " ")
+                             .replace("\\", " ")  # Added replacement for '\'
+                             .replace("<", " ")
+                             .replace(">", " ")
+                             .replace("\"", " ")
+                             .replace("'", " "))
     return sanitized_title
 
 def progress_hook(d):
