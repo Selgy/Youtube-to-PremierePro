@@ -118,8 +118,8 @@ jobs:
 
     - name: Sign macOS Executables
       run: |
-        chmod +x ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec
-        codesign --deep --force --verify --verbose --sign "$MACOS_CERTIFICATE_NAME" "dist/YoutubetoPremiere.app"
+        security find-identity -p codesigning -v
+        codesign --deep --force --verify --verbose --sign "$MACOS_CERTIFICATE_NAME" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
 
 
     - name: Codesign App Bundle
