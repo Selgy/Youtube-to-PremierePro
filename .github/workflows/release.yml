@@ -103,46 +103,38 @@ jobs:
           ls -la $DEST_PATH
 
     
-    - name: List Certificates in Keychain
-      run: |
-            security find-identity -p codesigning -v ~/Library/Keychains/build.keychain-db
 
-    - name: Unlock Keychain
-      env:
-              MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-              security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD ~/Library/Keychains/build.keychain-db
-          
-            
-    - name: list exec
-      run: |
-            ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
-
-    - name: Sign the Application
-      run: |
-              codesign --deep --force --options runtime --entitlements ./entitlements.plist --sign "Developer ID Application: Your Developer ID" dist/YoutubetoPremiere.app
-
-    - name: Codesign App Bundle
+    - name: Create and Configure Keychain
       env:
           MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
           MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
           MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
-            # Decode the Base64 certificate
             echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
-        
-            # Create a custom keychain
             security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
             security default-keychain -s build.keychain
             security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-        
-            # Import the certificate into the keychain
             security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-        
-            # Set key partition list
             security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-  
+
+    - name: Unlock Keychain
+      env:
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+          security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD ~/Library/Keychains/build.keychain-db
+
+    - name: List Certificates in Keychain
+      run: |
+          security find-identity -p codesigning -v ~/Library/Keychains/build.keychain-db
+
+    - name: Sign the Application
+      run: |
+          codesign --deep --force --verify --verbose --sign "Mac Developer ID installer: mickael ducatez" --keychain ~/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
+
+    - name: List Executable
+      run: |
+          ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
+          
     - name: Install jq
       run: brew install jq
           
