@@ -148,14 +148,17 @@ jobs:
     - name: Sign the Application
       run: |
           # Extract the name of the certificate
-          CERTIFICATE_NAME="$(security find-identity -v -p codesigning $KEYCHAIN_PATH | grep 'developer ID Application: mickael ducatez (9H8DB46V75)' | awk '{print $2}')"
+          security find-identity -v -p codesigning $KEYCHAIN_PATH
 
+          # Extract the name of the certificate
+          CERTIFICATE_NAME="$(security find-identity -v -p codesigning $KEYCHAIN_PATH | grep 'Developer ID Application: mickael ducatez' | awk -F '"' '{print $2}')"
+          
           # Check if certificate name was extracted
           if [ -z "$CERTIFICATE_NAME" ]; then
             echo "Certificate name not found"
             exit 1
           fi
-
+          
           # Use the certificate name to sign the application
           codesign --deep --force --verify --verbose --sign "$CERTIFICATE_NAME" --keychain $KEYCHAIN_PATH "dist/YoutubetoPremiere.app"
 
