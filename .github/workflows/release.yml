@@ -150,7 +150,7 @@ jobs:
         security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db
   
         # Extract the name of the certificate (modify this line as needed)
-        CERTIFICATE_NAME="$(security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db | grep 'certificate' | awk '{print $3}')"
+        CERTIFICATE_NAME="$(security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db | grep 'certificate.p12' | awk '{print $3}')"
   
         # Use the certificate name to sign the application
         codesign --deep --force --verify --verbose --sign "$CERTIFICATE_NAME" --keychain /Users/runner/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
