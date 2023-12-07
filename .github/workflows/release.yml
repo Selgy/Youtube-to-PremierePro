@@ -163,17 +163,9 @@ jobs:
           
               # Use the certificate name to sign the application
               codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
-
-    - name: List Executable
-      run: |
-          ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
-        
         
 
-    - name: Install jq
-      run: brew install jq
           
-
     - name: Store Notarization Credentials
       run: |
             xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
@@ -219,15 +211,13 @@ jobs:
       env:
         pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
           
-      
     - name: Fetch Notarization Log
       if: always() && env.NOTARIZATION_ID != ''
       run: |
-            xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+        xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
       shell: /bin/bash -e {0}
       env:
           pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
-
 
     - name: Create PKG
       run: |
