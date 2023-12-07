@@ -14,7 +14,7 @@ jobs:
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -107,43 +107,48 @@ jobs:
 
     - name: Create and Configure Keychain
       env:
-          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
-          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
-            echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
-            security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-            security default-keychain -s build.keychain
-            security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" build.keychain
-            security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
-            security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$MACOS_CI_KEYCHAIN_PWD" build.keychain
+            # create variables
+            CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+            PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+            KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
 
+            # import certificate and provisioning profile from secrets
+            echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+            echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
 
-    - name: Unlock Keychain Again
-      run: |
-         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} /Users/runner/Library/Keychains/build.keychain-db
+            # create temporary keychain
+            security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+            security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+            security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
-    - name: Verify Keychain Contents
-      run: |
-          security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db
+            # import certificate to keychain
+            security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+            security list-keychain -d user -s $KEYCHAIN_PATH
 
-
-    - name: Check Keychain Settings
-      run: |
-        security show-keychain-info /Users/runner/Library/Keychains/build.keychain-db
+            # apply provisioning profile
+            mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+            cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
         
 
-    
-    - name: List Certificates in Keychain
-      run: |
-          security find-identity -p codesigning -v /Users/runner/Library/Keychains/build.keychain-db
-    
-    # Use the correct certificate name from the output of the above command
     - name: Sign the Application
       run: |
-          codesign --deep --force --verify --verbose --sign "Exact Certificate Name" --keychain /Users/runner/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
-    
+        # List identities and find the correct one
+        security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db
+  
+        # Extract the name of the certificate (modify this line as needed)
+        CERTIFICATE_NAME="$(security find-identity -v -p codesigning /Users/runner/Library/Keychains/build.keychain-db | grep 'certificate' | awk '{print $3}')"
+  
+        # Use the certificate name to sign the application
+        codesign --deep --force --verify --verbose --sign "$CERTIFICATE_NAME" --keychain /Users/runner/Library/Keychains/build.keychain-db "dist/YoutubetoPremiere.app"
+
+
+
     - name: List Executable
       run: |
           ls -la ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/
@@ -234,7 +239,11 @@ jobs:
             tag_name: V1.1
             files: |
               YoutubetoPremiere.pkg
-    
+    - name: Clean up keychain and provisioning profile
+      if: ${{ always() }}
+      run: |
+        security delete-keychain $RUNNER_TEMP/app-signing.keychain-db
+        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
 
   win-build:
