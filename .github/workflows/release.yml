@@ -162,8 +162,7 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --force --verify --verbose --sign "03EFE51D815A8A43CB4D833E4752FB17BBABCA00" --keychain $KEYCHAIN_PATH "dist/YoutubetoPremiere.app"
-          
+              codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
 
     - name: List Executable
       run: |
