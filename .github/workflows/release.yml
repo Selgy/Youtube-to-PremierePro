@@ -121,7 +121,7 @@ jobs:
 
     - name: Unlock Keychain Again
       run: |
-         security unlock-keychain -p ${{ secrets.MACOS_CI_KEYCHAIN_PWD }} /Users/runner/Library/Keychains/build.keychain-db
+         security unlock-keychain -p ${{ secrets.KEYCHAIN_PASSWORD }} /Users/runner/Library/Keychains/build.keychain-db
 
     - name: Verify Keychain Contents
       run: |
@@ -133,12 +133,7 @@ jobs:
         security show-keychain-info /Users/runner/Library/Keychains/build.keychain-db
 
         
-        
-    - name: Unlock Keychain
-      env:
-          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-          security unlock-keychain -p $MACOS_CI_KEYCHAIN_PWD ~/Library/Keychains/build.keychain-db
+
     
     - name: List Certificates in Keychain
       run: |
