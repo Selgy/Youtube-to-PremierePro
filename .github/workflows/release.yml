@@ -127,18 +127,18 @@ jobs:
             security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
 
             # import certificate to keychain
-            security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+            security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH || echo "Certificate import failed"
             security list-keychain -d user -s $KEYCHAIN_PATH
 
             # Apply provisioning profile
             mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
             cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
 
-            # List all certificates to verify import (add this line)
+            # List all certificates to verify import
             echo "Listing all certificates in keychain:"
             security find-certificate -a /Users/runner/Library/Keychains/build.keychain-db
 
-            # List all identities (not just valid ones) to check the certificate (add this line)
+            # List all identities (not just valid ones) to check the certificate
             echo "Listing all identities in keychain:"
             security find-identity -p codesigning /Users/runner/Library/Keychains/build.keychain-db
             echo "find-certificate:"
