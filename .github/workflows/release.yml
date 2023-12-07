@@ -147,18 +147,23 @@ jobs:
         
     - name: Sign the Application
       run: |
-            # Extract and print the name of the certificate
-            CERTIFICATE_NAME="Developer ID Application: mickael ducatez (9H8DB46V75)"
-            echo "Certificate Name: $CERTIFICATE_NAME"
-        
-            # List contents of dist directory for debugging
-            echo "Listing contents of dist directory:"
-            ls -la dist
-        
-            # Use the certificate name to sign the application
-            codesign --deep --force --verify --verbose --sign "$CERTIFICATE_NAME" --keychain $KEYCHAIN_PATH "dist/YoutubetoPremiere.app"
+              # Set shell to stop on error
+              set -e
           
-
+              # Extract and print the name of the certificate
+              CERTIFICATE_NAME="Developer ID Application: mickael ducatez (9H8DB46V75)"
+              echo "Certificate Name: $CERTIFICATE_NAME"
+          
+              # Print the keychain path
+              echo "Keychain Path: $KEYCHAIN_PATH"
+          
+              # List contents of dist directory for debugging
+              echo "Listing contents of dist directory:"
+              ls -la dist
+          
+              # Use the certificate name to sign the application
+              codesign --deep --force --verify --verbose --sign "$CERTIFICATE_NAME" --keychain $KEYCHAIN_PATH "dist/YoutubetoPremiere.app"
+          
 
     - name: List Executable
       run: |
