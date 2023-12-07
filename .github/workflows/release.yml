@@ -141,7 +141,8 @@ jobs:
             # List all identities (not just valid ones) to check the certificate (add this line)
             echo "Listing all identities in keychain:"
             security find-identity -p codesigning /Users/runner/Library/Keychains/build.keychain-db
-
+            echo "find-certificate:"
+            security find-certificate -a /Users/runner/Library/Keychains/build.keychain-db
         
     - name: Sign the Application
       run: |
