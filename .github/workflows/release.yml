@@ -73,6 +73,8 @@ jobs:
     - name: Prepare PymiereLink and Installation Script
       run: |
 
+        mv "./com.youtubetopremiere.YoutubetoPremiere.plist" "./dist/YoutubetoPremiere.app/Contents/Info.plist"
+
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         cp "install_pymierelink.sh" "./dist/YoutubetoPremiere.app/Contents/Resources/"
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
@@ -164,6 +166,12 @@ jobs:
               # Use the certificate name to sign the application
               codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
         
+    - name: list app content
+      run: |
+          # List contents of the entire .app bundle to verify
+          echo "Listing contents of the .app bundle:"
+          find "./dist/YoutubetoPremiere.app"
+
 
     - name: Store Notarization Credentials
       run: |
@@ -197,7 +205,7 @@ jobs:
         pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
 
 
-        
+
     - name: Fetch Notarization Log
       if: env.NOTARIZATION_ID != 'null' && env.NOTARIZATION_ID != ''
       run: |
