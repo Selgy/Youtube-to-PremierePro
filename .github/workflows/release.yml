@@ -170,6 +170,9 @@ jobs:
               # Sign everything in the FFmpeg bin folder
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+
+
+              
     - name: list app content
       run: |
           # List contents of the entire .app bundle to verify
@@ -210,10 +213,9 @@ jobs:
               NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format json)
               echo "Notarization Info: $NOTARIZATION_INFO"
         
-              # Check if notarization was successful and staple the ticket
-              if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
-                  echo "Stapling notarization ticket to the app"
-                  xcrun stapler staple "./dist/YoutubetoPremiere.app"
+              if [[ $NOTARIZATION_INFO == *"\"status\":\"Accepted\""* ]]; then
+              echo "Stapling notarization ticket to the app"
+              xcrun stapler staple "./dist/YoutubetoPremiere.app"
               else
                   echo "Notarization failed."
                   exit 1
