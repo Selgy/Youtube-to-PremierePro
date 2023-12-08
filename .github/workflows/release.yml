@@ -197,16 +197,13 @@ jobs:
 
 
     - name: Fetch Notarization Log
-      if: env.NOTARIZATION_ID != 'null' && env.NOTARIZATION_ID != ''
+      if: always()
       run: |
-        xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
-      shell: /bin/bash -e {0}
-      env:
-        pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
-
-
-
-
+        if [ "$NOTARIZATION_ID" != "null" ]; then
+          xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+        else
+          echo "No Notarization ID available to fetch logs."
+        fi
 
 
     - name: Create PKG
