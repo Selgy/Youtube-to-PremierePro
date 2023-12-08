@@ -317,8 +317,8 @@ jobs:
     - name: Clean up keychain and provisioning profile
       if: ${{ always() }}
       run: |
-        security delete-keychain $KEYCHAIN_PATH
-        rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+                security delete-keychain $KEYCHAIN_PATH
+                rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
 
 
   win-build:
