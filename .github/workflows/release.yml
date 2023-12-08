@@ -311,14 +311,10 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere.pkg
+                signed_YoutubetoPremiere.pkg
 
 
-    - name: Clean up keychain and provisioning profile
-      if: ${{ always() }}
-      run: |
-                security delete-keychain $KEYCHAIN_PATH
-                rm ~/Library/MobileDevice/Provisioning\ Profiles/build_pp.mobileprovision
+
 
 
   win-build:
