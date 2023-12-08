@@ -224,35 +224,54 @@ jobs:
                   exit 1
               fi
       shell: /bin/bash -e {0}
-        
-    - name: Fetch Notarization Log
-      if: always()
+
+
+    - name: Create and Sign PKG
+      env:
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.INSTALLER_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.INSTALLER_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
       run: |
-        if [ "$NOTARIZATION_ID" != "null" ]; then
-          xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
-        else
-          echo "No Notarization ID available to fetch logs."
-        fi
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/installer_keychain.keychain-db
 
+          # Decode and import installer certificate from secrets
+          echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
 
-        - name: Create PKG
-        run: |
-              # Specify the certificate name for signing
-              CERTIFICATE_NAME="Developer ID Installer: mickael ducatez (9H8DB46V75)"
-  
-              # Specify the keychain path
-              KEYCHAIN_PATH=$RUNNER_TEMP/SelgykeyAPP.keychain-db
-  
-              # Build the package and sign it
-              pkgbuild --root ./dist/YoutubetoPremiere.app \
-                       --identifier ${{ secrets.PACKAGE_ID }} \
-                       --version "1.0" \
-                       --install-location "/Applications" \
-                       --sign "$CERTIFICATE_NAME" \
-                       --keychain "$KEYCHAIN_PATH" \
-                       "YoutubetoPremiere.pkg"
+          # Create temporary keychain for installer certificate
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
 
-                       
+          # Set the keychain for codesigning
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Define variables for packaging
+          PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
+          PACKAGE_VERSION="1.0"
+          APP_PATH="./dist/YoutubetoPremiere.app"
+          OUTPUT_PKG="YoutubetoPremiere.pkg"
+
+          # Create the package
+          pkgbuild --root "$APP_PATH" \
+                  --identifier "$PACKAGE_IDENTIFIER" \
+                  --version "$PACKAGE_VERSION" \
+                  --install-location "/Applications" \
+                  "$OUTPUT_PKG"
+
+          # Sign the package with the installer certificate
+          PRODUCTSIGN_IDENTITY=$(security find-identity -v -p basic "$KEYCHAIN_PATH" | grep 'Developer ID Installer' | head -n 1 | awk '{print $2}')
+          productsign --sign "$PRODUCTSIGN_IDENTITY" "$OUTPUT_PKG" "signed_$OUTPUT_PKG"
+
+          # Verify the signed package
+          pkgutil --check-signature "signed_$OUTPUT_PKG"
+
+          # Remove temporary keychain
+          security delete-keychain $KEYCHAIN_PATH
+
+                      
     - name: Get the release
       id: get_release
       uses: actions/github-script@v5
