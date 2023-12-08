@@ -235,10 +235,24 @@ jobs:
         fi
 
 
-    - name: Create PKG
-      run: |
-            pkgbuild --root ./dist/YoutubetoPremiere.app --identifier ${{ secrets.PACKAGE_ID }} --version "1.0" --install-location "/Applications" "YoutubetoPremiere.pkg"
-    
+        - name: Create PKG
+        run: |
+              # Specify the certificate name for signing
+              CERTIFICATE_NAME="Developer ID Installer: mickael ducatez (9H8DB46V75)"
+  
+              # Specify the keychain path
+              KEYCHAIN_PATH=$RUNNER_TEMP/SelgykeyAPP.keychain-db
+  
+              # Build the package and sign it
+              pkgbuild --root ./dist/YoutubetoPremiere.app \
+                       --identifier ${{ secrets.PACKAGE_ID }} \
+                       --version "1.0" \
+                       --install-location "/Applications" \
+                       --sign "$CERTIFICATE_NAME" \
+                       --keychain "$KEYCHAIN_PATH" \
+                       "YoutubetoPremiere.pkg"
+
+                       
     - name: Get the release
       id: get_release
       uses: actions/github-script@v5
