@@ -185,39 +185,27 @@ jobs:
         # Store Notarization ID in environment variable for later use
         echo "NOTARIZATION_ID=$NOTARIZATION_ID" >> $GITHUB_ENV
 
-        # Check if submission was successful
-        if [[ $NOTARIZATION_OUTPUT == *"\"status\":\"Invalid\""* ]]; then
-            echo "Notarization submission failed."
-            echo "Output: $NOTARIZATION_OUTPUT"
-            exit 1
-        fi
-
-        # Fetch Notarization Info
-        NOTARIZATION_INFO=$(xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile" --output-format json)
-        echo "Notarization Info: $NOTARIZATION_INFO"
-      
         # Check if notarization was successful and staple the ticket
         if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
-            xcrun stapler staple "./dist/YoutubetoPremiere.app"
+          xcrun stapler staple "./dist/YoutubetoPremiere.app"
         else
-            echo "Notarization failed."
-            exit 1
+          echo "Notarization failed."
+          exit 1
         fi
       shell: /bin/bash -e {0}
       env:
         pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
-          
+
+
+        
     - name: Fetch Notarization Log
-      if: always()
+      if: env.NOTARIZATION_ID != 'null' && env.NOTARIZATION_ID != ''
       run: |
-        if [ -n "$NOTARIZATION_ID" ]; then
-          xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
-        else
-          echo "No Notarization ID available to fetch logs."
-        fi
+        xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
       shell: /bin/bash -e {0}
       env:
-          pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
+        pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
+
 
 
 
