@@ -271,6 +271,28 @@ jobs:
           # Remove temporary keychain
           security delete-keychain $KEYCHAIN_PATH
 
+    - name: Notarize PKG Installer
+      env:
+                PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+                PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+      run: |
+                  # Store the notarization credentials
+                  echo "Create keychain profile for notarization"
+                  xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+                  
+                  # Create a ZIP file of the .pkg for notarization
+                  echo "Creating temp notarization archive for PKG"
+                  ditto -c -k --keepParent "signed_YoutubetoPremiere.pkg" "notarization_pkg.zip"
+                  
+                  # Send the notarization request for the PKG and capture the NOTARIZATION_ID
+                  echo "Notarize PKG"
+                  NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization_pkg.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
+                  NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
+                  echo "Notarization ID for PKG: $NOTARIZATION_ID"
+                 
+    
+
                       
     - name: Get the release
       id: get_release
