@@ -164,8 +164,11 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime "dist/YoutubetoPremiere.app"          
-        
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
+              echo "Signing FFmpeg binaries"
+              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+
+              
     - name: list app content
       run: |
           # List contents of the entire .app bundle to verify
