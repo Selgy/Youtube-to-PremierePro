@@ -10,6 +10,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
+    - name: Sync clock
+      run: sudo sntp -sS time.windows.com
+
     - name: Select Xcode Version
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
