@@ -164,7 +164,7 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
+              codesign --deep --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime "dist/YoutubetoPremiere.app"          
         
     - name: list app content
       run: |
