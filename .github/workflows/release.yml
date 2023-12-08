@@ -169,7 +169,7 @@ jobs:
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               # Sign everything in the FFmpeg bin folder
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-
+              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
     - name: list app content
       run: |
           # List contents of the entire .app bundle to verify
