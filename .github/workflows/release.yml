@@ -173,37 +173,27 @@ jobs:
           find "./dist/YoutubetoPremiere.app"
 
 
-    - name: Store Notarization Credentials
-      run: |
-            xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
-
-    - name: Notarize the Application
-      run: |
-        # Create a ZIP file of the .app for notarization
-        ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "YoutubetoPremiere.zip"
-      
-        # Submit the app for notarization using notarytool with JSON output format
-        NOTARIZATION_OUTPUT=$(xcrun notarytool submit "YoutubetoPremiere.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
-        echo "Notarization Output: $NOTARIZATION_OUTPUT"
-        
-        # Extract Notarization ID from JSON output
-        NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.RequestUUID')
-        echo "Notarization ID: $NOTARIZATION_ID"
-
-        # Store Notarization ID in environment variable for later use
-        echo "NOTARIZATION_ID=$NOTARIZATION_ID" >> $GITHUB_ENV
-
-        # Check if notarization was successful and staple the ticket
-        if [[ $NOTARIZATION_INFO == *"Status: Accepted"* ]]; then
-          xcrun stapler staple "./dist/YoutubetoPremiere.app"
-        else
-          echo "Notarization failed."
-          exit 1
-        fi
-      shell: /bin/bash -e {0}
+    - name: "Notarize app bundle"
       env:
-        pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64
-
+        PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+        PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+      run: |
+          # Store the notarization credentials
+          echo "Create keychain profile"
+          xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+      
+          # Create a ZIP file of the .app for notarization
+          echo "Creating temp notarization archive"
+          ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "notarization.zip"
+      
+          # Send the notarization request and wait for the result
+          echo "Notarize app"
+          xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait
+      
+          # Attach the staple to the app
+          echo "Attach staple"
+          xcrun stapler staple "./dist/YoutubetoPremiere.app"
 
 
     - name: Fetch Notarization Log
