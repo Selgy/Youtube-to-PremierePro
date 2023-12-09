@@ -36,29 +36,41 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+
+    - name: Cache FFmpeg
+      uses: actions/cache@v2
+      with:
+        path: /usr/local/Cellar/ffmpeg
+        key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/brew-list.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-ffmpeg-
+
     - name: Check and Copy FFmpeg
       run: |
-          # Install FFmpeg if not present
-          if ! brew list --versions ffmpeg > /dev/null; then
-            echo "Installing FFmpeg..."
-            brew install ffmpeg
-          else
-            echo "FFmpeg is already installed."
-          fi
-
-          # Define the destination path for FFmpeg
-          EXEC_PATH="./ffmpeg"
-
-          # Create the directory at the root and copy the entire FFmpeg installation
-          mkdir -p $EXEC_PATH
-          cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
+              # Save the list of installed brew packages
+              brew list > brew-list.txt
+          
+              # Check if FFmpeg is installed
+              if brew list --versions ffmpeg > /dev/null; then
+                echo "FFmpeg is already installed."
+              else
+                echo "Installing FFmpeg..."
+                brew install ffmpeg
+              fi
+          
+              # Define the destination path for FFmpeg
+              EXEC_PATH="./ffmpeg"
+          
+              # Create the directory at the root and copy the entire FFmpeg installation
+              mkdir -p $EXEC_PATH
+              cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
 
     - name: Install PyInstaller
       run: pip install --upgrade pyinstaller
 
     - name: Build Application with PyInstaller
       run: |
-        pyinstaller --clean --onefile --debug=all \
+        pyinstaller --clean --debug=all \
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
         --hidden-import=engineio.async_drivers.gevent \
