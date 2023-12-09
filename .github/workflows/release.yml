@@ -192,8 +192,7 @@ jobs:
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec  codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/MacOS" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app/Contents" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+  
 
 
 

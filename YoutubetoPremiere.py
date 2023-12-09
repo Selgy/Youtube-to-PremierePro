@@ -10,7 +10,6 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 import json
 import threading
-import pystray
 from PIL import Image, ImageDraw 
 import re
 import psutil
