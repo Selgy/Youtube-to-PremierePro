@@ -109,7 +109,7 @@ jobs:
       run: |
           # Define the FFmpeg installation path and the destination path
           FFMPEG_INSTALL_PATH=$(brew --prefix ffmpeg)
-          DEST_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg"
+          DEST_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
 
           # Create the destination directory and copy the entire FFmpeg installation
           mkdir -p $DEST_PATH
@@ -179,11 +179,15 @@ jobs:
               echo "Signing FFmpeg binaries"
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               # Sign everything in the FFmpeg bin folder
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/MacOS" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app/Contents/Frameworks" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app/Contents" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
 
-              
+
+
     - name: list app content
       run: |
           # List contents of the entire .app bundle to verify
