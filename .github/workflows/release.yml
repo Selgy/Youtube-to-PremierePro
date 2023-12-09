@@ -17,7 +17,7 @@ jobs:
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -63,21 +63,23 @@ jobs:
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
         --hidden-import=engineio.async_drivers.gevent \
+        --hidden-import=engineio.async_drivers.threading \
         --hidden-import=engineio.async_drivers \
         --hidden-import=gevent \
-        --hidden-import=engineio.async_drivers.threading \
-        --hidden-import=pygame.freetype \
-        --hidden-import=encodings.utf_16_le \
-        --hidden-import flask \
-        --hidden-import flask_cors \
-        --hidden-import flask_socketio \
-        --hidden-import yt_dlp \
-        --hidden-import pymiere \
-        --hidden-import pygame \
-        --hidden-import psutil \
-        --hidden-import tkinter \
-        --hidden-import PIL \
-        --hidden-import pystray \
+        --hidden-import=websocket \
+        --hidden-import=websockets \
+        --hidden-import=wsproto \
+        --hidden-import=pycryptodomex \
+        --hidden-import=pygame \
+        --hidden-import=pystray \
+        --hidden-import=PIL \
+        --hidden-import=flask \
+        --hidden-import=flask_cors \
+        --hidden-import=flask_socketio \
+        --hidden-import=yt_dlp \
+        --hidden-import=pymiere \
+        --hidden-import=psutil \
+        --hidden-import=tkinter \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
