@@ -251,6 +251,10 @@ jobs:
           APP_PATH="./dist/YoutubetoPremiere.app"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
 
+          mkdir scripts
+          cp path/to/your/postinstall.sh scripts/postinstall
+          chmod +x scripts/postinstall
+
           # Create the package
           pkgbuild --root "$APP_PATH" \
                   --identifier "$PACKAGE_IDENTIFIER" \
