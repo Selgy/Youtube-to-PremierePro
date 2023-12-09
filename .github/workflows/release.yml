@@ -237,10 +237,9 @@ jobs:
     - name: Prepare PKG content
       run: |
         mkdir pkgroot
-        mv ./dist/YoutubetoPremiere.app ./pkgroot/
-        cp -R ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink ./pkgroot/
+        cp -R "./dist/YoutubetoPremiere.app" "./pkgroot/"
+        cp -R "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink" "./pkgroot/PymiereLink"
     
-
     - name: Create and Sign PKG
       env:
           INSTALLER_CERTIFICATE_BASE64: ${{ secrets.INSTALLER_CERTIFICATE_BASE64 }}
