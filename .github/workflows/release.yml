@@ -59,7 +59,7 @@ jobs:
     - name: Build Application with PyInstaller
       run: |
       
-        pyinstaller --clean --onefile --windowed --debug all \
+        pyinstaller --clean --onefile --debug all \
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
         --hidden-import=engineio.async_drivers.gevent \
@@ -69,9 +69,7 @@ jobs:
         --hidden-import=websocket \
         --hidden-import=websockets \
         --hidden-import=wsproto \
-        --hidden-import=pycryptodomex \
         --hidden-import=pygame \
-        --hidden-import=pystray \
         --hidden-import=PIL \
         --hidden-import=flask \
         --hidden-import=flask_cors \
