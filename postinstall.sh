@@ -4,7 +4,7 @@
 CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
 
 # Define the source directory of PymiereLink (relative to the installation path)
-SOURCE_DIR="$1/Contents/Resources/PymiereLink"
+SOURCE_DIR="/Applications/Youtubetopremiere.app/Contents/Resources/PymiereLink"
 
 # Check if the source directory exists
 if [ -d "$SOURCE_DIR" ]; then
