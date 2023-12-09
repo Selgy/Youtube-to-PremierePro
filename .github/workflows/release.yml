@@ -254,10 +254,11 @@ jobs:
 
           # Define variables for packaging
           PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
-          PACKAGE_VERSION="1.0"
+          PACKAGE_VERSION="1.1"
           APP_PATH="./dist/YoutubetoPremiere.app"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
-
+          
+          ls -la dist/
 
           # Create the package
           pkgbuild --root "$APP_PATH" \
