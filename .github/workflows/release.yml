@@ -17,7 +17,7 @@ jobs:
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -58,7 +58,6 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-      
         pyinstaller --clean --onefile --debug=all \
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
@@ -81,6 +80,7 @@ jobs:
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
+        ls -la ./dist/
     
     - name: Prepare PymiereLink and Installation Script
       run: |
