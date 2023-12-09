@@ -9,8 +9,8 @@ SOURCE_DIR="/Applications/Youtubetopremiere.app/Contents/Resources/PymiereLink"
 # Create the target directory if it doesn't exist
 mkdir -p "$CEP_EXTENSIONS_DIR/PymiereLink"
 
-# Copy PymiereLink to the Adobe CEP extensions directory
-if cp "$SOURCE_DIR"/* "$CEP_EXTENSIONS_DIR/PymiereLink"; then
+# Copy PymiereLink to the Adobe CEP extensions directory (including subdirectories)
+if cp -R "$SOURCE_DIR"/* "$CEP_EXTENSIONS_DIR/PymiereLink"; then
     echo "PymiereLink installed successfully."
 else
     echo "Error: Failed to copy PymiereLink."

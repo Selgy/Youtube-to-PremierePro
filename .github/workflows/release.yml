@@ -90,6 +90,7 @@ jobs:
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
         mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
+        mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
 
     - name: Prepare Installation Scripts
       run: |
@@ -178,10 +179,9 @@ jobs:
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               # Sign everything in the FFmpeg bin folder
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec  codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/MacOS" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app/Contents/Frameworks" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents" -type f -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
 
 
