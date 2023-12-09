@@ -71,22 +71,23 @@ jobs:
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
-
-
+    
     - name: Prepare PymiereLink and Installation Script
       run: |
-
         mv "./com.youtubetopremiere.YoutubetoPremiere.plist" "./dist/YoutubetoPremiere.app/Contents/Info.plist"
-
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
+        # Ensure the executable is in the .app bundle
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
-          mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
+          echo "Executable found in .app bundle."
         else
-          echo "Executable not found. Check PyInstaller build process."
+          echo "Executable not found in .app bundle. Check PyInstaller build process."
           exit 1
         fi
         ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
         ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
+
+        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
+        mv "./dist/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
 
     - name: Prepare Installation Scripts
       run: |
@@ -228,7 +229,12 @@ jobs:
               fi
       shell: /bin/bash -e {0}
 
-
+    - name: Prepare PKG content
+      run: |
+        mkdir pkgroot
+        mv ./dist/YoutubetoPremiere.app ./pkgroot/
+        cp -R ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink ./pkgroot/
+    
 
     - name: Create and Sign PKG
       env:
@@ -252,21 +258,20 @@ jobs:
           # Set the keychain for codesigning
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-          # Define variables for packaging
           PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
           PACKAGE_VERSION="1.1"
-          APP_PATH="./dist/YoutubetoPremiere.app"
+          PKG_ROOT="./pkgroot"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
+          SCRIPTS_DIR="./scripts"
           
-          ls -la dist/
+          ls -la pkgroot/
 
-          # Create the package
-          pkgbuild --root "$APP_PATH" \
-                  --identifier "$PACKAGE_IDENTIFIER" \
-                  --version "$PACKAGE_VERSION" \
-                  --install-location "/Applications" \
-                  --scripts scripts \
-                  "$OUTPUT_PKG"
+          pkgbuild --root "$PKG_ROOT" \
+          --identifier "$PACKAGE_IDENTIFIER" \
+          --version "$PACKAGE_VERSION" \
+          --install-location "/Applications" \
+          --scripts "$SCRIPTS_DIR" \
+          "$OUTPUT_PKG"
 
           # Sign the package with the installer certificate
           PRODUCTSIGN_IDENTITY=$(security find-identity -v -p basic "$KEYCHAIN_PATH" | grep 'Developer ID Installer' | head -n 1 | awk '{print $2}')
@@ -311,6 +316,11 @@ jobs:
           const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
           return preRelease.upload_url
 
+
+    - name: Rename PKG file
+      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac.pkg
+        
+
     - name: Upload executables to asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v1
@@ -321,7 +331,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-                signed_YoutubetoPremiere.pkg
+              YoutubetoPremiere_Mac.pkg
 
 
 
