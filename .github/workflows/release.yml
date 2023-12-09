@@ -175,7 +175,7 @@ jobs:
               # Use the certificate name to sign the application
               codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
               echo "Signing FFmpeg binaries"
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
+              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               # Sign everything in the FFmpeg bin folder
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
               find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
