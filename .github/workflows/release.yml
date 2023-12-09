@@ -68,7 +68,16 @@ jobs:
         --hidden-import=engineio.async_drivers.threading \
         --hidden-import=pygame.freetype \
         --hidden-import=encodings.utf_16_le \
-        --hidden-import=libpython3.8.dylib \
+        --hidden-import flask \
+        --hidden-import flask_cors \
+        --hidden-import flask_socketio \
+        --hidden-import yt_dlp \
+        --hidden-import pymiere \
+        --hidden-import pygame \
+        --hidden-import psutil \
+        --hidden-import tkinter \
+        --hidden-import PIL \
+        --hidden-import pystray \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
