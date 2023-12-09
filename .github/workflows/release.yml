@@ -17,7 +17,7 @@ jobs:
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -84,7 +84,6 @@ jobs:
     
     - name: Prepare PymiereLink and Installation Script
       run: |
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/"
         mv "./Info.plist" "./dist/YoutubetoPremiere.app/Contents/"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         # Ensure the executable is in the .app bundle
