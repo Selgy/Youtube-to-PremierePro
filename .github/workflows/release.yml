@@ -67,7 +67,6 @@ jobs:
         --hidden-import=engineio.async_drivers.threading \
         --hidden-import=pygame.freetype \
         --hidden-import=encodings.utf_16_le \
-        --add-data "./icon.png:." \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
@@ -75,6 +74,7 @@ jobs:
     - name: Prepare PymiereLink and Installation Script
       run: |
         mv "./com.youtubetopremiere.YoutubetoPremiere.plist" "./dist/YoutubetoPremiere.app/Contents/Info.plist"
+        mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/notification_sound.mp3"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         # Ensure the executable is in the .app bundle
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
@@ -88,6 +88,11 @@ jobs:
 
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mv "./dist/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
+
+    - name: Read log pyinstaller 
+      run: |
+         cat build/YoutubetoPremiere/warn-YoutubetoPremiere.txt
+
 
     - name: Prepare Installation Scripts
       run: |

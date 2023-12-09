@@ -10,7 +10,7 @@
     <key>CFBundleIdentifier</key>
     <string>com.youtubetopremiere.YoutubetoPremiere</string>
     <key>CFBundleVersion</key>
-    <string>1.0.0</string> <!-- Change this for each version -->
+    <string>1.1.0</string> <!-- Change this for each version -->
     <key>CFBundleShortVersionString</key>
     <string>1.0</string> <!-- Human-readable version number -->
 
@@ -40,6 +40,5 @@
     <key>NSHighResolutionCapable</key>
     <true/>
 
-    <!-- Additional keys can be added as needed -->
 </dict>
 </plist>
