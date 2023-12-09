@@ -74,7 +74,6 @@ jobs:
     - name: Prepare PymiereLink and Installation Script
       run: |
         mv "./com.youtubetopremiere.YoutubetoPremiere.plist" "./dist/YoutubetoPremiere.app/Contents/Info.plist"
-        mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/notification_sound.mp3"
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
         # Ensure the executable is in the .app bundle
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
