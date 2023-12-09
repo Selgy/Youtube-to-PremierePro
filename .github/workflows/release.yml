@@ -79,7 +79,6 @@ jobs:
         mv "./com.youtubetopremiere.YoutubetoPremiere.plist" "./dist/YoutubetoPremiere.app/Contents/Info.plist"
 
         cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
-        cp "install_pymierelink.sh" "./dist/YoutubetoPremiere.app/Contents/Resources/"
         if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
           mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         else
@@ -252,7 +251,7 @@ jobs:
           OUTPUT_PKG="YoutubetoPremiere.pkg"
 
           mkdir scripts
-          cp path/to/your/postinstall.sh scripts/postinstall
+          cp ./postinstall.sh scripts/postinstall
           chmod +x scripts/postinstall
 
           # Create the package
@@ -260,6 +259,7 @@ jobs:
                   --identifier "$PACKAGE_IDENTIFIER" \
                   --version "$PACKAGE_VERSION" \
                   --install-location "/Applications" \
+                  --scripts scripts \
                   "$OUTPUT_PKG"
 
           # Sign the package with the installer certificate
