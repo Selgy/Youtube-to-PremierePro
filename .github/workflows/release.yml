@@ -221,6 +221,12 @@ jobs:
               fi
       shell: /bin/bash -e {0}
 
+    - name: Prepare Installation Scripts
+      run: |
+        mkdir scripts
+        cp path/to/your/postinstall.sh scripts/postinstall
+        chmod +x scripts/postinstall
+
 
     - name: Create and Sign PKG
       env:
