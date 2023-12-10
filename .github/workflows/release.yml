@@ -78,11 +78,15 @@ jobs:
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
+        --hidden-import=libpython3.8.dylib \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
     
+    - name: Find libpython3.8.dylib
+      run: find / -name libpython3.8.dylib 2>/dev/null
+
     - name: Prepare PymiereLink and Installation Script
       run: |
         mv "./Info.plist" "./dist/YoutubetoPremiere.app/Contents/"
