@@ -106,7 +106,7 @@ jobs:
 
 
     - name: Create symbolic link for libpython3.8.dylib
-      run: ln -s /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/libpython3.8.dylib
+      run: mv "./Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib" ""./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/libpython3.8.dylib"
 
 
     - name: Prepare Installation Scripts
