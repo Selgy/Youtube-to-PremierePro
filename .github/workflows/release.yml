@@ -26,6 +26,14 @@ jobs:
     - name: Select Xcode Version
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
 
+      
+    - name: Install libintl
+      run: brew install gettext
+      if: success()
+
+    - name: Set DYLD_LIBRARY_PATH
+      run: echo 'export DYLD_LIBRARY_PATH="/usr/local/opt/gettext/lib"' >> $GITHUB_ENV
+      if: success()
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip
