@@ -84,8 +84,6 @@ jobs:
         YoutubetoPremiere.py
         ls -la ./dist/
     
-    - name: Find libpython3.8.dylib
-      run: find / -name libpython3.8.dylib 2>/dev/null
 
     - name: Prepare PymiereLink and Installation Script
       run: |
@@ -105,6 +103,11 @@ jobs:
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
         mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
+
+
+    - name: Create symbolic link for libpython3.8.dylib
+      run: ln -s /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/libpython3.8.dylib
+
 
     - name: Prepare Installation Scripts
       run: |
