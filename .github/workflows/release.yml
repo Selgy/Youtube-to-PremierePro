@@ -111,9 +111,9 @@ jobs:
     - name: Move libpython3.8.dylib to the internal directory
       run: |
           brew install gettext
-          find / -name libintl.8.dylib
+       
           mv /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
-          mv /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libintl.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
+          mv /usr/local/lib/libintl.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
       
 
 
