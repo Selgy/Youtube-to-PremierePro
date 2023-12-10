@@ -104,11 +104,12 @@ jobs:
         mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
 
-
-    - name: Create symbolic link for libpython3.8.dylib
+    - name: Ensure target directory exists
+      run: mkdir -p ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
+      
+    - name: Move libpython3.8.dylib to the internal directory
       run: mv /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
-
-
+      
     - name: Prepare Installation Scripts
       run: |
           mkdir scripts
