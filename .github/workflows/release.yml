@@ -37,14 +37,6 @@ jobs:
       run: pip install -r requirements.txt
 
 
-    - name: Cache FFmpeg
-      uses: actions/cache@v2
-      with:
-        path: /usr/local/Cellar/ffmpeg
-        key: ${{ runner.os }}-ffmpeg-${{ hashFiles('**/brew-list.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-ffmpeg-
-
     - name: Check and Copy FFmpeg
       run: |
               # Save the list of installed brew packages
