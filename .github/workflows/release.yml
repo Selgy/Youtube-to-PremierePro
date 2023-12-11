@@ -56,12 +56,10 @@ jobs:
               mkdir -p $EXEC_PATH
               cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
 
-    #- name: Install PyInstaller
-    #  run: pip install --upgrade pyinstaller
 
     - name: Build Application with PyInstaller
       run: |
-        pyinstaller --windowed --clean --debug=all \
+        pyinstaller -- onefile --windowed --clean --debug=all \
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
         --hidden-import=engineio.async_drivers.gevent \
@@ -80,63 +78,13 @@ jobs:
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
-        --hidden-import=libpython3.8.dylib \
+        --add-data "./ffmpeg:." \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
     
-
-    - name: Prepare PymiereLink and Installation Script
-      run: |
-        mv "./Info.plist" "./dist/YoutubetoPremiere.app/Contents/"
-        cp -R "./PymiereLink" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
-        # Ensure the executable is in the .app bundle
-        if [ -f "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" ]; then
-          echo "Executable found in .app bundle."
-        else
-          echo "Executable not found in .app bundle. Check PyInstaller build process."
-          exit 1
-        fi
-        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/"
-        ls -la "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink"
-
-        mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
-        mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
-        mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
-        #mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
-
-      
-
-    - name: Prepare Installation Scripts
-      run: |
-          mkdir scripts
-          cp ./postinstall.sh scripts/postinstall
-          chmod +x scripts/postinstall
   
-          
-    - name: Find ffmpeg
-      shell: pwsh
-      run: |
-          Get-ChildItem -Recurse -Filter ffmpeg | Format-Table FullName
-
-    - name: Copy FFmpeg to PymiereLink Path
-      run: |
-          # Define the FFmpeg installation path and the destination path
-          FFMPEG_INSTALL_PATH=$(brew --prefix ffmpeg)
-          DEST_PATH="./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg"
-
-          # Create the destination directory and copy the entire FFmpeg installation
-          mkdir -p $DEST_PATH
-          cp -R $FFMPEG_INSTALL_PATH/. $DEST_PATH/
-
-          # Optional: List contents of the destination directory to verify
-          ls -la $DEST_PATH
-
-    
-    - name: find "_internal"
-      run: |
-              find ~/ -type d -name "_internal" 2>/dev/null
 
     - name: Create and Configure Keychain
       env:
@@ -193,21 +141,7 @@ jobs:
           
               # Use the certificate name to sign the application
               codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere.app"          
-              echo "Signing FFmpeg binaries"
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              # Sign everything in the FFmpeg bin folder
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/ffmpeg/bin" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec" -type f -exec  codesign --timestamp --deep --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-              find "dist/YoutubetoPremiere.app/Contents/MacOS" -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "$CERTIFICATE_NAME" {} \;
-  
 
-
-
-    - name: list app content
-      run: |
-          # List contents of the entire .app bundle to verify
-          echo "Listing contents of the .app bundle:"
-          find "./dist/YoutubetoPremiere.app"
 
 
     - name: "Notarize app bundle"
@@ -222,7 +156,7 @@ jobs:
             
                   # Create a ZIP file of the .app for notarization
                   echo "Creating temp notarization archive"
-                  ditto -c -k --keepParent "./dist/YoutubetoPremiere.app" "notarization.zip"
+                  ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
             
                   # Send the notarization request and capture the NOTARIZATION_ID
                   echo "Notarize app"
@@ -249,7 +183,7 @@ jobs:
             
                   if [[ $NOTARIZATION_INFO == *"\"status\":\"Accepted\""* ]]; then
                       echo "Stapling notarization ticket to the app"
-                      xcrun stapler staple "./dist/YoutubetoPremiere.app"
+                      xcrun stapler staple "./dist/YoutubetoPremiere"
                   else
                       echo "Notarization failed."
                       exit 1
@@ -260,8 +194,8 @@ jobs:
     - name: Prepare PKG content
       run: |
         mkdir pkgroot
-        cp -R "./dist/YoutubetoPremiere.app" "./pkgroot/"
-        cp -R "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink" "./pkgroot/PymiereLink"
+        cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
+        cp -R "./PymiereLink/*" "./pkgroot/PymiereLink"
     
     - name: Create and Sign PKG
       env:
