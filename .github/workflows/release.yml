@@ -15,8 +15,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Install Homebrew and gettext
+      run: |
+        # Check if Homebrew is installed
+        if ! command -v brew &>/dev/null; then
+            echo "Homebrew not found. Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        else
+            echo "Homebrew is already installed."
+        fi
+
+        # Install gettext
+        echo "Installing gettext..."
+        brew install gettext
+
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v2
       with:
         python-version: 3.8
 
@@ -25,8 +39,6 @@ jobs:
 
     - name: Select Xcode Version
       run: sudo xcode-select -switch /Applications/Xcode_14.0.app
-
-    
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip setuptools wheel
