@@ -103,16 +103,11 @@ jobs:
         mkdir -p "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         mv "./dist/YoutubetoPremiere.app/Contents/MacOS/YoutubetoPremiere" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
         mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
-        mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
+        #mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
 
     - name: Ensure target directory exists
       run: mkdir -p ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
       
-    - name: Move libpython3.8.dylib to the internal directory
-      run: |
-          brew install gettext
-      
-
 
     - name: Prepare Installation Scripts
       run: |
