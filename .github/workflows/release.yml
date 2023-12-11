@@ -15,19 +15,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install Homebrew and gettext
-      run: |
-        # Check if Homebrew is installed
-        if ! command -v brew &>/dev/null; then
-            echo "Homebrew not found. Installing Homebrew..."
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        else
-            echo "Homebrew is already installed."
-        fi
 
-        # Install gettext
-        echo "Installing gettext..."
-        brew install gettext
+
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -145,7 +134,9 @@ jobs:
           ls -la $DEST_PATH
 
     
-
+    - name: find "_internal"
+      run: |
+              find ~/ -type d -name "_internal" 2>/dev/null
 
     - name: Create and Configure Keychain
       env:
