@@ -29,7 +29,7 @@ jobs:
     
 
     - name: Upgrade pip
-      run: python -m pip install --upgrade pip
+      run: python -m pip install --upgrade pip setuptools wheel
 
     - name: Install dependencies
       run: pip install -r requirements.txt
@@ -111,9 +111,6 @@ jobs:
     - name: Move libpython3.8.dylib to the internal directory
       run: |
           brew install gettext
-       
-          mv /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
-          mv /usr/local/lib/libintl.8.dylib ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
       
 
 
