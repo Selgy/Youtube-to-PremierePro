@@ -67,8 +67,8 @@ jobs:
               mkdir -p $EXEC_PATH
               cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
 
-    - name: Install PyInstaller
-      run: pip install --upgrade pyinstaller
+    #- name: Install PyInstaller
+    #  run: pip install --upgrade pyinstaller
 
     - name: Build Application with PyInstaller
       run: |
@@ -117,8 +117,6 @@ jobs:
         mv "./notification_sound.mp3" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec"
         #mv "./node_modules" "./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/"
 
-    - name: Ensure target directory exists
-      run: mkdir -p ./dist/YoutubetoPremiere.app/Contents/Resources/PymiereLink/exec/_internal/
       
 
     - name: Prepare Installation Scripts
