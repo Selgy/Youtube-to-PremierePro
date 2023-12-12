@@ -191,7 +191,7 @@ jobs:
       run: |
         mkdir pkgroot
         cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
-        cp -R "./PymiereLink/*" "./pkgroot/PymiereLink"
+        cp -R "./PymiereLink" "./pkgroot/PymiereLink"
     
     - name: Create and Sign PKG
       env:
