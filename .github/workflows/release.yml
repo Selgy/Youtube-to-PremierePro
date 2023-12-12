@@ -111,10 +111,11 @@ jobs:
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
       
-    - name: List Python Directory Contents
-      run: ls -la /Users/runner/hostedtoolcache/Python/3.8.8/x64
-
-          
+    - name: Find libpython3.8.dylib in lib directory
+      run: |
+        LIBPYTHON_PATH=$(find /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib -name "libpython3.8.dylib" 2>/dev/null)
+        echo "Found libpython3.8.dylib at: $LIBPYTHON_PATH"
+        
     - name: Find and Sign libpython3.8.dylib
       run: |
           # Find libpython3.8.dylib
