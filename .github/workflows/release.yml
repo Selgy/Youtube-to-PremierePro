@@ -110,7 +110,26 @@ jobs:
           EXEC_PATH="./ffmpeg"
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
-            
+      
+          
+    - name: Find and Sign libpython3.8.dylib
+      run: |
+          # Find libpython3.8.dylib
+          LIBPYTHON_PATH=$(find / -name "libpython3.8.dylib" 2>/dev/null)
+          echo "Found libpython3.8.dylib at: $LIBPYTHON_PATH"
+      
+          # Check if libpython3.8.dylib is found
+          if [ -z "$LIBPYTHON_PATH" ]; then
+            echo "libpython3.8.dylib not found"
+            exit 1
+          fi
+      
+          # Sign libpython3.8.dylib
+          echo "Signing libpython3.8.dylib..."
+          codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose "$LIBPYTHON_PATH"
+      env:
+            KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      shell: bash
 
     - name: Build Application with PyInstaller
       run: |
@@ -143,24 +162,7 @@ jobs:
       run: |
           find ./dist -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
 
-    - name: Find and Sign libpython3.8.dylib
-      run: |
-            # Find libpython3.8.dylib
-            LIBPYTHON_PATH=$(find / -name "libpython3.8.dylib" 2>/dev/null)
-            echo "Found libpython3.8.dylib at: $LIBPYTHON_PATH"
-        
-            # Check if libpython3.8.dylib is found
-            if [ -z "$LIBPYTHON_PATH" ]; then
-              echo "libpython3.8.dylib not found"
-              exit 1
-            fi
-        
-            # Sign libpython3.8.dylib
-            echo "Signing libpython3.8.dylib..."
-            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose "$LIBPYTHON_PATH"
-      env:
-            KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      shell: bash
+
         
     - name: Sign the Application
       run: |
