@@ -111,14 +111,11 @@ jobs:
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
       
-    - name: Sign libpython3.8.dylib
+    - name: Set DYLD_LIBRARY_PATH
       run: |
-          LIBPYTHON_PATH=$(find /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib -name "libpython3.8.dylib" 2>/dev/null)
-          echo "Found libpython3.8.dylib at: $LIBPYTHON_PATH"
-          echo "Signing libpython3.8.dylib..."
-          codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose "$LIBPYTHON_PATH"
-      env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+            echo "Setting DYLD_LIBRARY_PATH to include Python library path"
+            echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        
 
     - name: Build Application with PyInstaller
       run: |
@@ -222,7 +219,12 @@ jobs:
                     exit 1
                 fi
       shell: /bin/bash -e {0}
-            
+
+
+    - name: Verify Code Signature
+      run: |
+        codesign --verify --deep --strict ./dist/YoutubetoPremiere
+    
 
     - name: Prepare PKG content
       run: |
