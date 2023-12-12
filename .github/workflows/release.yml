@@ -33,31 +33,30 @@ jobs:
       run: pip install -r requirements.txt
 
 
-    - name: Check and Copy FFmpeg
+    - name: Define FFmpeg execution path
       run: |
-              # Save the list of installed brew packages
-              brew list > brew-list.txt
-          
-              # Check if FFmpeg is installed
-              if brew list --versions ffmpeg > /dev/null; then
-                echo "FFmpeg is already installed."
-              else
-                echo "Installing FFmpeg..."
-                brew install ffmpeg
-              fi
-          
-              # Define the destination path for FFmpeg
-              EXEC_PATH="./ffmpeg"
-          
-              # Create the directory at the root and copy the entire FFmpeg installation
-              mkdir -p $EXEC_PATH
-              cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
+        EXEC_PATH="./ffmpeg"
+        echo "FFmpeg execution path: $EXEC_PATH"
+    
+    - name: Check FFmpeg installation and copy binaries
+      run: |
+        brew list > brew-list.txt
+        if brew list --versions ffmpeg > /dev/null; then
+          echo "FFmpeg is already installed."
+        else
+          echo "Installing FFmpeg..."
+          brew install ffmpeg
+        fi
+        mkdir -p $EXEC_PATH
+        cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
+        echo "Contents of $EXEC_PATH:"
+        ls -la $EXEC_PATH
+    
 
     - name: Sign FFmpeg binaries
       run: |
-                find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
+          find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
             
-
 
     - name: Build Application with PyInstaller
       run: |
