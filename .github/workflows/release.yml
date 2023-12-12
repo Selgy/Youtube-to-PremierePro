@@ -117,11 +117,16 @@ jobs:
                 echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         
 
-    - name: Verify Python Library
+    - name: Sign Python Library
       run: |
-            echo "Verifying Python library..."
-            ls -l /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            echo "Signing Python library..."
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+    
+    - name: Verify Signed Python Library
+      run: |
+            echo "Verifying signed Python library..."
             codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+              
     
 
     - name: Build Application with PyInstaller
