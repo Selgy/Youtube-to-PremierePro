@@ -111,10 +111,18 @@ jobs:
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
       
-    - name: Set DYLD_LIBRARY_PATH
+          - name: Set DYLD_LIBRARY_PATH
+          run: |
+                echo "Setting DYLD_LIBRARY_PATH to include Python library path"
+                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        
+    - name: Verify Python Library
       run: |
-            echo "Setting DYLD_LIBRARY_PATH to include Python library path"
-            echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+            echo "Verifying Python library..."
+            ls -l /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+    
+
         
 
     - name: Build Application with PyInstaller
@@ -144,6 +152,12 @@ jobs:
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
+
+        
+    - name: Verify Bundle Contents
+      run: |
+              echo "Verifying bundle contents..."
+              ls -la ./dist/YoutubetoPremiere/YoutubetoPremiere.app/Contents/MacOS
 
 
     - name: Make Executable
