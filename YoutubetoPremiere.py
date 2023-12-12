@@ -26,20 +26,23 @@ logging.basicConfig(level=logging.INFO,
 
 
 if getattr(sys, 'frozen', False):
+    # The application is frozen by PyInstaller
     script_dir = os.path.dirname(sys.executable)
 else:
+    # The application is running in a normal Python environment
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-        
 if platform.system() == 'Windows':
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg.exe')
+    # For Windows, assuming FFmpeg binary is bundled at the specified path
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
-    # Assuming the ffmpeg binary is in the same relative path within your application
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
-    os.chmod(ffmpeg_path, 0o755)
+    # For macOS, assuming FFmpeg binary is bundled at the root of the application
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+    os.chmod(ffmpeg_path, 0o755)  # Ensure FFmpeg is executable
 else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
+
 
 
 if platform.system() == 'Windows':
