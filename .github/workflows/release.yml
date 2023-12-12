@@ -131,7 +131,7 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-        pyinstaller --onefile --windowed --clean --debug=all \
+        pyinstaller --onedir --windowed --clean --debug=all \
         --hidden-import=engineio.async_drivers.eventlet \
         --hidden-import=engineio.async_drivers.gevent_uwsgi \
         --hidden-import=engineio.async_drivers.gevent \
