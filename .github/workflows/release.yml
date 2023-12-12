@@ -35,8 +35,7 @@ jobs:
     - name: Define FFmpeg execution path
       run: |
         # Define the destination path for FFmpeg
-        EXEC_PATH="./ffmpeg"
-        echo "FFmpeg execution path: $EXEC_PATH"
+
         EXEC_PATH="./ffmpeg"
         echo "FFmpeg execution path: $EXEC_PATH"
     
@@ -69,6 +68,8 @@ jobs:
 
     - name: Sign FFmpeg binaries
       run: |
+          EXEC_PATH="./ffmpeg"
+          echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
             
 
