@@ -32,9 +32,11 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-
     - name: Define FFmpeg execution path
       run: |
+        # Define the destination path for FFmpeg
+        EXEC_PATH="./ffmpeg"
+        echo "FFmpeg execution path: $EXEC_PATH"
         EXEC_PATH="./ffmpeg"
         echo "FFmpeg execution path: $EXEC_PATH"
     
