@@ -159,6 +159,10 @@ jobs:
               echo "Verifying bundle contents..."
               ls -la ./dist/YoutubetoPremiere/YoutubetoPremiere.app/Contents/MacOS
 
+    - name: Re-sign and Verify Executable
+      run: |
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose ./dist/YoutubetoPremiere
+            codesign --verify --verbose --deep ./dist/YoutubetoPremiere
 
     - name: Make Executable
       run: |
