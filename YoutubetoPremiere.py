@@ -37,7 +37,7 @@ if platform.system() == 'Windows':
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     # For macOS, assuming FFmpeg binary is bundled at the root of the application
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg',  'bin', 'ffmpeg')
     os.chmod(ffmpeg_path, 0o755)  # Ensure FFmpeg is executable
 else:
     # Handle other operating systems or raise an exception
