@@ -231,9 +231,7 @@ jobs:
         echo "Fetching notarization log for $NOTARIZATION_ID..."
         xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
 
-        echo "Attach staple"
-        sudo xcrun stapler staple "./dist/YoutubetoPremiere"
-
+ 
             
     - name: Prepare PKG content
       run: |
