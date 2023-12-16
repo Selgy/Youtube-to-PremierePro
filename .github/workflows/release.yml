@@ -232,7 +232,7 @@ jobs:
         xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
 
         echo "Attach staple"
-        xcrun stapler staple "./dist/YoutubetoPremiere"
+        sudo xcrun stapler staple "./dist/YoutubetoPremiere"
 
             
     - name: Prepare PKG content
