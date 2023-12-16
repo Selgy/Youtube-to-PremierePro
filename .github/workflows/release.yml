@@ -199,7 +199,7 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "dist/YoutubetoPremiere"          
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" ".dist/YoutubetoPremiere"          
 
 
     - name: "Notarize executable"
@@ -247,6 +247,17 @@ jobs:
                 fi
       shell: /bin/bash -e {0}
 
+    - name: Staple Notarization Ticket to Executable
+      run: |
+        echo "Stapling notarization ticket to the executable..."
+        xcrun stapler staple "./dist/YoutubetoPremiere"
+        echo "Stapling completed."
+
+    - name: Verify Stapled Executable
+      run: |
+        echo "Verifying the stapled executable..."
+        xcrun stapler validate "./dist/YoutubetoPremiere"
+        echo "Verification completed."
 
     - name: Verify Code Signature
       run: |
