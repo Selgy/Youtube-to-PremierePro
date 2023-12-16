@@ -212,9 +212,12 @@ jobs:
                 echo "Create keychain profile"
                 xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
               
+                ls -R ./dist
+
                 # Create a ZIP file of the executable for notarization
                 echo "Creating temp notarization archive"
-                ditto -c -k --keepParent "./dist/" "notarization.zip"
+                ditto -c -k --keepParent "./dist/YoutubetoPremiere/YoutubetoPremiere" "notarization.zip"
+
               
                 # Send the notarization request and capture the NOTARIZATION_ID
                 echo "Notarize executable"
