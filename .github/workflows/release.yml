@@ -203,28 +203,37 @@ jobs:
 
     - name: "Notarize app bundle"
       env:
-                MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
-                MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-                MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+        MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       run: |
-                echo "Create keychain profile"
-                xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
-            
-                echo "Creating temp notarization archive"
-                ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
-            
-                echo "Notarize app"
-                NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
-                NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
-                
-                if [[ $NOTARIZATION_ID == "null" ]]; then
-                    echo "Notarization submission failed."
-                    echo "Output: $NOTARIZATION_OUTPUT"
-                    exit 1
-                fi
-            
-                echo "Attach staple"
-                xcrun stapler staple "./dist/YoutubetoPremiere"
+        echo "Create keychain profile"
+        xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
+
+        echo "Creating temp notarization archive"
+        ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
+
+        echo "Notarize app"
+        NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
+        NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
+        
+        if [[ $NOTARIZATION_ID == "null" ]]; then
+            echo "Notarization submission failed."
+            echo "Output: $NOTARIZATION_OUTPUT"
+            exit 1
+        fi
+
+        # Check Notarization Status
+        echo "Checking Notarization Status for $NOTARIZATION_ID"
+        xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+
+        # Fetch and display the notarization log
+        echo "Fetching notarization log for $NOTARIZATION_ID..."
+        xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+
+        echo "Attach staple"
+        xcrun stapler staple "./dist/YoutubetoPremiere"
+
             
     - name: Prepare PKG content
       run: |
