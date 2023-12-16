@@ -199,7 +199,7 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" ".dist/YoutubetoPremiere"          
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere"          
 
 
     - name: "Notarize executable"
