@@ -214,7 +214,7 @@ jobs:
               
                 # Create a ZIP file of the executable for notarization
                 echo "Creating temp notarization archive"
-                ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
+                ditto -c -k --keepParent "./dist/" "notarization.zip"
               
                 # Send the notarization request and capture the NOTARIZATION_ID
                 echo "Notarize executable"
