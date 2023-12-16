@@ -252,18 +252,6 @@ jobs:
                 fi
       shell: /bin/bash -e {0}
 
-    - name: Staple Notarization Ticket to Executable
-      run: |
-        echo "Stapling notarization ticket to the executable..."
-        xcrun stapler staple "./dist/YoutubetoPremiere/YoutubetoPremiere"
-        echo "Stapling completed."
-
-    - name: Verify Stapled Executable
-      run: |
-        echo "Verifying the stapled executable..."
-        xcrun stapler validate "./dist/YoutubetoPremiere/YoutubetoPremiere"
-        echo "Verification completed."
-
     - name: Verify Code Signature
       run: |
         codesign --verify --deep --strict ./dist/YoutubetoPremiere
