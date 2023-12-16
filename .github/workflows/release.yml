@@ -199,7 +199,8 @@ jobs:
               ls -la dist
           
               # Use the certificate name to sign the application
-              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere"          
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere"
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere/YoutubetoPremiere"          
 
 
     - name: "Notarize executable"
@@ -216,7 +217,8 @@ jobs:
 
                 # Create a ZIP file of the executable for notarization
                 echo "Creating temp notarization archive"
-                ditto -c -k --keepParent "./dist/YoutubetoPremiere/YoutubetoPremiere" "notarization.zip"
+                ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
+
 
               
                 # Send the notarization request and capture the NOTARIZATION_ID
