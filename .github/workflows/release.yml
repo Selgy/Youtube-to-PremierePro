@@ -68,17 +68,20 @@ jobs:
                 echo "Listing all identities in SelgykeyAPP keychain:"
                 security find-identity -p codesigning $KEYCHAIN_PATH
 
+    - name: Prepare PKG content
+      run: |
+          mkdir pkgroot
+
     - name: Define FFmpeg execution path
       run: |
-        # Define the destination path for FFmpeg
-
-        EXEC_PATH="./ffmpeg"
+        # Define the destination path for FFmpeg inside pkgroot
+        EXEC_PATH="./pkgroot/ffmpeg"
         echo "FFmpeg execution path: $EXEC_PATH"
-    
+
     - name: Check FFmpeg installation and copy binaries
       run: |
-          # Define the destination path for FFmpeg
-          EXEC_PATH="./ffmpeg"
+          # Define the destination path for FFmpeg inside pkgroot
+          EXEC_PATH="./pkgroot/ffmpeg"
           echo "FFmpeg execution path: $EXEC_PATH"
           
           # Save the list of installed brew packages
@@ -92,21 +95,18 @@ jobs:
             brew install ffmpeg
           fi
       
-          # Create the directory and copy the entire FFmpeg installation
+          # Create the directory inside pkgroot and copy the entire FFmpeg installation
           mkdir -p $EXEC_PATH
           cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
           echo "Contents of $EXEC_PATH:"
           ls -la $EXEC_PATH
 
-    
-        
-
     - name: Sign FFmpeg binaries
       run: |
-          EXEC_PATH="./ffmpeg"
+          EXEC_PATH="./pkgroot/ffmpeg"
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
-      
+
     - name: Set DYLD_LIBRARY_PATH
       run: |
                 echo "Setting DYLD_LIBRARY_PATH to include Python library path"
@@ -231,7 +231,6 @@ jobs:
             
     - name: Prepare PKG content
       run: |
-        mkdir pkgroot
         cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
         cp -R "./PymiereLink" "./pkgroot/PymiereLink"
     
