@@ -104,7 +104,8 @@ jobs:
           echo "FFmpeg execution path: $EXEC_PATH"
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
           echo "Setting execute permissions for FFmpeg binaries"
-          find "$EXEC_PATH" -type f -exec chmod +x {} \;
+          chmod +x $EXEC_PATH/bin/ffmpeg
+          chmod +x $EXEC_PATH/bin/ffprobe  # If you're using ffprobe
 
     - name: Set DYLD_LIBRARY_PATH
       run: |
