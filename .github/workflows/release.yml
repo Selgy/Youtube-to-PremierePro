@@ -105,7 +105,7 @@ jobs:
       run: |
           EXEC_PATH="./pkgroot/ffmpeg"
           echo "FFmpeg execution path: $EXEC_PATH"
-          find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
+          find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
 
     - name: "Notarize app bundle"
       env:
