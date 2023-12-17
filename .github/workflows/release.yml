@@ -151,7 +151,7 @@ jobs:
         --add-data "./ffmpeg:./ffmpeg" \ 
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
-        YoutubetoPremiere.py
+        "/System/Volumes/Data/Users/runner/work/Youtube-to-PremierePro/Youtube-to-PremierePro/YoutubetoPremiere.py"
         ls -la ./dist/
 
         
