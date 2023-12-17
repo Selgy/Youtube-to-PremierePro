@@ -129,7 +129,7 @@ jobs:
 
     - name: Build Application with PyInstaller
       run: |
-        find / -name YoutubetoPremiere.py
+        find / -name YoutubetoPremiere.py 2>/dev/null
         pip install --upgrade pyinstaller
         pyinstaller --onedir --clean --debug=all \
         --hidden-import=engineio.async_drivers.eventlet \
