@@ -68,75 +68,8 @@ jobs:
                 echo "Listing all identities in SelgykeyAPP keychain:"
                 security find-identity -p codesigning $KEYCHAIN_PATH
 
-    - name: Prepare PKG content
-      run: |
-          mkdir pkgroot
 
-    - name: Define FFmpeg execution path
-      run: |
-        # Define the destination path for FFmpeg inside pkgroot
-        EXEC_PATH="./pkgroot/ffmpeg"
-        echo "FFmpeg execution path: $EXEC_PATH"
 
-    - name: Check FFmpeg installation and copy binaries
-      run: |
-          # Define the destination path for FFmpeg inside pkgroot
-          EXEC_PATH="./pkgroot/ffmpeg"
-          echo "FFmpeg execution path: $EXEC_PATH"
-          
-          # Save the list of installed brew packages
-          brew list > brew-list.txt
-        
-          # Check if FFmpeg is installed
-          if brew list --versions ffmpeg > /dev/null; then
-            echo "FFmpeg is already installed."
-          else
-            echo "Installing FFmpeg..."
-            brew install ffmpeg
-          fi
-      
-          # Create the directory inside pkgroot and copy the entire FFmpeg installation
-          mkdir -p $EXEC_PATH
-          cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
-          echo "Contents of $EXEC_PATH:"
-          ls -la $EXEC_PATH
-
-    - name: Sign FFmpeg binaries
-      run: |
-          EXEC_PATH="./pkgroot/ffmpeg"
-          echo "FFmpeg execution path: $EXEC_PATH"
-          find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --deep --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
-
-    - name: "Notarize app bundle"
-      env:
-            MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
-            MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
-            MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      run: |
-            echo "Create keychain profile"
-            xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
-    
-            echo "Creating temp notarization archive"
-            ditto -c -k --keepParent "./pkgroot/ffmpeg" "notarization.zip"
-    
-            echo "Notarize app"
-            NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
-            NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
-            
-            if [[ $NOTARIZATION_ID == "null" ]]; then
-                echo "Notarization submission failed."
-                echo "Output: $NOTARIZATION_OUTPUT"
-                exit 1
-            fi
-    
-            # Check Notarization Status
-            echo "Checking Notarization Status for $NOTARIZATION_ID"
-            xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile"
-    
-            # Fetch and display the notarization log
-            echo "Fetching notarization log for $NOTARIZATION_ID..."
-            xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
-    
     - name: Set DYLD_LIBRARY_PATH
       run: |
                 echo "Setting DYLD_LIBRARY_PATH to include Python library path"
@@ -178,6 +111,7 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --add-binary "/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib:." \
+        --add-data "./ffmpeg:./ffmpeg" \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
@@ -260,9 +194,47 @@ jobs:
             
     - name: Prepare PKG content
       run: |
+        mkdir pkgroot
         cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
         cp -R "./PymiereLink" "./pkgroot/PymiereLink"
     
+    - name: Define FFmpeg execution path
+      run: |
+          # Define the destination path for FFmpeg inside pkgroot
+          EXEC_PATH="./pkgroot/ffmpeg"
+          echo "FFmpeg execution path: $EXEC_PATH"
+  
+    - name: Check FFmpeg installation and copy binaries
+      run: |
+            # Define the destination path for FFmpeg inside pkgroot
+            EXEC_PATH="./pkgroot/ffmpeg"
+            echo "FFmpeg execution path: $EXEC_PATH"
+            
+            # Save the list of installed brew packages
+            brew list > brew-list.txt
+          
+            # Check if FFmpeg is installed
+            if brew list --versions ffmpeg > /dev/null; then
+              echo "FFmpeg is already installed."
+            else
+              echo "Installing FFmpeg..."
+              brew install ffmpeg
+            fi
+        
+            # Create the directory inside pkgroot and copy the entire FFmpeg installation
+            mkdir -p $EXEC_PATH
+            cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
+            echo "Contents of $EXEC_PATH:"
+            ls -la $EXEC_PATH
+  
+    - name: Sign FFmpeg binaries
+      run: |
+            EXEC_PATH="./pkgroot/ffmpeg"
+            echo "FFmpeg execution path: $EXEC_PATH"
+            find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
+  
+
+
     - name: Create and Sign PKG
       env:
           INSTALLER_CERTIFICATE_BASE64: ${{ secrets.INSTALLER_CERTIFICATE_BASE64 }}
