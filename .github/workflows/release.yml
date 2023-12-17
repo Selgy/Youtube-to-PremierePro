@@ -148,10 +148,10 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --add-binary "/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib:." \
-        --add-data "./ffmpeg:./ffmpeg" \ 
+        --add-binary "./ffmpeg/bin/ffmpeg:ffmpeg" \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
-        "/System/Volumes/Data/Users/runner/work/Youtube-to-PremierePro/Youtube-to-PremierePro/YoutubetoPremiere.py"
+        YoutubetoPremiere.py
         ls -la ./dist/
 
         
