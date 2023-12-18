@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the Adobe CEP extensions directory for the current user
-CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
+CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
 
 # GitHub URL of the com.selgy.youtubetopremiere folder
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
