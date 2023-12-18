@@ -40,7 +40,7 @@ fi
 
 # Deleting youtubetopremiere and com.selgy.youtubetopremiere from the application folder
 echo "Deleting youtubetopremiere and com.selgy.youtubetopremiere from the application folder..."
-rm -rf "/Applications/youtubetopremiere"
+rm -rf "/Applications/YoutubetoPremiere"
 rm -rf "/Applications/com.selgy.youtubetopremiere"
 
 echo "Cleanup completed."
