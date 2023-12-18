@@ -1,54 +1,55 @@
 #!/bin/bash
 
-CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
+# Define the user's Adobe CEP extensions directory
+CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
-EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
+EXECUTABLE_PATH="$HOME/Applications/YoutubetoPremiere"
 
 echo "Creating $CEP_EXTENSIONS_DIR..."
-sudo mkdir -p "$CEP_EXTENSIONS_DIR" && echo "Directory created successfully." || { echo "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
+mkdir -p "$CEP_EXTENSIONS_DIR" && echo "Directory created successfully." || { echo "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
 
 echo "Downloading com.selgy.youtubetopremiere from GitHub..."
-sudo curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "Download successful." || { echo "Failed to download from GitHub"; exit 1; }
+curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "Download successful." || { echo "Failed to download from GitHub"; exit 1; }
 
 echo "Installing com.selgy.youtubetopremiere..."
-sudo unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
-sudo mv "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere" "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere" && echo "Move successful." || { echo "Failed to move directory"; exit 1; }
+unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
+mv "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere" "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere" && echo "Move successful." || { echo "Failed to move directory"; exit 1; }
 
 # Delete the intermediate folder from GitHub
-sudo rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
+rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
 
 # Delete the downloaded ZIP file
-sudo rm "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
+rm "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
 EXEC_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec"
 echo "Creating $EXEC_DIR..."
-sudo mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
 
 echo "Copying executable to $EXEC_DIR..."
-sudo cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
 # Set execution permission for ffmpeg
 FFMPEG_PATH="$EXEC_DIR/_internal/ffmpeg/bin/ffmpeg"
 if [ -f "$FFMPEG_PATH" ]; then
     echo "Setting execution permission for ffmpeg..."
-    sudo chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
+    chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
 else
     echo "ffmpeg file not found at $FFMPEG_PATH."
 fi
 
 echo "Cleanup started..."
 
-# Deleting YoutubetoPremiere and related files from the application folder
-#if [ -d "/Applications/YoutubetoPremiere" ]; then
-#    sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
-#else
-#    echo "Directory /Applications/YoutubetoPremiere does not exist or already deleted."
-#fi
-
-if [ -d "/Applications/com.selgy.youtubetopremiere" ]; then
-    sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
+# Deleting YoutubetoPremiere and related files from the user's application folder
+if [ -d "$HOME/Applications/YoutubetoPremiere" ]; then
+    rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
 else
-    echo "Directory /Applications/com.selgy.youtubetopremiere does not exist or already deleted."
+    echo "Directory $HOME/Applications/YoutubetoPremiere does not exist or already deleted."
+fi
+
+if [ -d "$HOME/Applications/com.selgy.youtubetopremiere" ]; then
+    rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
+else
+    echo "Directory $HOME/Applications/com.selgy.youtubetopremiere does not exist or already deleted."
 fi
 
 echo "Cleanup completed."
