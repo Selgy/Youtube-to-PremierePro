@@ -228,6 +228,10 @@ jobs:
         echo "Fetching notarization log for $NOTARIZATION_ID..."
         xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
 
+
+    - name: Make postinstall script executable
+      run: chmod +x ./scripts/postinstall
+
  
             
     - name: Prepare PKG content
@@ -263,7 +267,6 @@ jobs:
           PKG_ROOT="./pkgroot"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
           SCRIPTS_DIR="./scripts"
-          chmod +x $SCRIPTS_DIR/postinstall
           ls -la pkgroot/
 
           pkgbuild --root "$PKG_ROOT" \
