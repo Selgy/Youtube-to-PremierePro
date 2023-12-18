@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Enable PlayerDebugMode for Adobe CEP versions 8 to 11
+defaults write com.adobe.CSXS.8 PlayerDebugMode 1
+defaults write com.adobe.CSXS.9 PlayerDebugMode 1
+defaults write com.adobe.CSXS.10 PlayerDebugMode 1
+defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
