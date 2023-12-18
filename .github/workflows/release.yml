@@ -105,7 +105,8 @@ jobs:
           find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
           echo "Setting execute permissions for FFmpeg binaries"
           chmod +x $EXEC_PATH/bin/ffmpeg
-          chmod +x $EXEC_PATH/bin/ffprobe  # If you're using ffprobe
+          chmod +x $EXEC_PATH/bin/ffprobe 
+
 
     - name: Set DYLD_LIBRARY_PATH
       run: |
@@ -233,7 +234,7 @@ jobs:
       run: |
         mkdir pkgroot
         cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
-        cp -R "./PymiereLink" "./pkgroot/PymiereLink"
+        cp -R "./com.selgy.youtubetopremiere" "./pkgroot/com.selgy.youtubetopremiere"
     
     - name: Create and Sign PKG
       env:
@@ -443,17 +444,17 @@ jobs:
         echo "SectionEnd" >> installer.nsi
     
         echo "Function .onInit" >> installer.nsi
-        echo "StrCpy \$INSTDIR 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\PymiereLink'" >> installer.nsi
+        echo "StrCpy \$INSTDIR 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\com.selgy.youtubetopremiere'" >> installer.nsi
         echo "FunctionEnd" >> installer.nsi
     
         echo "Section 'MainSection' SEC01" >> installer.nsi
         echo "SetOutPath '\$INSTDIR'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\PymiereLink'" >> installer.nsi
-        echo "File /r 'PymiereLink\\*.*'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\PymiereLink\\exec'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere'" >> installer.nsi
+        echo "File /r 'com.selgy.youtubetopremiere\\*.*'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere\\exec'" >> installer.nsi
         echo "File 'dist\\YoutubetoPremiere.exe'" >> installer.nsi
-        echo "CreateDirectory '\$INSTDIR\\PymiereLink\\exec\\ffmpeg_win'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\PymiereLink\\exec\\ffmpeg_win'" >> installer.nsi
+        echo "CreateDirectory '\$INSTDIR\\com.selgy.youtubetopremiere\\exec\\ffmpeg_win'" >> installer.nsi
+        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere\\exec\\ffmpeg_win'" >> installer.nsi
         echo "File /r 'ffmpeg\\ffmpeg_win\\*.*'" >> installer.nsi
         echo "SectionEnd" >> installer.nsi
     

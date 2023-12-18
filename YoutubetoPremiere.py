@@ -370,13 +370,21 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         logging.error("Download failed with youtube_dl.")
         # Handle the error appropriately, maybe notify the u
 
-def play_notification_sound(volume=0.5):  # Default volume set to 50%
+def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
-    pygame.mixer.music.load("notification_sound.mp3")  # Load your notification sound file
+
+    # Check the operating system and set the path for the notification sound
+    if platform.system() == 'Darwin':  # Darwin is the system name for macOS
+        notification_sound_path = os.path.join(script_dir, '_internal', 'notification_sound.mp3')
+    else:
+        notification_sound_path = "notification_sound.mp3"
+
+    pygame.mixer.music.load(notification_sound_path)  # Load the notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
+
 
 
 def load_settings():
