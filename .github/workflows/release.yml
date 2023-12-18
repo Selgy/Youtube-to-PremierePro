@@ -263,7 +263,7 @@ jobs:
           PKG_ROOT="./pkgroot"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
           SCRIPTS_DIR="./scripts"
-          chmod +x postinstall
+          chmod +x $SCRIPTS_DIR/postinstall.sh
           ls -la pkgroot/
 
           pkgbuild --root "$PKG_ROOT" \
