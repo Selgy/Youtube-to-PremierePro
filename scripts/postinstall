@@ -21,30 +21,20 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-EXEC_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec"
-echo "Creating $EXEC_DIR..."
-mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+#EXEC_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec"
+#echo "Creating $EXEC_DIR..."
+#mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
 
-echo "Copying executable to $EXEC_DIR..."
-cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+#echo "Copying executable to $EXEC_DIR..."
+#cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# Set execution permission for ffmpeg
-FFMPEG_PATH="$EXEC_DIR/_internal/ffmpeg/bin/ffmpeg"
-if [ -f "$FFMPEG_PATH" ]; then
-    echo "Setting execution permission for ffmpeg..."
-    chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
-else
-    echo "ffmpeg file not found at $FFMPEG_PATH."
-fi
-
-echo "Cleanup started..."
 
 # Deleting YoutubetoPremiere and related files from the user's application folder
-if [ -d "$HOME/Applications/YoutubetoPremiere" ]; then
-    rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
-else
-    echo "Directory $HOME/Applications/YoutubetoPremiere does not exist or already deleted."
-fi
+#if [ -d "$HOME/Applications/YoutubetoPremiere" ]; then
+#    rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
+#else
+#    echo "Directory $HOME/Applications/YoutubetoPremiere does not exist or already deleted."
+#fi
 
 if [ -d "$HOME/Applications/com.selgy.youtubetopremiere" ]; then
     rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
