@@ -10,10 +10,14 @@ var cmd;
 if (os.platform() === 'darwin') {
     // macOS specific command for a standalone executable
     var macExecutablePath = path.join(execPath, 'YoutubetoPremiere');
-    cmd = `chmod +x "${macExecutablePath}" && "${macExecutablePath}"`;  // Set execute permissions and then run
+    // Use AppleScript to launch and hide the application
+    var appleScriptCommand = `tell application "Finder" to launch application "${macExecutablePath}"`;
+    cmd = `osascript -e '${appleScriptCommand}' -e 'delay 2' -e 'tell application "System Events" to set visible of process "YoutubetoPremiere" to false'`;
 } else if (os.platform() === 'win32') {
     // Windows specific command
-    cmd = `"${path.join(execPath, 'YoutubetoPremiere.exe')}"`;
+    var winExecutablePath = path.join(execPath, 'YoutubetoPremiere.exe');
+    // Use a Windows batch command to launch the application without a window
+    cmd = `start /B "" "${winExecutablePath}"`;
 }
 
 if (cmd) {

@@ -3,14 +3,17 @@
     <head>
         <meta charset="utf-8">
         <script src="./lib/CSInterface.js"></script>
+        <script src="./app.js"></script>
         <script type="text/javascript">
-            // Launch node server
             window.onload = function () {
+                var csInterface = new CSInterface();
+                var extensionRoot = csInterface.getSystemPath(SystemPath.EXTENSION) + "/";
+
                 var child_process = require('child_process');
                 var path = require('path');
 
                 // Construct the path to the app.js file
-                var appJsPath = path.join(__dirname, 'app.js');
+                var appJsPath = path.join(extensionRoot, 'app.js');
 
                 // Execute the app.js script
                 child_process.exec(`node "${appJsPath}"`, function(err, stdout, stderr) {
@@ -21,7 +24,6 @@
                     console.log('app.js stdout:', stdout);
                     console.error('app.js stderr:', stderr);
                 });
-
                 var http = require('http');
 
                 var hostname = '127.0.0.1';

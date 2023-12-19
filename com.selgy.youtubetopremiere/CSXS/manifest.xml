@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest Version="6.0" ExtensionBundleId="com.selgy.youtubetopremiere" ExtensionBundleVersion="1.0" ExtensionBundleName="YoutubetoPremiere" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<ExtensionList>
-		<Extension Id="com.qmasingarbe.PymiereLink" Version="1.0.0" />
+		<Extension Id="com.selgy.youtubetopremiere" Version="1.0.0" />
 	</ExtensionList>
 	<ExecutionEnvironment>
 		<HostList>
@@ -16,7 +16,7 @@
 	</ExecutionEnvironment>
 
 	<DispatchInfoList>
-		<Extension Id="com.qmasingarbe.PymiereLink">
+		<Extension Id="com.selgy.youtubetopremiere">
 			<DispatchInfo >
 				<Resources>
 					<MainPath>./index.html</MainPath>
@@ -38,7 +38,7 @@
 				</Lifecycle>
 				<UI>
 					<Type>Custom</Type>
-					<Menu>Pymiere Link</Menu>
+					<Menu>YoutubetoPremiere</Menu>
 					<Geometry>
 						<Size>
 							<Height>300</Height>
