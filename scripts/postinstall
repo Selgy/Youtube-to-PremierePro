@@ -46,13 +46,13 @@ echo "Cleanup started..."
 
 # Deleting YoutubetoPremiere and related files from the user's application folder
 if [ -d "$HOME/Applications/YoutubetoPremiere" ]; then
-    rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
+    sudo rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
 else
     echo "Directory $HOME/Applications/YoutubetoPremiere does not exist or already deleted."
 fi
 
 if [ -d "$HOME/Applications/com.selgy.youtubetopremiere" ]; then
-    rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
+    sudo rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
 else
     echo "Directory $HOME/Applications/com.selgy.youtubetopremiere does not exist or already deleted."
 fi
