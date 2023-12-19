@@ -19,7 +19,17 @@ curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetoprem
 
 echo "Installing com.selgy.youtubetopremiere..."
 unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
-mv -f "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere" "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere" && echo "Move successful." || { echo "Failed to move directory"; exit 1; }
+
+# Removing existing installation if it exists
+TARGET_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere"
+SOURCE_DIR="$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere"
+
+if [ -d "$TARGET_DIR" ]; then
+    echo "Existing installation found. Removing..."
+    rm -rf "$TARGET_DIR" && echo "Existing directory removed." || { echo "Failed to remove existing directory"; exit 1; }
+fi
+
+mv -f "$SOURCE_DIR" "$TARGET_DIR" && echo "Installation successful." || { echo "Failed to install"; exit 1; }
 
 # Delete the intermediate folder from GitHub
 rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
@@ -27,7 +37,7 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-EXEC_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec"
+EXEC_DIR="$TARGET_DIR/exec"
 echo "Creating $EXEC_DIR..."
 mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
 
