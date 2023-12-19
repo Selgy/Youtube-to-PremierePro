@@ -38,7 +38,7 @@ cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully."
 FFMPEG_PATH="$EXEC_DIR/_internal/ffmpeg/bin/ffmpeg"
 if [ -f "$FFMPEG_PATH" ]; then
     echo "Setting execution permission for ffmpeg..."
-    chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
+    sudo chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
 else
     echo "ffmpeg file not found at $FFMPEG_PATH."
 fi
@@ -47,6 +47,6 @@ echo "Cleanup started..."
 
 # Force delete the directories
 sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
-sudo rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
+sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
 
 echo "Cleanup completed."
