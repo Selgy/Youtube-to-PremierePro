@@ -5,6 +5,7 @@ defaults write com.adobe.CSXS.8 PlayerDebugMode 1
 defaults write com.adobe.CSXS.9 PlayerDebugMode 1
 defaults write com.adobe.CSXS.10 PlayerDebugMode 1
 defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
@@ -18,13 +19,13 @@ curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetoprem
 
 echo "Installing com.selgy.youtubetopremiere..."
 unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
-mv "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere" "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere" && echo "Move successful." || { echo "Failed to move directory"; exit 1; }
+mv -f "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere" "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere" && echo "Move successful." || { echo "Failed to move directory"; exit 1; }
 
 # Delete the intermediate folder from GitHub
 rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
 
 # Delete the downloaded ZIP file
-rm "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
+rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
 EXEC_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec"
 echo "Creating $EXEC_DIR..."
@@ -44,17 +45,8 @@ fi
 
 echo "Cleanup started..."
 
-# Deleting YoutubetoPremiere and related files from the user's application folder
-if [ -d "$HOME/Applications/YoutubetoPremiere" ]; then
-    sudo rm -rf "$HOME/Applications/YoutubetoPremiere" && echo "Deleted $HOME/Applications/YoutubetoPremiere directory." || { echo "Failed to delete $HOME/Applications/YoutubetoPremiere"; exit 1; }
-else
-    echo "Directory $HOME/Applications/YoutubetoPremiere does not exist or already deleted."
-fi
-
-if [ -d "$HOME/Applications/com.selgy.youtubetopremiere" ]; then
-    sudo rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
-else
-    echo "Directory $HOME/Applications/com.selgy.youtubetopremiere does not exist or already deleted."
-fi
+# Force delete the directories
+sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
+sudo rm -rf "$HOME/Applications/com.selgy.youtubetopremiere" && echo "Deleted $HOME/Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete $HOME/Applications/com.selgy.youtubetopremiere"; exit 1; }
 
 echo "Cleanup completed."
