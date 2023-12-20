@@ -44,16 +44,22 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# Download and Setup FFmpeg
-FFMPEG_PATH="$EXEC_DIR/_internal/ffmpeg/bin/"
+FFMPEG_BIN_DIR="$EXEC_DIR/_internal/ffmpeg/bin"
+FFMPEG_EXECUTABLE_PATH="$FFMPEG_BIN_DIR/ffmpeg"
+
+echo "Creating FFmpeg bin directory..."
+mkdir -p "$FFMPEG_BIN_DIR"
+
 echo "Downloading FFmpeg binary..."
-mkdir -p "$(dirname "$FFMPEG_PATH")"
 curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
-echo "Extracting FFmpeg binary..."
-7z x ffmpeg.7z -o"$(dirname "$FFMPEG_PATH")"
+
+echo "Extracting FFmpeg binary to bin directory..."
+7z x ffmpeg.7z -o"$FFMPEG_BIN_DIR"
 rm ffmpeg.7z
+
 echo "Setting execution permission for FFmpeg binary..."
-chmod +x "$FFMPEG_PATH"
+chmod +x "$FFMPEG_EXECUTABLE_PATH"
+
 
 echo "Cleanup started..."
 # Force delete the directories
