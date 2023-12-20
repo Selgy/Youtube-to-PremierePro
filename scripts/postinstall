@@ -45,7 +45,7 @@ echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
 # Set execution permission for ffmpeg
-FFMPEG_PATH="$EXEC_DIR/_internal/ffmpeg/bin/ffmpeg"
+FFMPEG_PATH="$HOME/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg"
 if [ -f "$FFMPEG_PATH" ]; then
     echo "Setting execution permission for ffmpeg..."
     sudo chmod +x "$FFMPEG_PATH" && echo "Execution permission set successfully." || { echo "Failed to set execution permission for ffmpeg"; exit 1; }
