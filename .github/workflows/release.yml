@@ -75,37 +75,36 @@ jobs:
         EXEC_PATH="./ffmpeg"
         echo "FFmpeg execution path: $EXEC_PATH"
 
-    - name: Check FFmpeg installation and copy binaries
+    - name: Download and Extract FFmpeg Binary
       run: |
-          # Define the destination path for FFmpeg inside pkgroot
-          EXEC_PATH="./ffmpeg"
-          echo "FFmpeg execution path: $EXEC_PATH"
-          
-          # Save the list of installed brew packages
-          brew list > brew-list.txt
+        # Define the destination path for FFmpeg inside pkgroot
+        EXEC_PATH="./ffmpeg"
+        echo "FFmpeg execution path: $EXEC_PATH"
         
-          # Check if FFmpeg is installed
-          if brew list --versions ffmpeg > /dev/null; then
-            echo "FFmpeg is already installed."
-          else
-            echo "Installing FFmpeg..."
-            brew install ffmpeg
-          fi
-      
-          # Create the directory inside pkgroot and copy the entire FFmpeg installation
-          mkdir -p $EXEC_PATH
-          cp -R $(brew --prefix ffmpeg)/. $EXEC_PATH/
-          echo "Contents of $EXEC_PATH:"
-          ls -la $EXEC_PATH
+        # Create the directory for FFmpeg
+        mkdir -p $EXEC_PATH
 
-    - name: Sign FFmpeg binaries
-      run: |
-          EXEC_PATH="./ffmpeg"
-          echo "FFmpeg execution path: $EXEC_PATH"
-          find "$EXEC_PATH" \( -name "*.dylib" -or -name "*.so" -or -name "ffmpeg" \) -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
-          echo "Setting execute permissions for FFmpeg binaries"
-          chmod +x $EXEC_PATH/bin/ffmpeg
+        # Download FFmpeg binary
+        echo "Downloading FFmpeg binary..."
+        curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
         
+        # Extract the downloaded binary
+        echo "Extracting FFmpeg binary..."
+        7z x ffmpeg.7z -o$EXEC_PATH
+        rm ffmpeg.7z
+
+        echo "Contents of $EXEC_PATH:"
+        ls -la $EXEC_PATH
+
+    - name: Sign FFmpeg Binary
+      run: |
+        EXEC_PATH="./ffmpeg"
+        echo "FFmpeg execution path: $EXEC_PATH"
+        # Signing the FFmpeg binary
+        codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" $EXEC_PATH/ffmpeg
+        echo "Setting execute permissions for FFmpeg binary"
+        chmod +x $EXEC_PATH/ffmpeg
+
 
     - name: Set DYLD_LIBRARY_PATH
       run: |
@@ -124,7 +123,6 @@ jobs:
             codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
               
     
-
     - name: Build Application with PyInstaller
       run: |
         pip install --upgrade pyinstaller
@@ -147,14 +145,12 @@ jobs:
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
-        --add-binary "/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib:." \
-        --add-data "./ffmpeg/bin/:./ffmpeg/bin/" \
-        --add-data "./ffmpeg/lib:./ffmpeg/lib" \
-        --add-data "./ffmpeg/share:./ffmpeg/share" \
+        --add-binary "./ffmpeg/ffmpeg:./ffmpeg/" \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
+  
 
         
     - name: Verify Executable Contents
