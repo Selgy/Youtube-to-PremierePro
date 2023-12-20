@@ -145,7 +145,7 @@ jobs:
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
-        --add-binary "./ffmpeg/ffmpeg:./ffmpeg/" \
+        --add-binary "./ffmpeg/ffmpeg:./ffmpeg/bin/" \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
