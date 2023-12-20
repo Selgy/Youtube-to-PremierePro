@@ -69,41 +69,6 @@ jobs:
                 security find-identity -p codesigning $KEYCHAIN_PATH
 
 
-    - name: Define FFmpeg execution path
-      run: |
-        # Define the destination path for FFmpeg inside pkgroot
-        EXEC_PATH="./ffmpeg"
-        echo "FFmpeg execution path: $EXEC_PATH"
-
-    - name: Download and Extract FFmpeg Binary
-      run: |
-        # Define the destination path for FFmpeg inside pkgroot
-        EXEC_PATH="./ffmpeg"
-        echo "FFmpeg execution path: $EXEC_PATH"
-        
-        # Create the directory for FFmpeg
-        mkdir -p $EXEC_PATH
-
-        # Download FFmpeg binary
-        echo "Downloading FFmpeg binary..."
-        curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
-        
-        # Extract the downloaded binary
-        echo "Extracting FFmpeg binary..."
-        7z x ffmpeg.7z -o$EXEC_PATH
-        rm ffmpeg.7z
-
-        echo "Contents of $EXEC_PATH:"
-        ls -la $EXEC_PATH
-
-    - name: Sign FFmpeg Binary
-      run: |
-        EXEC_PATH="./ffmpeg"
-        echo "FFmpeg execution path: $EXEC_PATH"
-        # Signing the FFmpeg binary
-        codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" $EXEC_PATH/ffmpeg
-        echo "Setting execute permissions for FFmpeg binary"
-        chmod +x $EXEC_PATH/ffmpeg
 
 
     - name: Set DYLD_LIBRARY_PATH
@@ -145,7 +110,6 @@ jobs:
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
-        --add-binary "./ffmpeg/ffmpeg:./ffmpeg/bin/" \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
