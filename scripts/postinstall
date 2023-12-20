@@ -51,11 +51,11 @@ echo "Creating FFmpeg bin directory..."
 mkdir -p "$FFMPEG_BIN_DIR"
 
 echo "Downloading FFmpeg binary..."
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
+curl -v -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
 
 echo "Extracting FFmpeg binary to bin directory..."
-7z x ffmpeg.7z -o"$FFMPEG_BIN_DIR"
-rm ffmpeg.7z
+7z x ffmpeg.7z -o"$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
+#rm ffmpeg.7z
 
 echo "Setting execution permission for FFmpeg binary..."
 chmod +x "$FFMPEG_EXECUTABLE_PATH"
