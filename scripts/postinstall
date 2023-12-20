@@ -51,11 +51,11 @@ echo "Creating FFmpeg bin directory..."
 mkdir -p "$FFMPEG_BIN_DIR"
 
 echo "Downloading FFmpeg binary..."
-curl -v -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.7z" --output ffmpeg.7z
+curl -v -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output ffmpeg.zip
 
 echo "Extracting FFmpeg binary to bin directory..."
-7z x ffmpeg.7z -o"$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
-#rm ffmpeg.7z
+unzip ffmpeg.zip -d "$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
+rm ffmpeg.zip
 
 echo "Setting execution permission for FFmpeg binary..."
 chmod +x "$FFMPEG_EXECUTABLE_PATH"
@@ -70,4 +70,4 @@ echo "Cleanup completed."
 
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
-open "https://chromewebstore.google.com/u/2/detail/youtube-to-premiere-pro/l
+open "https://chromewebstore.google.com/u/2/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
