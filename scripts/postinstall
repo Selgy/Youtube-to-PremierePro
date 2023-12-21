@@ -38,12 +38,6 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
 EXEC_DIR="$TARGET_DIR/exec"
-echo "Creating $EXEC_DIR..."
-mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
-
-echo "Copying executable to $EXEC_DIR..."
-cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
-
 FFMPEG_BIN_DIR="$EXEC_DIR/_internal/ffmpeg/bin"
 FFMPEG_EXECUTABLE_PATH="$FFMPEG_BIN_DIR/ffmpeg"
 
@@ -51,19 +45,23 @@ echo "Creating FFmpeg bin directory..."
 mkdir -p "$FFMPEG_BIN_DIR"
 
 echo "Downloading FFmpeg binary..."
-curl -v -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output ffmpeg.zip
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output ffmpeg.zip
 
 echo "Extracting FFmpeg binary to bin directory..."
 unzip ffmpeg.zip -d "$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
 rm ffmpeg.zip
 
-echo "Changing ownership of FFmpeg binary to the current user..."
-sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
+if [ -f "$FFMPEG_EXECUTABLE_PATH" ]; then
+    echo "Changing ownership of FFmpeg binary to the current user..."
+    sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
+else
+    echo "FFmpeg binary not found at $FFMPEG_EXECUTABLE_PATH"
+fi
 
 echo "Cleanup started..."
 # Force delete the directories
-sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
-sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
+sudo rm -rf "/Applications/YoutubetoPremiere"
+sudo rm -rf "/Applications/com.selgy.youtubetopremiere"
 
 echo "Cleanup completed."
 
