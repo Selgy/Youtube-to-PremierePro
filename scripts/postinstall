@@ -53,12 +53,10 @@ curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip"
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
-# Change ownership of FFmpeg binary
-if [ -f "$FFMPEG_BIN_DIR/ffmpeg" ]; then
-    chown -v $(whoami) "$FFMPEG_BIN_DIR/ffmpeg" 2> "$LOG_FILE"
-else
-    echo "FFmpeg binary not found." >> "$LOG_FILE"
-fi
+
+echo "About to change ownership" >> "$LOG_FILE"
+sudo chown $(whoami) "/Users/m1/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg" >> "$LOG_FILE" 2>&1
+echo "Ownership change attempted" >> "$LOG_FILE"
 
 
 echo "Cleanup started..."
