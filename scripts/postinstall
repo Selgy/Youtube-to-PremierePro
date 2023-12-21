@@ -46,7 +46,8 @@ cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully."
 
 EXEC_DIR="$TARGET_DIR/exec"
 FFMPEG_BIN_DIR="$EXEC_DIR/_internal/ffmpeg/bin"
-FFMPEG_EXECUTABLE_PATH="$FFMPEG_BIN_DIR/ffmpeg"
+#FFMPEG_EXECUTABLE_PATH="$FFMPEG_BIN_DIR/ffmpeg"
+FFMPEG_EXECUTABLE_PATH="/Users/m1/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg"
 
 echo "Creating FFmpeg bin directory..."
 mkdir -p "$FFMPEG_BIN_DIR"
@@ -58,12 +59,29 @@ echo "Extracting FFmpeg binary to bin directory..."
 unzip ffmpeg.zip -d "$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
 rm ffmpeg.zip
 
+
+# Check if the FFmpeg binary exists
 if [ -f "$FFMPEG_EXECUTABLE_PATH" ]; then
-    echo "Changing ownership of FFmpeg binary to the current user..."
+    echo "FFmpeg binary found. Changing ownership to the current user..."
     sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
+    echo "Ownership changed successfully."
 else
     echo "FFmpeg binary not found at $FFMPEG_EXECUTABLE_PATH"
 fi
+
+
+# Check if the FFmpeg binary exists
+if [ -f "$FFMPEG_EXECUTABLE_PATH" ]; then
+    echo "FFmpeg binary found. Changing ownership to the current user..."
+    sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
+    echo "Ownership changed successfully."
+else
+    echo "FFmpeg binary not found at $FFMPEG_EXECUTABLE_PATH"
+fi
+
+
+
+
 echo "Cleanup started..."
 # Force delete the directories
 sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
