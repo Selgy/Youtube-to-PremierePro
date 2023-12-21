@@ -44,28 +44,18 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-FFMPEG_BIN_DIR="$EXEC_DIR/_internal/ffmpeg/bin"
-FFMPEG_EXECUTABLE_PATH="$FFMPEG_BIN_DIR/ffmpeg"
-
-echo "Creating FFmpeg bin directory..."
+FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
 mkdir -p "$FFMPEG_BIN_DIR"
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
-echo "Downloading FFmpeg binary..."
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output ffmpeg.zip
-
-echo "Extracting FFmpeg binary to bin directory..."
-unzip ffmpeg.zip -d "$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
-rm ffmpeg.zip
-
-# Check if the FFmpeg binary exists and change ownership to the current user
-if [ -f "$FFMPEG_EXECUTABLE_PATH" ]; then
-    echo "Changing ownership of FFmpeg binary to the current user..."
-    sudo chown $(whoami) "/Users/m1/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg"
-    echo "Ownership changed successfully."
+# Change ownership of FFmpeg binary
+if [ -f "$FFMPEG_BIN_DIR/ffmpeg" ]; then
+    sudo chown -v $(whoami) "$FFMPEG_BIN_DIR/ffmpeg"
 else
-    echo "FFmpeg binary not found at $FFMPEG_EXECUTABLE_PATH"
+    echo "FFmpeg binary not found."
 fi
-
 
 
 echo "Cleanup started..."
