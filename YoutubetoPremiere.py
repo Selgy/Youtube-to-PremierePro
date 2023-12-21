@@ -207,19 +207,13 @@ def import_video_to_premiere(video_path):
 
 
 
+
 def sanitize_title(title):
-    # Replace known problematic characters
-    sanitized_title = (title.replace(":", " ")
-                             .replace("|", " ")  # Added replacement for '|'
-                             .replace("｜", " ")
-                             .replace("*", " ")
-                             .replace("?", " ")
-                             .replace("/", " ")
-                             .replace("\\", " ")  # Added replacement for '\'
-                             .replace("<", " ")
-                             .replace(">", " ")
-                             .replace("\"", " ")
-                             .replace("'", " "))
+    # Define a regular expression pattern that matches unwanted characters
+    # This pattern keeps letters, numbers, and specific special characters
+    pattern = '[^A-Za-z0-9 \.\,\;\!\ùéèà€\$ùéèàçôâêîôûäëïöüÿñ]+'
+    # Replace unwanted characters with a space
+    sanitized_title = re.sub(pattern, ' ', title)
     return sanitized_title
 
 def progress_hook(d):
