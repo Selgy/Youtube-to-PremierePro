@@ -44,6 +44,9 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
+
+
+LOG_FILE="$HOME/Desktop/ffmpeg_chown_log.txt"
 FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
 mkdir -p "$FFMPEG_BIN_DIR"
 curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
@@ -52,9 +55,9 @@ rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
 # Change ownership of FFmpeg binary
 if [ -f "$FFMPEG_BIN_DIR/ffmpeg" ]; then
-    sudo chown -v $(whoami) "$FFMPEG_BIN_DIR/ffmpeg"
+    chown -v $(whoami) "$FFMPEG_BIN_DIR/ffmpeg" 2> "$LOG_FILE"
 else
-    echo "FFmpeg binary not found."
+    echo "FFmpeg binary not found." >> "$LOG_FILE"
 fi
 
 
