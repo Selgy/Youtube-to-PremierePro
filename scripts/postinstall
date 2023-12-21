@@ -1,13 +1,18 @@
 #!/bin/bash
 
+# get the current user
+loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+
 # Enable PlayerDebugMode for Adobe CEP versions 8 to 11
 defaults write com.adobe.CSXS.8 PlayerDebugMode 1
 defaults write com.adobe.CSXS.9 PlayerDebugMode 1
 defaults write com.adobe.CSXS.10 PlayerDebugMode 1
 defaults write com.adobe.CSXS.11 PlayerDebugMode 1
 
-# Define the user's Adobe CEP extensions directory
-CEP_EXTENSIONS_DIR="$HOME/Library/Application Support/Adobe/CEP/extensions"
+# Define the user's Adobe CEP extensions directory based on the logged-in user
+CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
+
+# Other variables
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
@@ -37,25 +42,28 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-EXEC_DIR="$TARGET_DIR/exec"
-echo "Creating $EXEC_DIR..."
-mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+echo "Copying executable to $TARGET_DIR..."
+cp -R "$EXECUTABLE_PATH/"* "$TARGET_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-echo "Copying executable to $EXEC_DIR..."
-cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+# If a user is logged in, perform operations in user context
+if [ -n "$loggedInUser" ]; then
+    # Get the uid of the logged-in user
+    uid=$(id -u "$loggedInUser")
 
-# FFmpeg binary download and extraction
-FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
-mkdir -p "$FFMPEG_BIN_DIR"
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
-unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
+    FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+    mkdir -p "$FFMPEG_BIN_DIR"
+    curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+    unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+    rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
-# Change ownership of FFmpeg binary
-LOG_FILE="$HOME/Desktop/ffmpeg_chown_log.txt"
-echo "About to change ownership" >> "$LOG_FILE"
-sudo chown $(whoami) "/Users/m1/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg" >> "$LOG_FILE" 2>&1
-echo "Ownership change attempted" >> "$LOG_FILE"
+    # Change ownership of FFmpeg binary
+    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
+    launchctl asuser "$uid" bash -c "
+        echo 'About to change ownership' >> '$LOG_FILE';
+        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
+        echo 'Ownership change attempted' >> '$LOG_FILE';
+    "
+fi
 
 echo "Cleanup started..."
 # Force delete the directories
