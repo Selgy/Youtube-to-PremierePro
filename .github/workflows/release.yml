@@ -191,7 +191,7 @@ jobs:
 
 
     - name: Make postinstall script executable
-      run: chmod +x ./scripts/postinstall
+      run: sudo chmod +x ./scripts/postinstall
 
  
             
