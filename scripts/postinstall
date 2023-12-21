@@ -60,7 +60,7 @@ rm ffmpeg.zip
 # Check if the FFmpeg binary exists and change ownership to the current user
 if [ -f "$FFMPEG_EXECUTABLE_PATH" ]; then
     echo "Changing ownership of FFmpeg binary to the current user..."
-    sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
+    sudo chown $(whoami) "/Users/m1/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin/ffmpeg"
     echo "Ownership changed successfully."
 else
     echo "FFmpeg binary not found at $FFMPEG_EXECUTABLE_PATH"
