@@ -57,7 +57,8 @@ echo "Extracting FFmpeg binary to bin directory..."
 unzip ffmpeg.zip -d "$FFMPEG_BIN_DIR" && echo "Extraction successful" || echo "Extraction failed"
 rm ffmpeg.zip
 
-
+echo "Changing ownership of FFmpeg binary to the current user..."
+sudo chown $(whoami) "$FFMPEG_EXECUTABLE_PATH"
 
 echo "Cleanup started..."
 # Force delete the directories
