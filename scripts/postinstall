@@ -9,10 +9,8 @@ defaults write com.adobe.CSXS.9 PlayerDebugMode 1
 defaults write com.adobe.CSXS.10 PlayerDebugMode 1
 defaults write com.adobe.CSXS.11 PlayerDebugMode 1
 
-# Define the user's Adobe CEP extensions directory based on the logged-in user
+# Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
-
-# Other variables
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
@@ -42,8 +40,12 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-echo "Copying executable to $TARGET_DIR/exec..."
-cp -R "$EXECUTABLE_PATH/"* "$TARGET_DIR/exec" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+EXEC_DIR="$TARGET_DIR/exec"
+echo "Creating $EXEC_DIR..."
+mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+
+echo "Copying executable to $EXEC_DIR..."
+cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
 # If a user is logged in, perform operations in user context
 if [ -n "$loggedInUser" ]; then
