@@ -42,8 +42,8 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-echo "Copying executable to $TARGET_DIR..."
-cp -R "$EXECUTABLE_PATH/"* "$TARGET_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+echo "Copying executable to $TARGET_DIR/exec..."
+cp -R "$EXECUTABLE_PATH/"* "$TARGET_DIR/exec" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
 # If a user is logged in, perform operations in user context
 if [ -n "$loggedInUser" ]; then
