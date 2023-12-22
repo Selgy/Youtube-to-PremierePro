@@ -419,6 +419,9 @@ jobs:
     
         # Compile the NSIS script
         makensis installer.nsi
+      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+      env:
+        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
 
     - name: List directory contents dist
       run: dir dist
