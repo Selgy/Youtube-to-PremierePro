@@ -376,13 +376,22 @@ jobs:
 
     - name: Install NSIS Plugins
       run: |
-        curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
-        mkdir -p "nsis/plugins/x86-unicode/"
-        mv nsExec.dll "nsis/plugins/x86-unicode/"
+          # Download the nsExec plugin
+          curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
+      
+          # Create a directory for the plugin
+          $pluginPath = "nsis/plugins/x86-unicode"
+          mkdir -p $pluginPath
+      
+          # Move the downloaded plugin to the created directory
+          mv nsExec.dll $pluginPath
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
       env:
         pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
     
+
+
+
     - name: Create installer
       uses: joncloud/makensis-action@v4
       with:
@@ -393,7 +402,7 @@ jobs:
         pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
 
 
-        
+
     - name: List directory contents dist
       run: dir dist
     
