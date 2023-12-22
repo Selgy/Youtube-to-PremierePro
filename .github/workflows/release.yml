@@ -377,19 +377,23 @@ jobs:
     - name: Install NSIS Plugins
       run: |
         curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
-        mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
-        mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+        mkdir -p "nsis/plugins/x86-unicode/"
+        mv nsExec.dll "nsis/plugins/x86-unicode/"
+      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+      env:
+        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
     
     - name: Create installer
       uses: joncloud/makensis-action@v4
       with:
-        script-file: './installer.nsi'  # Path to your NSIS script file
-        arguments: '/V3'  # Additional arguments for makensis
-        # If needed, specify additional plugin paths
-        additional-plugin-paths: |
-            "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
-  
+        script-file: ./installer.nsi
+        arguments: /V3
+        additional-plugin-paths: "${{ github.workspace }}/nsis/plugins/x86-unicode/"
+      env:
+        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
 
+
+        
     - name: List directory contents dist
       run: dir dist
     
