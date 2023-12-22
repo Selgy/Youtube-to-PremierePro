@@ -379,7 +379,7 @@ jobs:
           curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
           mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
           mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
-          shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
       env:
         pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
 
