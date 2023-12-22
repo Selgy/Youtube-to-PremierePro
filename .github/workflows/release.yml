@@ -388,45 +388,51 @@ jobs:
         
     - name: Create Installer with NSIS
       run: |
-        echo "!include 'MUI2.nsh'" > installer.nsi
+          !include "MUI2.nsh"
 
-        echo "Name 'YoutubetoPremiere Installer'" >> installer.nsi
-        echo "OutFile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-        echo "!define MUI_ABORTWARNING" >> installer.nsi
-        echo "!define MUI_ICON 'icon.ico'" >> installer.nsi
-    
-        echo "!insertmacro MUI_PAGE_WELCOME" >> installer.nsi
-        echo "!insertmacro MUI_PAGE_DIRECTORY" >> installer.nsi
-        echo "!insertmacro MUI_PAGE_INSTFILES" >> installer.nsi
-        echo "!insertmacro MUI_PAGE_FINISH" >> installer.nsi
-        echo "!insertmacro MUI_LANGUAGE 'English'" >> installer.nsi
-    
-        echo "Section 'PreInstall' SEC_PRE" >> installer.nsi
-        echo "nsProcess::KillProcess 'YoutubetoPremiere.exe'" >> installer.nsi
-        echo "Pop \$0" >> installer.nsi
-        echo "IfFileExists 'C:\\Program Files (x86)\\YoutubetoPremiere\\YoutubetoPremiere.exe' 0 +2" >> installer.nsi
-        echo "Delete 'C:\\Program Files (x86)\\YoutubetoPremiere'" >> installer.nsi
-        echo "SectionEnd" >> installer.nsi
-    
-        echo "Function .onInit" >> installer.nsi
-        echo "StrCpy \$INSTDIR 'C:\\Program Files (x86)\\Common Files\\Adobe\\CEP\\extensions\\com.selgy.youtubetopremiere'" >> installer.nsi
-        echo "FunctionEnd" >> installer.nsi
-    
-        echo "Section 'MainSection' SEC01" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere'" >> installer.nsi
-        echo "File /r 'com.selgy.youtubetopremiere\\*.*'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere\\exec'" >> installer.nsi
-        echo "File 'dist\\YoutubetoPremiere.exe'" >> installer.nsi
-        echo "CreateDirectory '\$INSTDIR\\com.selgy.youtubetopremiere\\exec\\ffmpeg_win'" >> installer.nsi
-        echo "SetOutPath '\$INSTDIR\\com.selgy.youtubetopremiere\\exec\\ffmpeg_win'" >> installer.nsi
-        echo "File /r 'ffmpeg\\ffmpeg_win\\*.*'" >> installer.nsi
-        echo "SectionEnd" >> installer.nsi
-    
-        echo "ShowInstDetails show" >> installer.nsi
-        echo "ShowUnInstDetails show" >> installer.nsi
-    
-        makensis installer.nsi
+          Name "YoutubetoPremiere Installer"
+          OutFile "YoutubetoPremiereInstaller.exe"
+          !define MUI_ABORTWARNING
+          !define MUI_ICON "icon.ico"
+          
+          !insertmacro MUI_PAGE_WELCOME
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_PAGE_FINISH
+          !insertmacro MUI_LANGUAGE "English"
+          
+          Function .onInit
+              nsExec::ExecToStack 'tasklist | findstr /R /C:"YoutubetoPremiere.exe"'
+              Pop $0 ; Return value
+              Pop $1 ; Output
+              StrCmp $0 0 0 processRunning
+              MessageBox MB_OK|MB_ICONEXCLAMATION "Please close YoutubetoPremiere before continuing with the installation."
+              Abort
+              processRunning:
+          FunctionEnd
+          
+          Section "MainSection" SEC01
+              SetOutPath "$INSTDIR"
+              SetOutPath "$INSTDIR\com.selgy.youtubetopremiere"
+              File /r "com.selgy.youtubetopremiere\*.*"
+              SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec"
+              File "dist\YoutubetoPremiere.exe"
+              CreateDirectory "$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win"
+              SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win"
+              File /r "ffmpeg\ffmpeg_win\*.*"
+              WriteUninstaller "$INSTDIR\Uninstall.exe"
+          SectionEnd
+          
+          Section "Uninstall"
+              Delete "$INSTDIR\YoutubetoPremiere.exe"
+              RMDir /r "$INSTDIR\com.selgy.youtubetopremiere"
+              Delete "$INSTDIR\Uninstall.exe"
+              RMDir "$INSTDIR"
+          SectionEnd
+          
+          ShowInstDetails show
+          ShowUnInstDetails show
+      
       
 
     - name: List directory contents dist
