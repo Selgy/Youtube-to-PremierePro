@@ -432,7 +432,9 @@ jobs:
           
           ShowInstDetails show
           ShowUnInstDetails show
-      
+      shell: pwsh
+      env:
+        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
       
 
     - name: List directory contents dist
