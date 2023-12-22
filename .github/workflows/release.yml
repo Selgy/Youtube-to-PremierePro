@@ -376,15 +376,11 @@ jobs:
 
     - name: Install NSIS Plugins
       run: |
-          curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
-          curl -L https://nsis.sourceforge.io/NsProcess_plugin -o nsProcessW.dll
-          $nsisPath = (Get-Command makensis).Source.Replace('makensis.exe', '')
-          New-Item -Path "${nsisPath}Plugins\x86-unicode\" -ItemType Directory -Force
-          Move-Item nsExec.dll "${nsisPath}Plugins\x86-unicode\" -Force
-          Move-Item nsProcessW.dll "${nsisPath}Plugins\x86-unicode\nsProcess.dll" -Force
-      
-      shell: pwsh
-    
+            curl -L https://nsis.sourceforge.io/NsExec_plug-in -o nsExec.dll
+            mkdir -p "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+            mv nsExec.dll "$RUNNER_TOOL_CACHE/nsis/3.0/nsis/plugins/x86-unicode/"
+
+          
         
     - name: Create Installer with NSIS
       run: |
