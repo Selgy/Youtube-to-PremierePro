@@ -406,7 +406,7 @@ jobs:
               echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
               echo 'SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec"' >> installer.nsi
               echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-              echo 'File /r "ffmpeg_win\*.*"' >> installer.nsi
+              echo 'File /r "ffmpeg\*.*"' >> installer.nsi
               echo 'SectionEnd' >> installer.nsi
               echo 'Section "Uninstall"' >> installer.nsi
               echo '  Delete "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
