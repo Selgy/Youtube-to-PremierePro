@@ -377,36 +377,46 @@ jobs:
 
     - name: Create NSIS Script
       run: |
-            echo "!include MUI2.nsh" > installer.nsi
-            echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
-            echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-            echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
-            echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
-            echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
-            echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
-            echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
-            echo 'Icon "icon.ico"' >> installer.nsi
-            
-            echo 'Section "Copy com.selgy.youtubetopremiere Extension" SEC01' >> installer.nsi
-            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"' >> installer.nsi
-            echo 'File /r "com.selgy.youtubetopremiere\*.*"' >> installer.nsi
-            echo 'SectionEnd' >> installer.nsi
-            
-            echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
-            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere\exec"' >> installer.nsi
-            echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-            echo 'CreateDirectory "$INSTDIR\ffmpeg_win"' >> installer.nsi
-            echo 'SetOutPath "$INSTDIR\ffmpeg_win"' >> installer.nsi
-            echo 'File /r "ffmpeg\*.*"' >> installer.nsi
-            echo 'SectionEnd' >> installer.nsi
-            
-            
-            makensis installer.nsi
+              echo "!include MUI2.nsh" > installer.nsi
+              echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
+              echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+              echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
+              echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_TEXT "Youtube to Premiere has been successfully installed on your computer."' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_BUTTON "Finish"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_RUN "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"' >> installer.nsi
+              echo '!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"' >> installer.nsi
+              echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
+              echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
+              echo 'Icon "icon.ico"' >> installer.nsi
+              echo 'Function .onInit' >> installer.nsi
+              echo '  nsExec::ExecToStack "tasklist /nh /fi \"imagename eq YoutubetoPremiere.exe\""' >> installer.nsi
+              echo '  Pop $0' >> installer.nsi
+              echo '  StrCmp $0 "" notRunning' >> installer.nsi
+              echo '  MessageBox MB_OK|MB_ICONSTOP "YoutubetoPremiere is currently running. Please close it before continuing."' >> installer.nsi
+              echo '  Abort' >> installer.nsi
+              echo '  notRunning:' >> installer.nsi
+              echo 'FunctionEnd' >> installer.nsi
+              echo 'Section "Copy com.selgy.youtubetopremiere Extension" SEC01' >> installer.nsi
+              echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"' >> installer.nsi
+              echo 'File /r "com.selgy.youtubetopremiere\*.*"' >> installer.nsi
+              echo 'SectionEnd' >> installer.nsi
+              echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
+              echo 'SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec"' >> installer.nsi
+              echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
+              echo 'File /r "ffmpeg_win\*.*"' >> installer.nsi
+              echo 'SectionEnd' >> installer.nsi
+              echo 'Section "Uninstall"' >> installer.nsi
+              echo '  Delete "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
+              echo '  RMDir /r "$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win"' >> installer.nsi
+              echo '  RMDir /r "$SMPROGRAMS\YoutubetoPremiere"' >> installer.nsi
+              echo '  DeleteRegKey HKLM "Software\YoutubetoPremiere"' >> installer.nsi
+              echo 'SectionEnd' >> installer.nsi
+              makensis installer.nsi
+      shell: cmd
+      
         
 
     - name: List directory contents dist
@@ -416,11 +426,18 @@ jobs:
       id: get_release
       uses: actions/github-script@v5
       with:
-          script: |
-            const { owner, repo } = context.repo
-            const releases = await github.rest.repos.listReleases({ owner, repo })
-            const preRelease = releases.data.find(release => release.prerelease and release.tag_name === 'V1.1')
-            return preRelease.upload_url
+        script: |
+          const { owner, repo } = context.repo;
+          const releases = await github.rest.repos.listReleases({ owner, repo });
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1');
+          return preRelease ? preRelease.upload_url : null;
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        debug: false
+        user-agent: actions/github-script
+        result-encoding: json
+      env:
+        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
+      
     
     - name: Upload executables to asset
       id: upload-release-asset
