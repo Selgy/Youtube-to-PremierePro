@@ -396,6 +396,8 @@ jobs:
           echo '  Pop $0' >> installer.nsi
           echo '  Pop $1' >> installer.nsi
           echo '  StrCmp $1 "" processNotRunning' >> installer.nsi
+          echo '  StrCpy $2 $1 25' >> installer.nsi
+          echo '  StrCmp $2 "INFO: No tasks are running" processNotRunning' >> installer.nsi
           echo '  MessageBox MB_OK|MB_ICONSTOP "YoutubetoPremiere is currently running. Please close it before continuing."' >> installer.nsi
           echo '  Abort' >> installer.nsi
           echo '  processNotRunning:' >> installer.nsi
