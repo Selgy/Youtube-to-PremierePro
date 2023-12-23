@@ -392,18 +392,19 @@ jobs:
             echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
             echo 'Icon "icon.ico"' >> installer.nsi
             
-            echo 'Section "Copy PymiereLink Extension" SEC01' >> installer.nsi
-            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link"' >> installer.nsi
-            echo 'File /r "Pymiere Link\*.*"' >> installer.nsi
+            echo 'Section "Copy com.selgy.youtubetopremiere Extension" SEC01' >> installer.nsi
+            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"' >> installer.nsi
+            echo 'File /r "com.selgy.youtubetopremiere\*.*"' >> installer.nsi
             echo 'SectionEnd' >> installer.nsi
             
             echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
-            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\Pymiere Link\exec"' >> installer.nsi
+            echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere\exec"' >> installer.nsi
             echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-            echo 'CreateDirectory "$INSTDIR\ffmpeg"' >> installer.nsi
-            echo 'SetOutPath "$INSTDIR\ffmpeg"' >> installer.nsi
+            echo 'CreateDirectory "$INSTDIR\ffmpeg_win"' >> installer.nsi
+            echo 'SetOutPath "$INSTDIR\ffmpeg_win"' >> installer.nsi
             echo 'File /r "ffmpeg\*.*"' >> installer.nsi
             echo 'SectionEnd' >> installer.nsi
+            
             
             makensis installer.nsi
         
