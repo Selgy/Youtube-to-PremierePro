@@ -377,8 +377,6 @@ jobs:
 
     - name: Create NSIS Script
       run: |
-        New-Item -Type File -Path installer_script.nsi -Force
-        @"
         !include 'MUI2.nsh'
         Name 'YoutubetoPremiere Installer'
         OutFile 'YoutubetoPremiereInstaller.exe'
@@ -426,8 +424,7 @@ jobs:
         
         ShowInstDetails show
         ShowUnInstDetails show
-        
-        "@ | Set-Content -Path installer_script.nsi
+      
 
     - name: Build Installer with NSIS
       run: |
