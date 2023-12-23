@@ -372,7 +372,7 @@ jobs:
     
         
     - name: Install NSIS
-      run: choco install nsis
+      run: choco install nsis --force
 
     - name: Install NSIS Plugins
       run: |
