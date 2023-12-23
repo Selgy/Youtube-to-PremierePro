@@ -375,23 +375,6 @@ jobs:
       run: |
         choco install nsis
 
-    - name: Download and Install NSExec plugin
-      run: |
-          curl -L https://nsis.sourceforge.io/mediawiki/images/1/18/NsExec.zip -o NsExec.zip
-          if ($LASTEXITCODE -ne 0) { 
-              Write-Error "Error downloading NSExec.zip"
-              exit $LASTEXITCODE
-          }
-          try {
-              Expand-Archive -Path NsExec.zip -DestinationPath $Env:ProgramFiles\NSIS\Plugins\x86-unicode -Force
-          } catch {
-              Write-Error "Error expanding NSExec.zip: $_"
-              exit 1
-          }
-      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
-      env:
-        pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
-    
     - name: Create NSIS Script
       run: |
         New-Item -Type File -Path installer_script.nsi -Force
