@@ -378,8 +378,8 @@ jobs:
     - name: Create NSIS Script
       run: |
               echo "!include MUI2.nsh" > installer.nsi
-              echo "Caption 'YoutubetoPremiere Installer'" >> installer.nsi
-              echo "Outfile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
+              echo "Caption 'Y2P Installer'" >> installer.nsi
+              echo "Outfile 'Y2PInstaller.exe'" >> installer.nsi
               echo '!define MUI_INSTFILESPAGE_TEXT_TOP "Youtube to Premiere is now being installed on your computer."' >> installer.nsi
               echo '!define MUI_INSTFILESPAGE_TEXT_COMPLETED "Installation Completed"' >> installer.nsi
               echo '!define MUI_FINISHPAGE_TITLE "Installation Completed"' >> installer.nsi
@@ -448,4 +448,4 @@ jobs:
           prerelease: ${{ github.ref != 'refs/heads/master' }}
           tag_name: V1.1
           files: |
-              YoutubetoPremiereInstaller.exe
+            Y2PInstaller.exe
