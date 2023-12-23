@@ -8,7 +8,7 @@ on:
 jobs:
   mac-build:
     runs-on: macos-latest
-
+    needs: win-build
     steps:
 
     - name: Checkout code
