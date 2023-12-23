@@ -415,8 +415,7 @@ jobs:
               echo '  DeleteRegKey HKLM "Software\YoutubetoPremiere"' >> installer.nsi
               echo 'SectionEnd' >> installer.nsi
               makensis installer.nsi
-      shell: cmd
-      
+    
         
 
     - name: List directory contents dist
