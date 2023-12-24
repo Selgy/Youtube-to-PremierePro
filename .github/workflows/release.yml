@@ -377,10 +377,9 @@ jobs:
 
     - name: Download and Install NSIS Process Plugin
       run: |
-          curl -L https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip -o NsProcess.zip
-          Expand-Archive -Path NsProcess.zip -DestinationPath "$Env:ProgramFiles(x86)\NSIS\Plugins\x86-unicode\"
-          Remove-Item NsProcess.zip
-
+          curl -L -o NsProcess.zip https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip
+          unzip NsProcess.zip -d "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Plugins"
+      shell: pwsh
 
     - name: Compile Installer with NSIS
       run: makensis ./installer.nsi
