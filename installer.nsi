@@ -5,14 +5,14 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 !define MUI_ABORTWARNING
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
 
 !insertmacro MUI_LANGUAGE 'English'
 
 Function .onInit
-    # Initialization code here
+    # Set the installation path
+    StrCpy $INSTDIR "$PROGRAMFILES64\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"
 FunctionEnd
 
 Section 'Install YoutubetoPremiere' SEC01
@@ -30,6 +30,7 @@ Section 'Install YoutubetoPremiere' SEC01
     File /r 'ffmpeg\*.*'
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere'
     File /r 'com.selgy.youtubetopremiere\*.*'
+    WriteUninstaller "$INSTDIR\uninstall.exe"
 SectionEnd
 
 Section 'Uninstall'
