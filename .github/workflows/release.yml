@@ -375,25 +375,13 @@ jobs:
       run: |
         choco install nsis
 
-    - name: Download and Install NSIS NsProcess Plugin
+    - name: Download and Install NSIS Process Plugin
       run: |
           curl -L https://nsis.sourceforge.io/mediawiki/images/1/18/NsProcess.zip -o NsProcess.zip
-          if (-Not (Test-Path -Path NsProcess.zip)) {
-              Write-Error "Failed to download NsProcess.zip"
-              exit 1
-          }
-      
-          # Directly specifying the plugin path
-          $pluginPath = "${Env:ProgramFiles(x86)}\NSIS\Plugins\x86-unicode"
-          
-          if (-Not (Test-Path -Path $pluginPath)) {
-              Write-Error "NSIS plugin path does not exist: $pluginPath"
-              exit 1
-          }
-          Expand-Archive -Path NsProcess.zip -DestinationPath $pluginPath
+          Expand-Archive -Path NsProcess.zip -DestinationPath "$Env:ProgramFiles(x86)\NSIS\Plugins\x86-unicode\"
           Remove-Item NsProcess.zip
-      shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
-      
+
+
     - name: Compile Installer with NSIS
       run: makensis ./installer.nsi
       
