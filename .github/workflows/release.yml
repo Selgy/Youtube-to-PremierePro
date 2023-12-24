@@ -382,6 +382,11 @@ jobs:
           unzip NsProcess.zip -d "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Plugins"
       shell: pwsh
 
+    - name: List NSIS Include Directory
+      run: |
+        ls "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include"
+      shell: pwsh
+
     - name: Compile Installer with NSIS
       run: makensis ./installer.nsi
       
