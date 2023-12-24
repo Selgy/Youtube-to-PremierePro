@@ -376,54 +376,8 @@ jobs:
         choco install nsis
 
 
-    - name: Create NSIS Script
-      run: |
-          echo "!include MUI2.nsh" > installer.nsi
-          echo "Name 'YoutubetoPremiere Installer'" >> installer.nsi
-          echo "OutFile 'YoutubetoPremiereInstaller.exe'" >> installer.nsi
-          echo "!define MUI_ICON 'icon.ico'" >> installer.nsi
-          echo "!define MUI_ABORTWARNING" >> installer.nsi
-        
-          # Pages
-          echo "!insertmacro MUI_PAGE_WELCOME" >> installer.nsi
-          echo "!insertmacro MUI_PAGE_DIRECTORY" >> installer.nsi
-          echo "!insertmacro MUI_PAGE_INSTFILES" >> installer.nsi
-          echo "!insertmacro MUI_PAGE_FINISH" >> installer.nsi
-        
-          echo "!insertmacro MUI_LANGUAGE 'English'" >> installer.nsi
-        
-          echo "Function .onInit" >> installer.nsi
-          # Initialization code here
-          echo "FunctionEnd" >> installer.nsi
-        
-          # Installation Section
-          echo "Section 'Install YoutubetoPremiere' SEC01" >> installer.nsi
-          echo "  nsExec::ExecToStack \`"tasklist /nh /fi 'imagename eq YoutubetoPremiere.exe'\`"" >> installer.nsi
-          echo "  Pop $0" >> installer.nsi
-          echo "  Pop $1" >> installer.nsi
-          echo "  StrCmp $1 '' installationContinue" >> installer.nsi
-          echo "  StrCmp $1 'INFO: No tasks are running.' installationContinue" >> installer.nsi
-          echo "  MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'" >> installer.nsi
-          echo "  Abort" >> installer.nsi
-          echo "  installationContinue:" >> installer.nsi
-          echo "  SetOutPath '$INSTDIR'" >> installer.nsi
-          echo "  File 'dist\YoutubetoPremiere.exe'" >> installer.nsi
-          echo "  SetOutPath '$INSTDIR\com.selgy.youtubetopremiere\exec'" >> installer.nsi
-          echo "  File /r 'ffmpeg\*.*'" >> installer.nsi
-          echo "  SetOutPath '$INSTDIR\com.selgy.youtubetopremiere'" >> installer.nsi
-          echo "  File /r 'com.selgy.youtubetopremiere\*.*'" >> installer.nsi
-          echo "SectionEnd" >> installer.nsi
-        
-          # Uninstallation Section
-          echo "Section 'Uninstall'" >> installer.nsi
-          echo "  Delete '$INSTDIR\YoutubetoPremiere.exe'" >> installer.nsi
-          echo "  RMDir /r '$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win'" >> installer.nsi
-          echo "  RMDir /r '$INSTDIR\com.selgy.youtubetopremiere'" >> installer.nsi
-          echo "  DeleteRegKey HKLM 'Software\YoutubetoPremiere'" >> installer.nsi
-          echo "SectionEnd" >> installer.nsi
-        
-          makensis installer.nsi
-      
+    - name: Compile Installer with NSIS
+      run: makensis ./installer.nsi
       
 
     - name: List directory contents dist
