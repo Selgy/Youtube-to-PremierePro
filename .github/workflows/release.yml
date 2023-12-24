@@ -382,7 +382,10 @@ jobs:
               Write-Error "Failed to download NsProcess.zip"
               exit 1
           }
-          $pluginPath = "$Env:ProgramFiles(x86)\NSIS\Plugins\x86-unicode\"
+      
+          # Correcting the plugin path
+          $pluginPath = Join-Path -Path $Env:ProgramFiles(x86) -ChildPath "NSIS\Plugins\x86-unicode"
+          
           if (-Not (Test-Path -Path $pluginPath)) {
               Write-Error "NSIS plugin path does not exist: $pluginPath"
               exit 1
@@ -391,7 +394,6 @@ jobs:
           Remove-Item NsProcess.zip
       shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
       
-
     - name: Compile Installer with NSIS
       run: makensis ./installer.nsi
       
