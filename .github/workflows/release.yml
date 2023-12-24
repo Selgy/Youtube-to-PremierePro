@@ -383,8 +383,8 @@ jobs:
               exit 1
           }
       
-          # Correcting the plugin path
-          $pluginPath = Join-Path -Path $Env:ProgramFiles(x86) -ChildPath "NSIS\Plugins\x86-unicode"
+          # Directly specifying the plugin path
+          $pluginPath = "${Env:ProgramFiles(x86)}\NSIS\Plugins\x86-unicode"
           
           if (-Not (Test-Path -Path $pluginPath)) {
               Write-Error "NSIS plugin path does not exist: $pluginPath"
