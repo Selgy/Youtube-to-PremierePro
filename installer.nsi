@@ -1,4 +1,7 @@
-!include MUI2.nsh
+!include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "Process.nsh"
+
 Name 'YoutubetoPremiere Installer'
 OutFile 'YoutubetoPremiereInstaller.exe'
 !define MUI_ICON 'icon.ico'
@@ -16,14 +19,13 @@ Function .onInit
 FunctionEnd
 
 Section 'Install YoutubetoPremiere' SEC01
-    nsExec::ExecToStack 'tasklist /nh /fi "imagename eq YoutubetoPremiere.exe"'
-    Pop $0
-    Pop $1
-    StrCmp $1 '' installationContinue
-    StrCmp $1 'INFO: No tasks are running.' installationContinue
-    MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'
-    Abort
-    installationContinue:
+    # Check if YoutubetoPremiere.exe is running
+    ${ProcessExists} "YoutubetoPremiere.exe" $0
+    ${If} $0 == 1
+        MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'
+        Abort
+    ${EndIf}
+
     SetOutPath '$INSTDIR'
     File 'dist\YoutubetoPremiere.exe'
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere\exec'
