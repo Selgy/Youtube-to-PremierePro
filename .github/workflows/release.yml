@@ -375,6 +375,7 @@ jobs:
       run: |
         choco install nsis
 
+
     - name: Create NSIS Script
       run: |
           echo "!include MUI2.nsh" > installer.nsi
@@ -397,12 +398,12 @@ jobs:
         
           # Installation Section
           echo "Section 'Install YoutubetoPremiere' SEC01" >> installer.nsi
-          echo "nsExec::ExecToStack 'tasklist /nh /fi \`"imagename eq YoutubetoPremiere.exe\`"'" >> installer.nsi
-          echo "Pop $0" >> installer.nsi
-          echo "Pop $1" >> installer.nsi
-          echo "StrCmp $1 '' installationContinue" >> installer.nsi
-          echo "StrCmp $1 'INFO: No tasks are running.' installationContinue" >> installer.nsi
-          echo "MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'" >> installer.nsi
+          echo "  nsExec::ExecToStack \`"tasklist /nh /fi 'imagename eq YoutubetoPremiere.exe'\`"" >> installer.nsi
+          echo "  Pop $0" >> installer.nsi
+          echo "  Pop $1" >> installer.nsi
+          echo "  StrCmp $1 '' installationContinue" >> installer.nsi
+          echo "  StrCmp $1 'INFO: No tasks are running.' installationContinue" >> installer.nsi
+          echo "  MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'" >> installer.nsi
           echo "  Abort" >> installer.nsi
           echo "  installationContinue:" >> installer.nsi
           echo "  SetOutPath '$INSTDIR'" >> installer.nsi
@@ -422,6 +423,7 @@ jobs:
           echo "SectionEnd" >> installer.nsi
         
           makensis installer.nsi
+      
       
 
     - name: List directory contents dist
