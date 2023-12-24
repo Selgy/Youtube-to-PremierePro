@@ -391,34 +391,39 @@ jobs:
           echo '!insertmacro MUI_PAGE_INSTFILES' >> installer.nsi
           echo '!insertmacro MUI_PAGE_FINISH' >> installer.nsi
           echo 'Icon "icon.ico"' >> installer.nsi
+      
           echo 'Function .onInit' >> installer.nsi
+          # Add any initialization code here
+          echo 'FunctionEnd' >> installer.nsi
+      
+          echo 'Section "Install YoutubetoPremiere" SEC01' >> installer.nsi
           echo '  nsExec::ExecToStack "tasklist /nh /fi \"imagename eq YoutubetoPremiere.exe\""' >> installer.nsi
           echo '  Pop $0' >> installer.nsi
           echo '  Pop $1' >> installer.nsi
-          echo '  StrCmp $1 "" processNotRunning' >> installer.nsi
-          echo '  StrCmp $1 "INFO: No tasks are running" processNotRunning' >> installer.nsi
+          echo '  StrCmp $1 "" installationContinue' >> installer.nsi
+          echo '  StrCmp $1 "INFO: No tasks are running" installationContinue' >> installer.nsi
           echo '  MessageBox MB_OK|MB_ICONSTOP "YoutubetoPremiere is currently running. Please close it before continuing."' >> installer.nsi
           echo '  Abort' >> installer.nsi
-          echo '  processNotRunning:' >> installer.nsi
-          echo 'FunctionEnd' >> installer.nsi
-          echo 'Section "Copy com.selgy.youtubetopremiere Extension" SEC01' >> installer.nsi
+          echo '  installationContinue:' >> installer.nsi
+          echo '  SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec"' >> installer.nsi
+          echo '  File "dist\YoutubetoPremiere.exe"' >> installer.nsi
+          echo '  File /r "ffmpeg\*.*"' >> installer.nsi
+          echo 'SectionEnd' >> installer.nsi
+      
+          echo 'Section "Copy com.selgy.youtubetopremiere Extension" SEC02' >> installer.nsi
           echo 'SetOutPath "C:\Program Files (x86)\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"' >> installer.nsi
           echo 'File /r "com.selgy.youtubetopremiere\*.*"' >> installer.nsi
           echo 'SectionEnd' >> installer.nsi
-          echo 'Section "Install YoutubetoPremiere" SEC02' >> installer.nsi
-          echo 'SetOutPath "$INSTDIR\com.selgy.youtubetopremiere\exec"' >> installer.nsi
-          echo 'File "dist\YoutubetoPremiere.exe"' >> installer.nsi
-          echo 'File /r "ffmpeg\*.*"' >> installer.nsi
-          echo 'SectionEnd' >> installer.nsi
+      
           echo 'Section "Uninstall"' >> installer.nsi
           echo '  Delete "$INSTDIR\YoutubetoPremiere.exe"' >> installer.nsi
           echo '  RMDir /r "$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win"' >> installer.nsi
           echo '  RMDir /r "$SMPROGRAMS\YoutubetoPremiere"' >> installer.nsi
           echo '  DeleteRegKey HKLM "Software\YoutubetoPremiere"' >> installer.nsi
           echo 'SectionEnd' >> installer.nsi
+      
           makensis installer.nsi
       
-        
 
     - name: List directory contents dist
       run: dir dist
