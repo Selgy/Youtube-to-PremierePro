@@ -30,8 +30,10 @@ Section 'Install YoutubetoPremiere' SEC01
     SetOutPath '$INSTDIR'
     File 'dist\YoutubetoPremiere.exe'
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere\exec'
-    File /r 'ffmpeg\*.*'
+    File 'dist\YoutubetoPremiere.exe'
+    File 'dist\uninstall.exe'  ; Assuming uninstaller is also in 'dist' directory
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere'
+    File /r 'ffmpeg\*.*'
     File /r 'com.selgy.youtubetopremiere\*.*'
     WriteUninstaller "$INSTDIR\uninstall.exe"
 SectionEnd
