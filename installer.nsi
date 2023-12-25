@@ -1,6 +1,5 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
-!addincludedir "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include"
 !include "nsProcess.nsh"
 
 Name 'YoutubetoPremiere Installer'
@@ -21,8 +20,9 @@ FunctionEnd
 
 Section 'Install YoutubetoPremiere' SEC01
     # Check if YoutubetoPremiere.exe is running
-    ${ProcessExists} "YoutubetoPremiere.exe" $0
-    ${If} $0 == 1
+    nsProcess::_FindProcess "YoutubetoPremiere.exe"
+    Pop $R0
+    ${If} $R0 == 0
         MessageBox MB_OK|MB_ICONSTOP 'YoutubetoPremiere is currently running. Please close it before continuing.'
         Abort
     ${EndIf}
