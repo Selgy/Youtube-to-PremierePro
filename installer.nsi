@@ -14,12 +14,10 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 !insertmacro MUI_LANGUAGE 'English'
 
 Function .onInit
-    # Set the installation path
     StrCpy $INSTDIR "$PROGRAMFILES64\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"
 FunctionEnd
 
 Section 'Install YoutubetoPremiere' SEC01
-    # Check if YoutubetoPremiere.exe is running
     nsProcess::_FindProcess "YoutubetoPremiere.exe"
     Pop $R0
     ${If} $R0 == 0
@@ -27,20 +25,20 @@ Section 'Install YoutubetoPremiere' SEC01
         Abort
     ${EndIf}
 
-    SetOutPath '$INSTDIR'
-    File 'dist\YoutubetoPremiere.exe'
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere\exec'
     File 'dist\YoutubetoPremiere.exe'
-    File 'dist\uninstall.exe'  ; Assuming uninstaller is also in 'dist' directory
+    File 'dist\uninstall.exe'
+
     SetOutPath '$INSTDIR\com.selgy.youtubetopremiere'
     File /r 'ffmpeg\*.*'
     File /r 'com.selgy.youtubetopremiere\*.*'
-    WriteUninstaller "$INSTDIR\uninstall.exe"
+    
+    WriteUninstaller "$INSTDIR\com.selgy.youtubetopremiere\exec\uninstall.exe"
 SectionEnd
 
 Section 'Uninstall'
-    Delete '$INSTDIR\YoutubetoPremiere.exe'
-    RMDir /r '$INSTDIR\com.selgy.youtubetopremiere\exec\ffmpeg_win'
+    Delete '$INSTDIR\com.selgy.youtubetopremiere\exec\YoutubetoPremiere.exe'
+    Delete '$INSTDIR\com.selgy.youtubetopremiere\exec\uninstall.exe'
     RMDir /r '$INSTDIR\com.selgy.youtubetopremiere'
     DeleteRegKey HKLM 'Software\YoutubetoPremiere'
 SectionEnd
