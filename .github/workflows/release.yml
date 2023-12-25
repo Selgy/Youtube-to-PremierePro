@@ -387,7 +387,7 @@ jobs:
 
     - name: List NSIS Include Directory
       run: |
-        ls "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include"
+        ls "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\plugin"
       shell: pwsh
 
     - name: Compile Installer with NSIS
