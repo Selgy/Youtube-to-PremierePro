@@ -379,7 +379,10 @@ jobs:
       run: |
           curl -L -o NsProcess.zip http://nsis.sourceforge.net/mediawiki/images/archive/1/18/20140806212030!NsProcess.zip
           New-Item -ItemType Directory -Force -Path "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Plugins"
-          unzip NsProcess.zip -d "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Plugins"
+          New-Item -ItemType Directory -Force -Path "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include"
+          Expand-Archive -Path NsProcess.zip -DestinationPath "NsProcess"
+          Move-Item -Path "NsProcess\Include\*" -Destination "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include" -Force
+          Move-Item -Path "NsProcess\Plugin\*" -Destination "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Plugins" -Force
       shell: pwsh
 
     - name: List NSIS Include Directory
