@@ -1,8 +1,5 @@
 !include "MUI2.nsh"
 !include "LogicLib.nsh"
-!addincludedir "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\Include"
-!addincludedir "C:\ProgramData\chocolatey\lib\NSIS\tools\NSIS\plugin"
-
 !include "nsProcess.nsh"
 
 Name 'YoutubetoPremiere Installer'

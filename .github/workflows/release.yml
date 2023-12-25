@@ -377,15 +377,18 @@ jobs:
 
     - name: Download and Install NSIS Process Plugin
       run: |
-          curl -L -o NsProcess.zip http://nsis.sourceforge.net/mediawiki/images/archive/1/18/20140806212030!NsProcess.zip
-          Expand-Archive -Path NsProcess.zip -DestinationPath "NsProcess"
-          New-Item -ItemType Directory -Force -Path "C:\Program Files (x86)\NSIS\Plugins\x86-unicode"
-          Move-Item -Path "NsProcess\Plugin\*" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode" -Force
+        curl -L -o NsProcess.zip http://nsis.sourceforge.net/mediawiki/images/archive/1/18/20140806212030!NsProcess.zip
+        Expand-Archive -Path NsProcess.zip -DestinationPath "NsProcess"
+        New-Item -ItemType Directory -Force -Path "C:\Program Files (x86)\NSIS\Plugins\x86-unicode"
+        New-Item -ItemType Directory -Force -Path "C:\Program Files (x86)\NSIS\Include"
+        Move-Item -Path "NsProcess\Plugin\*" -Destination "C:\Program Files (x86)\NSIS\Plugins\x86-unicode" -Force
+        Move-Item -Path "NsProcess\Include\*" -Destination "C:\Program Files (x86)\NSIS\Include" -Force
       shell: pwsh
-      
-    - name: List NSIS Plugin Directory
+
+    - name: List NSIS Plugin and Include Directories
       run: |
-          ls "C:\Program Files (x86)\NSIS\Plugins\x86-unicode"
+        ls "C:\Program Files (x86)\NSIS\Plugins\x86-unicode"
+        ls "C:\Program Files (x86)\NSIS\Include"
       shell: pwsh
 
     - name: Compile Installer with NSIS
