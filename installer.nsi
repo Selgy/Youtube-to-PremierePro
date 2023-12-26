@@ -35,7 +35,7 @@ Section 'Install YoutubetoPremiere' SEC01
 
     SetOutPath '$INSTDIR\exec'
     File 'dist\YoutubetoPremiere.exe'
-    File /r 'ffmpeg_win\*.*'
+    File /r 'ffmpeg/ffmpeg_win\*.*'
     Rename "$INSTDIR\uninstall.exe" "$INSTDIR\exec\uninstall.exe"
     
     SetOutPath '$INSTDIR'
