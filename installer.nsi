@@ -30,14 +30,16 @@ Section 'Install YoutubetoPremiere' SEC01
         Abort
     ${EndIf}
 
-    # Create the uninstaller in the main installation directory
     WriteUninstaller "$INSTDIR\uninstall.exe"
 
     SetOutPath '$INSTDIR\exec'
     File 'dist\YoutubetoPremiere.exe'
-    File 'ffmpeg/ffmpeg_win\*.*'
+    File /r 'ffmpeg_win\*.*'
     Rename "$INSTDIR\uninstall.exe" "$INSTDIR\exec\uninstall.exe"
-    
+
+    SetOutPath '$INSTDIR\exec\ffmpeg_win'
+    File /r 'ffmpeg_win\bin\*.*'
+
     SetOutPath '$INSTDIR'
     File /r 'com.selgy.youtubetopremiere\*.*'
 SectionEnd
