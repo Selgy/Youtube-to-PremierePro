@@ -11,8 +11,6 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
-!define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"
 !define MUI_FINISHPAGE_RUN_NOTCHECKED
 !define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"
