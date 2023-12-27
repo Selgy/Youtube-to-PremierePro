@@ -382,14 +382,17 @@ def play_notification_sound(volume=0.4):  # Default volume set to 50%
 
 
 def load_settings():
+    default_settings = {'resolution': '1080', 'framerate': '30', 'downloadPath': '', 'downloadMP3': False}
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
-        logging.info(f'Loaded settings: {settings}')
-        logging.info(f'Settings file contents: {settings}')  # Log the loaded settings
-        return settings
-    logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
-    return None
+    else:
+        settings = default_settings
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+    logging.info(f'Loaded settings: {settings}')
+    return settings
+
 
 
 def is_premiere_running():
