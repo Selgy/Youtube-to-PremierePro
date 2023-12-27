@@ -12,8 +12,10 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN
-!define MUI_FINISHPAGE_RUN_TEXT "Open the chrome extension"
+!define MUI_FINISHPAGE_RUN_TEXT "Launch YoutubetoPremiere"
 !define MUI_FINISHPAGE_RUN_NOTCHECKED
+!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_LANGUAGE 'English'
 
@@ -30,11 +32,10 @@ Section 'Install YoutubetoPremiere' SEC01
         Abort
     ${EndIf}
 
-    WriteUninstaller "$INSTDIR\uninstall.exe"
+
 
     SetOutPath '$INSTDIR\exec'
     File 'dist\YoutubetoPremiere.exe'
-    Rename "$INSTDIR\uninstall.exe" "$INSTDIR\exec\uninstall.exe"
     
     SetOutPath '$INSTDIR\exec\ffmpeg_win'
     File /r 'ffmpeg\ffmpeg_win\*.*'
@@ -61,7 +62,5 @@ Section 'Uninstall'
 SectionEnd
 
 Function un.onGUIEnd
-    ${If} $ChromeExtensionCheckbox == 1
-        ExecShell "open" "https://chromewebstore.google.com/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
-    ${EndIf}
+    ; No need for ExecShell command here
 FunctionEnd
