@@ -19,7 +19,7 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 
 Function .onInit
     StrCpy $INSTDIR "$PROGRAMFILES64\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere"
-    StrCpy $ChromeExtensionCheckbox 1
+    StrCpy $ChromeExtensionCheckbox 1 ; Set to 1 to be checked by default
 FunctionEnd
 
 Section 'Install YoutubetoPremiere' SEC01
@@ -41,6 +41,15 @@ Section 'Install YoutubetoPremiere' SEC01
     
     SetOutPath '$INSTDIR'
     File /r 'com.selgy.youtubetopremiere\*.*'
+SectionEnd
+
+Section "Enable Debugging for CSXS Versions 6 to 11"
+    WriteRegStr HKCU "Software\Adobe\CSXS.6" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.7" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.8" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.9" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.10" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.11" "PlayerDebugMode" "1"
 SectionEnd
 
 Section 'Uninstall'
