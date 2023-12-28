@@ -1,5 +1,5 @@
 ScriptInstaller.nsi
-ffmpeg
+ffmpeg_win
 venv
 YoutubetoPremiere Installer.exe
 YoutubetoPremiere.exe

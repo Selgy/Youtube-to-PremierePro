@@ -128,6 +128,14 @@ def is_premiere_running():
             return True
     return False
 
+def generate_new_filename(base_path, original_name, extension):
+    counter = 1
+    new_name = f"{original_name}_{counter}.{extension}"
+    while os.path.exists(os.path.join(base_path, new_name)):
+        counter += 1
+        new_name = f"{original_name}_{counter}.{extension}"
+    return new_name
+
 
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
@@ -209,11 +217,15 @@ def import_video_to_premiere(video_path):
 
 
 def sanitize_title(title):
-    # Define a regular expression pattern that matches unwanted characters
-    # This pattern keeps letters, numbers, and specific special characters
-    pattern = '[^A-Za-z0-9 \.\,\;\!\ùéèà€\$ùéèàçôâêîôûäëïöüÿñ]+'
+    # Allow Unicode letters, numbers, and specific special characters
+    pattern = '[^\w \(\)\,\"\&\.\;\!\€\$\-\_]+'
+    
     # Replace unwanted characters with a space
     sanitized_title = re.sub(pattern, ' ', title)
+
+    # Normalize whitespace (replace multiple spaces with a single space)
+    sanitized_title = re.sub(r'\s+', ' ', sanitized_title).strip()
+
     return sanitized_title
 
 def progress_hook(d):
@@ -260,13 +272,10 @@ def get_current_project_path():
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
     # Determine the final download path
     if user_download_path.strip():
-        # Use the user-specified path if it's provided
         final_download_path = user_download_path
     else:
-        # Get the directory of the current Premiere Pro project
         project_dir_path = get_current_project_path()
         if project_dir_path:
-            # Create 'YoutubeToPremiere_download' directory next to the project file
             final_download_path = os.path.join(project_dir_path, 'YoutubeToPremiere_download')
             if not os.path.exists(final_download_path):
                 os.makedirs(final_download_path)
@@ -274,17 +283,21 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
             logging.error("Premiere Pro project path not found.")
             return
 
-
     with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
         info_dict = ydl.extract_info(video_url, download=False)
 
     video_title = sanitize_title(info_dict['title'])
     file_extension = "wav" if download_mp3 else "mp4"
 
+    # Generate the initial output template
     sanitized_output_template = os.path.join(final_download_path, f"{video_title}.{file_extension}")
 
-    ydl_opts = get_default_ydl_opts()
-    ydl_opts.update({'outtmpl': sanitized_output_template, 'ffmpeg_location': ffmpeg_path})
+    # Check if file with the same name already exists and update the filename
+    counter = 1
+    while os.path.exists(sanitized_output_template):
+        new_filename = f"{video_title}_{counter}.{file_extension}"
+        sanitized_output_template = os.path.join(final_download_path, new_filename)
+        counter += 1
 
     ydl_opts = {
         'outtmpl': sanitized_output_template,
@@ -296,73 +309,26 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         'nooverwrites': False,
     }
 
-    if download_mp3:  # change this to something like download_audio
-        ydl_opts.update({
-            'format': f'bestaudio[ext=m4a]/best',
-            'outtmpl': sanitized_output_template,
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False,
-        })
+    if download_mp3:
+        ydl_opts['format'] = 'bestaudio[ext=m4a]/best'
     else:
-        ydl_opts.update({
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': sanitized_output_template,
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False,
-        })
+        ydl_opts['format'] = f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
 
-    sanitized_output_template = os.path.join(final_download_path, f"{video_title}.{file_extension}")
-    ydl_opts['outtmpl'] = sanitized_output_template
-
-
-    logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
+    logging.info(f'download_mp3: {download_mp3}')  
     logging.info(f'ydl_opts before download: {ydl_opts}') 
-    print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
-    
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
-    logging.info(f'download_mp3: {download_mp3}')
 
-
-    if result == 0 and download_mp3:
-        sanitized_output_template = os.path.join(final_download_path, f"{video_title}.wav")
-       
-
-        # Check if the .wav file exists before trying to import it to Premiere.
+    if result == 0:
         if os.path.exists(sanitized_output_template):
-            # Import the WAV file into Premiere
             import_video_to_premiere(sanitized_output_template)
-            socketio.emit('download-complete')  # Notify the frontend of completion if you're using a frontend
-            play_notification_sound()  # Play a sound to notify the user if needed
+            socketio.emit('download-complete')
+            play_notification_sound()
         else:
-            logging.error("Expected WAV file not found after download and conversion.")
-            # Handle the error appropriately, maybe notify the user or retry the download.
-
-    elif result == 0 and not download_mp3:
-        mp4_filename = os.path.join(final_download_path, f"{video_title}.mp4")
-
-
-        # Check if the .mp4 file exists before trying to import it to Premiere.
-        if os.path.exists(mp4_filename):
-            # Import the MP4 file into Premiere
-            import_video_to_premiere(mp4_filename)
-            socketio.emit('download-complete')  # Notify the frontend of completion if you're using a frontend
-            play_notification_sound()  # Play a sound to notify the user if needed
-        else:
-            logging.error("Expected MP4 file not found after download.")
-            # Handle the error appropriately, maybe notify the user or retry the download.
-
+            logging.error(f"Expected file not found after download: {sanitized_output_template}")
     else:
         logging.error("Download failed with youtube_dl.")
-        # Handle the error appropriately, maybe notify the u
 
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
