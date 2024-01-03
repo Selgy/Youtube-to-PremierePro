@@ -92,7 +92,30 @@
 
         /* Style to hide the license section */
         .hidden { display: none; }
-        </style>
+
+
+        .clip-settings {
+            margin-bottom: 20px;
+            display: flex; /* Use flex to align items in a row */
+            align-items: center; /* Vertically center items */
+        }
+
+        .clip-settings label {
+            margin-right: 10px; /* Space between label and dropdowns */
+        }
+
+        .input-container {
+            margin-right: 10px; /* Space between dropdowns */
+        }
+
+        .input-container:last-child {
+            margin-right: 0; /* No margin for the last dropdown */
+        }
+
+        .input-container select {
+            min-width: 100px; /* Adjust width as needed */
+        }
+    </style>
         </head>
         <body>
         <div id="licenseSection">
@@ -124,6 +147,28 @@
     <p id="path-info" style="color: #c0c0ff; font-size: 10px; margin-top: -10px; margin-bottom: 20px;">
         If left empty, the video will be saved in a folder next to the currently open Premiere Pro project.
     </p>
+
+    <div class="clip-settings">
+        <label>Clip Settings:</label>
+        <div class="input-container">
+            <select id="seconds-before">
+                <option value="15">-15 sec</option>
+                <option value="30">-30 sec</option>
+                <option value="60">-1 min</option>
+                <option value="120">-2 min</option>
+            </select>
+        </div>
+        
+        <div class="input-container">
+            <select id="seconds-after">
+                    <option value="15">+15 sec</option>
+                    <option value="30">+30 sec</option>
+                    <option value="60">+1 min</option>
+                    <option value="120">+2 min</option>
+            </select>
+        </div>
+    </div>
+    
 
     <div class="checkbox-container">
         <label for="download-mp3">Audio Only:</label>

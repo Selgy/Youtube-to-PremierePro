@@ -4,7 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resolution: '1080p',
         framerate: '30',
         downloadPath: '',
-        downloadMP3: false
+        downloadMP3: false,
+        secondsBefore: '15',  // Default value if not in localStorage
+        secondsAfter: '15'    // Default value if not in localStorage
     };
 
     // Initialize settings
@@ -12,12 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('framerate').value = settings.framerate;
     document.getElementById('download-path').value = settings.downloadPath;
     document.getElementById('download-mp3').checked = settings.downloadMP3;
+    document.getElementById('seconds-before').value = settings.secondsBefore;
+    document.getElementById('seconds-after').value = settings.secondsAfter;
 
     // Add event listeners for each setting to automatically save and send changes
     document.getElementById('resolution').addEventListener('change', saveAndSendSettings);
     document.getElementById('framerate').addEventListener('change', saveAndSendSettings);
     document.getElementById('download-path').addEventListener('change', saveAndSendSettings);
     document.getElementById('download-mp3').addEventListener('change', saveAndSendSettings);
+    document.getElementById('seconds-before').addEventListener('change', saveAndSendSettings);
+    document.getElementById('seconds-after').addEventListener('change', saveAndSendSettings);
 });
 
 function saveAndSendSettings() {
@@ -25,7 +31,9 @@ function saveAndSendSettings() {
         resolution: document.getElementById('resolution').value,
         framerate: document.getElementById('framerate').value,
         downloadPath: document.getElementById('download-path').value,
-        downloadMP3: document.getElementById('download-mp3').checked
+        downloadMP3: document.getElementById('download-mp3').checked,
+        secondsBefore: document.getElementById('seconds-before').value,
+        secondsAfter: document.getElementById('seconds-after').value
     };
 
     // Save to Local Storage

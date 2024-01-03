@@ -73,16 +73,22 @@ function toggleContentVisibility(isValid) {
 }
 
 function loadSettings() {
-    // Load and apply the settings as before
+    // Load settings with default values for new options
     const settings = JSON.parse(localStorage.getItem('settings')) || {
         resolution: '1080p',
         framerate: '30',
         downloadPath: '',
-        downloadMP3: false
+        downloadMP3: false,
+        secondsBefore: 15, // Default value for seconds before
+        secondsAfter: 15   // Default value for seconds after
     };
 
+    // Apply the settings to the form
     document.getElementById('resolution').value = settings.resolution;
     document.getElementById('framerate').value = settings.framerate;
     document.getElementById('download-path').value = settings.downloadPath;
     document.getElementById('download-mp3').checked = settings.downloadMP3;
+    document.getElementById('seconds-before').value = settings.secondsBefore;
+    document.getElementById('seconds-after').value = settings.secondsAfter;
 }
+

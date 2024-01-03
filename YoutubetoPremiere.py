@@ -148,7 +148,7 @@ def generate_new_filename(base_path, original_name, extension):
 def handle_video_url():
     global video_url_global
     data = request.get_json()
-
+    settings = load_settings()
     # Log the incoming data for debugging
     logging.info(f"Received data: {data}")
 
@@ -160,6 +160,15 @@ def handle_video_url():
     video_url_global = data.get('videoUrl')
     current_time = data.get('currentTime')
     download_type = data.get('downloadType')
+
+    try:
+        # Retrieve secondsBefore and secondsAfter from request or settings
+        seconds_before = int(data.get('secondsBefore', settings['secondsBefore']))
+        seconds_after = int(data.get('secondsAfter', settings['secondsAfter']))
+    except (ValueError, TypeError):
+        logging.error("Invalid secondsBefore or secondsAfter values.")
+        return jsonify(error="Invalid time settings"), 400
+
 
     # Error handling for invalid or missing download type
     if download_type not in ['clip', 'full']:
@@ -186,9 +195,9 @@ def handle_video_url():
 
     # Execute the appropriate function based on download type
     if download_type == 'clip':
-        clip_start = max(0, current_time - 15)  # Assuming you want 15 seconds before the current time
-        clip_end = current_time + 15  # Assuming you want 15 seconds after the current time
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3)
+        clip_start = max(0, current_time - seconds_before)
+        clip_end = current_time + seconds_after
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
 
     elif download_type == 'full':
         download_video(video_url_global, resolution, framerate, download_path, download_mp3)
@@ -306,11 +315,12 @@ def get_current_project_path():
         return None
 
 
-def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3):
-    clip_duration = clip_end - clip_start  # Calculate clip duration
-    if clip_duration <= 0:
-        logging.error("Invalid clip duration. Clip end time must be greater than clip start time.")
-        return
+def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after):
+    clip_duration = clip_end - clip_start
+    logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
+
+    # Ensure that clip_duration is being calculated correctly
+    logging.info(f"Clip duration calculated as: {clip_duration} seconds")
 
     logging.info(f"Starting download and process clip for URL: {video_url} with clip_start: {clip_start} and clip_duration: {clip_duration}")
     download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
@@ -476,7 +486,16 @@ def play_notification_sound(volume=0.4):  # Default volume set to 50%
 
 
 def load_settings():
-    default_settings = {'resolution': '1080', 'framerate': '30', 'downloadPath': '', 'downloadMP3': False}
+    # Default settings structure
+    default_settings = {
+        'resolution': '1080',
+        'framerate': '30',
+        'downloadPath': '',
+        'downloadMP3': False,
+        'secondsBefore': '15',
+        'secondsAfter': '15'
+    }
+
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
@@ -484,9 +503,9 @@ def load_settings():
         settings = default_settings
         with open(SETTINGS_FILE, 'w') as f:
             json.dump(settings, f, indent=4)
+
     logging.info(f'Loaded settings: {settings}')
     return settings
-
 
 
 def is_premiere_running():
