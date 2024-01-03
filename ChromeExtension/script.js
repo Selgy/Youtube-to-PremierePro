@@ -1,50 +1,39 @@
-document.addEventListener('DOMContentLoaded', (event) => {
+document.addEventListener('DOMContentLoaded', () => {
     // Load settings from Local Storage
-    const settings = JSON.parse(localStorage.getItem('settings'));
-    if (settings) {
-        document.getElementById('resolution').value = settings.resolution || '1080p';
-        document.getElementById('framerate').value = settings.framerate || '30';
-        
-        // Only set the download path if it's not empty
-        const downloadPathInput = document.getElementById('download-path');
-        if (settings.downloadPath && settings.downloadPath.trim() !== '') {
-            downloadPathInput.value = settings.downloadPath;
-        } else {
-            downloadPathInput.value = '';
-        }
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        resolution: '1080p',
+        framerate: '30',
+        downloadPath: '',
+        downloadMP3: false
+    };
 
-        document.getElementById('download-mp3').checked = settings.downloadMP3 || false;
-    }
+    // Initialize settings
+    document.getElementById('resolution').value = settings.resolution;
+    document.getElementById('framerate').value = settings.framerate;
+    document.getElementById('download-path').value = settings.downloadPath;
+    document.getElementById('download-mp3').checked = settings.downloadMP3;
 
-    const button = document.getElementById('save-settings');
-    const message = document.getElementById('message');
-
-    button.addEventListener('click', () => {
-        const settings = {
-            resolution: document.getElementById('resolution').value,
-            framerate: document.getElementById('framerate').value,
-            downloadPath: document.getElementById('download-path').value,
-            downloadMP3: document.getElementById('download-mp3').checked
-        };
-        
-        sendSettingsToServer(settings); // Call the function only once here
-
-        localStorage.setItem('settings', JSON.stringify(settings));
-        console.log('Settings saved');
-
-        // Show the "Settings saved" message
-        message.style.display = 'block';  // Show message
-        setTimeout(() => {
-            message.style.opacity = '1';
-            setTimeout(() => {
-                message.style.opacity = '0';
-                setTimeout(() => {
-                    message.style.display = 'none';  // Hide message
-                }, 500);
-            }, 2000);  // Display for 2 seconds
-        }, 10);
-    });
+    // Add event listeners for each setting to automatically save and send changes
+    document.getElementById('resolution').addEventListener('change', saveAndSendSettings);
+    document.getElementById('framerate').addEventListener('change', saveAndSendSettings);
+    document.getElementById('download-path').addEventListener('change', saveAndSendSettings);
+    document.getElementById('download-mp3').addEventListener('change', saveAndSendSettings);
 });
+
+function saveAndSendSettings() {
+    const settings = {
+        resolution: document.getElementById('resolution').value,
+        framerate: document.getElementById('framerate').value,
+        downloadPath: document.getElementById('download-path').value,
+        downloadMP3: document.getElementById('download-mp3').checked
+    };
+
+    // Save to Local Storage
+    localStorage.setItem('settings', JSON.stringify(settings));
+
+    // Send to server
+    sendSettingsToServer(settings);
+}
 
 async function sendSettingsToServer(settings) {
     try {
@@ -55,7 +44,9 @@ async function sendSettingsToServer(settings) {
             },
             body: JSON.stringify(settings),
         });
-
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
         const data = await response.json();
         console.log('Success:', data);
     } catch (error) {

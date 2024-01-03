@@ -45,14 +45,19 @@
             display: flex;
             align-items: center;
             margin-bottom: 15px;
+            justify-content: flex-start; /* Align items to the start */
+            width: 100%; /* Ensure full width */
         }
         .checkbox-container label {
-            flex-grow: 1; /* Label takes up remaining space */
+            flex: 0 0 auto; /* Don't grow, don't shrink, based on content */
+            margin-right: 10px; /* Space between label and checkbox */
+            white-space: nowrap; /* Prevent text wrapping */
         }
         .checkbox-container input {
+            flex: 0 1 auto; /* Don't grow, allow shrink */
             transform: scale(1.3); /* Slightly larger checkbox */
-            margin-left: 10px;
         }
+        
         #message {
                 position: fixed;
                 top: 50%; /* Center vertically */
@@ -99,14 +104,14 @@
 
     <label for="download-path">Download Path:</label>
     <input type="text" id="download-path" placeholder="Enter path here" />
+    <p id="path-info" style="color: #c0c0ff; font-size: 10px; margin-top: -10px; margin-bottom: 20px;">
+        If left empty, the video will be saved in a folder next to the currently open Premiere Pro project.
+    </p>
 
     <div class="checkbox-container">
         <label for="download-mp3">Audio Only:</label>
         <input type="checkbox" id="download-mp3">
     </div>
-
-    <button id="save-settings">Save Settings</button>
-    <div id="message">Settings saved</div>
 
     <script src="script.js"></script>
 </body>

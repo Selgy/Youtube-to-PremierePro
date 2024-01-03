@@ -17,6 +17,7 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 import subprocess
+import shutil
 
 should_shutdown = False
 
@@ -129,6 +130,12 @@ def is_premiere_running():
     return False
 
 def generate_new_filename(base_path, original_name, extension):
+    base_filename = f"{original_name}.{extension}"
+    if not os.path.exists(os.path.join(base_path, base_filename)):
+        # If the base file does not exist, return it without a counter
+        return base_filename
+    
+    # If the base file exists, start the counter to generate a new name
     counter = 1
     new_name = f"{original_name}_{counter}.{extension}"
     while os.path.exists(os.path.join(base_path, new_name)):
@@ -141,19 +148,34 @@ def generate_new_filename(base_path, original_name, extension):
 def handle_video_url():
     global video_url_global
     data = request.get_json()
+
+    # Log the incoming data for debugging
+    logging.info(f"Received data: {data}")
+
+    # Error handling for missing data
+    if not data:
+        logging.error("No data received in request.")
+        return jsonify(error="No data provided"), 400
+
     video_url_global = data.get('videoUrl')
+    current_time = data.get('currentTime')
+    download_type = data.get('downloadType')
+
+    # Error handling for invalid or missing download type
+    if download_type not in ['clip', 'full']:
+        logging.error(f"Invalid download type: {download_type}")
+        return jsonify(error="Invalid download type"), 400
 
     # Load settings and get the values
     settings = load_settings()
     if settings is None:
         logging.error("Settings not received from the extension.")
-        return jsonify(error="Settings not received"), 500 
+        return jsonify(error="Settings not received"), 500
 
-    # Extract settings values and user-provided download path
     resolution = settings.get('resolution')
     framerate = settings.get('framerate')
-    user_specified_path = data.get('downloadPath')  # Corrected this line
-    download_mp3 = settings.get('downloadMP3') 
+    download_path = data.get('downloadPath', settings.get('downloadPath', '')).strip()
+    download_mp3 = settings.get('downloadMP3')
 
     # Check if Adobe Premiere Pro is running
     if not is_premiere_running():
@@ -162,13 +184,16 @@ def handle_video_url():
         messagebox.showerror("Error", "Adobe Premiere Pro is not running")
         return jsonify(error="Adobe Premiere Pro is not running"), 400
 
-    download_path = user_specified_path if user_specified_path else settings.get('downloadPath').strip()
+    # Execute the appropriate function based on download type
+    if download_type == 'clip':
+        clip_start = max(0, current_time - 15)  # Assuming you want 15 seconds before the current time
+        clip_end = current_time + 15  # Assuming you want 15 seconds after the current time
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3)
 
-    # Initiate the download of the video
-    download_video(video_url_global, resolution, framerate, download_path, download_mp3)
-    response = jsonify(success=True)
-    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
-    return response, 200
+    elif download_type == 'full':
+        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
+
+    return jsonify(success=True), 200
 
 
 def read_settings_from_local():
@@ -253,6 +278,18 @@ def convert_to_wav(m4a_path, wav_path):
     except Exception as e:
         logging.error(f'Error converting {m4a_path} to WAV: {e}', exc_info=True)
 
+def get_default_download_path():
+    # Get the path of the current Premiere Pro project
+    project_dir_path = get_current_project_path()
+    if project_dir_path:
+        default_path = os.path.join(project_dir_path, 'YoutubeToPremiere_download')
+        if not os.path.exists(default_path):
+            os.makedirs(default_path)
+        return default_path
+    else:
+        logging.error("No active Premiere Pro project found.")
+        return None
+
 def get_current_project_path():
     try:
         proj = pymiere.objects.app.project
@@ -268,37 +305,135 @@ def get_current_project_path():
         logging.error(f'Error getting project path: {e}', exc_info=True)
         return None
 
-    
-def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
-    # Determine the final download path
-    if user_download_path.strip():
-        final_download_path = user_download_path
+
+def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3):
+    clip_duration = clip_end - clip_start  # Calculate clip duration
+    if clip_duration <= 0:
+        logging.error("Invalid clip duration. Clip end time must be greater than clip start time.")
+        return
+
+    logging.info(f"Starting download and process clip for URL: {video_url} with clip_start: {clip_start} and clip_duration: {clip_duration}")
+    download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
+    if download_path is None:
+        logging.error("No active Premiere Pro project found.")
+        return
+
+    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
+    base_filename = f"{sanitized_title}_clip"
+    unique_filename = generate_new_filename(download_path, base_filename, "mp4")
+
+    clip_file_path = os.path.join(download_path, unique_filename)
+  # for video
+    mp3_file_path = os.path.join(download_path, unique_filename)  # base for audio
+
+    if download_mp3:
+        # Download only the audio segment as MP3
+        ydl_opts = {
+            'format': 'bestaudio[ext=m4a]/best',
+            'outtmpl': f"{mp3_file_path}.%(ext)s",  # Let youtube_dl handle the extension
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'wav',
+                'preferredquality': '192',
+            }],
+            'progress_hooks': [progress_hook],
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
+
+        original_mp3_file = f"{mp3_file_path}.wav"
+        temp_mp3_file = f"{mp3_file_path}_temp.wav"
+
+        ffmpeg_command = [
+            ffmpeg_path,
+            '-y',
+            '-i', original_mp3_file,
+            '-ss', str(clip_start),
+            '-t', str(clip_duration),
+            '-acodec', 'pcm_s16le',
+            '-ar', '44100',
+            '-ac', '2',
+            temp_mp3_file
+        ]
+
+        try:
+            subprocess.run(ffmpeg_command, check=True)
+            os.remove(original_mp3_file)  # Remove the original full audio
+            os.rename(temp_mp3_file, original_mp3_file)  # Rename the trimmed file
+            logging.info(f'Trimmed audio saved to {original_mp3_file}')
+            import_video_to_premiere(original_mp3_file)
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during audio clipping process: {e}', exc_info=True)
+            if os.path.exists(temp_mp3_file):
+                os.remove(temp_mp3_file)  # Clean up in case of error
     else:
-        project_dir_path = get_current_project_path()
-        if project_dir_path:
-            final_download_path = os.path.join(project_dir_path, 'YoutubeToPremiere_download')
-            if not os.path.exists(final_download_path):
-                os.makedirs(final_download_path)
-        else:
-            logging.error("Premiere Pro project path not found.")
-            return
+        # Download the video clip
+        ydl_opts = {
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best',
+            'outtmpl': clip_file_path,
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False,
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',
+            }]
+        }
 
-    with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
-        info_dict = ydl.extract_info(video_url, download=False)
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([video_url])
 
-    video_title = sanitize_title(info_dict['title'])
-    file_extension = "wav" if download_mp3 else "mp4"
+        # Trim the video clip
+        ffmpeg_command = [
+            ffmpeg_path,
+            '-y',
+            '-i', clip_file_path,
+            '-ss', str(clip_start),
+            '-t', str(clip_duration),
+            '-c:v', 'copy',
+            '-c:a', 'copy',
+            f"{clip_file_path}_temp.mp4"
+        ]
 
-    # Generate the initial output template
-    sanitized_output_template = os.path.join(final_download_path, f"{video_title}.{file_extension}")
+        try:
+            subprocess.run(ffmpeg_command, check=True)
+            os.remove(clip_file_path)  # Remove the original full video
+            os.rename(f"{clip_file_path}_temp.mp4", clip_file_path)  # Rename the trimmed video file
+            logging.info(f'Trimmed video saved to {clip_file_path}')
+            import_video_to_premiere(clip_file_path)
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during video clipping process: {e}', exc_info=True)
+            if os.path.exists(f"{clip_file_path}_temp.mp4"):
+                os.remove(f"{clip_file_path}_temp.mp4")  # Clean up in case of error
+    play_notification_sound()
+    socketio.emit('download-complete')
 
-    # Check if file with the same name already exists and update the filename
-    counter = 1
-    while os.path.exists(sanitized_output_template):
-        new_filename = f"{video_title}_{counter}.{file_extension}"
-        sanitized_output_template = os.path.join(final_download_path, new_filename)
-        counter += 1
 
+def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+    logging.info(f"Starting video download for URL: {video_url}")
+
+    # Determine the final download path
+    final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
+    if final_download_path is None:
+        logging.error("No active Premiere Pro project found.")
+        return None
+
+    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
+    base_filename = f"{sanitized_title}.mp4"
+    output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
+    sanitized_output_template = os.path.join(final_download_path, output_filename)
+
+    # Set youtube_dl options
     ydl_opts = {
         'outtmpl': sanitized_output_template,
         'ffmpeg_location': ffmpeg_path,
@@ -307,28 +442,21 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         'writeautomaticsub': False,
         'writethumbnail': False,
         'nooverwrites': False,
+        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     }
 
-    if download_mp3:
-        ydl_opts['format'] = 'bestaudio[ext=m4a]/best'
-    else:
-        ydl_opts['format'] = f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-
-    logging.info(f'download_mp3: {download_mp3}')  
-    logging.info(f'ydl_opts before download: {ydl_opts}') 
-
+    # Download the video
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
-
-    if result == 0:
-        if os.path.exists(sanitized_output_template):
+        if result == 0 and os.path.exists(sanitized_output_template):
+            logging.info(f"Video downloaded successfully: {sanitized_output_template}")
             import_video_to_premiere(sanitized_output_template)
-            socketio.emit('download-complete')
             play_notification_sound()
+            socketio.emit('download-complete')
         else:
-            logging.error(f"Expected file not found after download: {sanitized_output_template}")
-    else:
-        logging.error("Download failed with youtube_dl.")
+            logging.error("Download failed with youtube_dl.")
+            return None
+
 
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
@@ -429,4 +557,3 @@ if __name__ == "__main__":
    # image = create_image()
   #  icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
    # icon.run()
-

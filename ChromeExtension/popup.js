@@ -1,28 +1,39 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Load settings from Local Storage
-    const settings = JSON.parse(localStorage.getItem('settings'));
-    if (settings) {
-        document.getElementById('resolution').value = settings.resolution || '1080p';
-        document.getElementById('framerate').value = settings.framerate || '30';
-        document.getElementById('download-path').value = settings.downloadPath || 'TEST';
-        document.getElementById('download-mp3').checked = settings.downloadMP3 || false;
-    }
+    const settings = JSON.parse(localStorage.getItem('settings')) || {
+        resolution: '1080p',
+        framerate: '30',
+        downloadPath: '',
+        downloadMP3: false
+    };
 
-    const button = document.getElementById('save-settings');
-    const message = document.getElementById('message');
+    // Initialize settings
+    document.getElementById('resolution').value = settings.resolution;
+    document.getElementById('framerate').value = settings.framerate;
+    document.getElementById('download-path').value = settings.downloadPath;
+    document.getElementById('download-mp3').checked = settings.downloadMP3;
 
-    button.addEventListener('click', () => {
-        const settings = {
-            resolution: document.getElementById('resolution').value,
-            framerate: document.getElementById('framerate').value,
-            downloadPath: document.getElementById('download-path').value,
-            downloadMP3: document.getElementById('download-mp3').checked
-        };
-        sendSettingsToServer(settings);
-        localStorage.setItem('settings', JSON.stringify(settings));
-        showMessage(message, 'Settings saved');
-    });
+    // Event listeners for each setting
+    document.getElementById('resolution').addEventListener('change', saveAndSendSettings);
+    document.getElementById('framerate').addEventListener('change', saveAndSendSettings);
+    document.getElementById('download-path').addEventListener('change', saveAndSendSettings);
+    document.getElementById('download-mp3').addEventListener('change', saveAndSendSettings);
 });
+
+function saveAndSendSettings() {
+    const settings = {
+        resolution: document.getElementById('resolution').value,
+        framerate: document.getElementById('framerate').value,
+        downloadPath: document.getElementById('download-path').value,
+        downloadMP3: document.getElementById('download-mp3').checked
+    };
+
+    // Save to Local Storage
+    localStorage.setItem('settings', JSON.stringify(settings));
+
+    // Send to server
+    sendSettingsToServer(settings);
+}
 
 async function sendSettingsToServer(settings) {
     try {
@@ -41,18 +52,4 @@ async function sendSettingsToServer(settings) {
     } catch (error) {
         console.error('Error:', error);
     }
-}
-
-function showMessage(element, text) {
-    element.innerText = text;
-    element.style.display = 'block';
-    setTimeout(() => {
-        element.style.opacity = '1';
-        setTimeout(() => {
-            element.style.opacity = '0';
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 500);
-        }, 2000);
-    }, 10);
 }
