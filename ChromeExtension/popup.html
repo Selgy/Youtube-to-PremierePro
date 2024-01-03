@@ -74,20 +74,37 @@
                 width: auto; /* Auto width to only be as wide as needed */
                 max-width: calc(100% - 40px); /* Maximum width */
                 box-sizing: border-box; /* Box-sizing to include padding in width */
-
-
         }
-        #message.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, 0);
+                #mainContent { display: none; } /* Initially hide main content */
+
+        #licenseSection {
+            text-align: center;
+            padding: 20px;
+            background-color: #2e2f77;
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
 
-    </style>
-</head>
-<body>
-    <label for="resolution">Resolution:</label>
-    <select id="resolution">
+        #errorMessage {
+            color: red;
+            display: none;
+        }
+
+        /* Style to hide the license section */
+        .hidden { display: none; }
+        </style>
+        </head>
+        <body>
+        <div id="licenseSection">
+        <h2>Enter Your License Key</h2>
+        <input type="text" id="licenseKey" placeholder="Enter your key here">
+        <button id="submitKey">Submit</button>
+        <p id="errorMessage">Invalid Key. Please try again.</p>
+        </div>
+
+        <div id="mainContent">
+        <label for="resolution">Resolution:</label>
+        <select id="resolution">
         <option value="2160">2160p</option>
         <option value="1440">1440p</option>
         <option value="1080" selected>1080p</option>
@@ -112,7 +129,8 @@
         <label for="download-mp3">Audio Only:</label>
         <input type="checkbox" id="download-mp3">
     </div>
-
+</div>
+    <script src="popup.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
