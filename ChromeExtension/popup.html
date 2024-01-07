@@ -115,6 +115,51 @@
         .input-container select {
             min-width: 100px; /* Adjust width as needed */
         }
+
+        #last-paths-dropdown {
+            display: none;
+            position: absolute;
+            left: 0; /* Align to the left of the container */
+            top: 100%; /* Align directly below the input field */
+            background-color: white;
+            list-style-type: none;
+            padding: 5px;
+            margin-top: -100px; /* Pull the dropdown up slightly to close the gap */
+            border: 1px solid #ddd;
+            z-index: 1000; /* Ensure it's on top */
+            max-height: 200px; /* Maximum height with scroll */
+            overflow-y: auto; /* Scroll for overflow */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Visibility shadow */
+            width: calc(100% - 35px); /* Match width with input field */
+            box-sizing: border-box; /* Include padding and border in width */
+            overflow-x: hidden; /* Hide horizontal scrollbar */
+        }
+
+        #last-paths-dropdown li {
+            padding: 5px;
+            cursor: pointer;
+            background-color: #2e2f77;
+            color: white;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px; /* Reduced font size for better fit */
+            white-space: nowrap; /* Prevent text wrapping */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+        }
+
+        #last-paths-dropdown li:hover {
+            background-color: #4e52ff;
+        }
+
+
+        /* Input container adjustment */
+        .input-container {
+            flex-grow: 1; /* Take available horizontal space */
+            position: relative; /* For absolute positioning of dropdown */
+        }
+
+
+
     </style>
         </head>
         <body>
@@ -143,7 +188,13 @@
     </select>
 
     <label for="download-path">Download Path:</label>
-    <input type="text" id="download-path" placeholder="Enter path here" />
+    <div style="position: relative; display: flex; align-items: center;">
+        <input type="text" id="download-path" placeholder="Enter path here" style="flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;"/>
+        <button id="show-last-paths" style="width: 30px; height: 30px; padding: 0; line-height: 30px; text-align: center; border-radius: 5px; font-size: 16px; margin-left: 5px;">&#9660;</button>
+        <ul id="last-paths-dropdown" style="display: none; position: absolute; right: 0; top: 100%; background-color: white; list-style-type: none; padding: 0; margin: 0; border: 1px solid #ddd; z-index: 100;">
+            <!-- Paths will be added here -->
+        </ul>
+    </div>
     <p id="path-info" style="color: #c0c0ff; font-size: 10px; margin-top: -10px; margin-bottom: 20px;">
         If left empty, the video will be saved in a folder next to the currently open Premiere Pro project.
     </p>

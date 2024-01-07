@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM fully loaded and parsed');
     const licenseKey = await getLicenseKey();
     if (licenseKey) {
         const isValid = await validateGumroadLicense(licenseKey);
