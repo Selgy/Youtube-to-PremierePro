@@ -12,7 +12,7 @@ OutFile 'YoutubetoPremiereInstaller.exe'
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_INSTFILES
 !define MUI_FINISHPAGE_RUN_NOTCHECKED
-!define MUI_FINISHPAGE_SHOWREADME "https://chrome.google.com/webstore/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
+!define MUI_FINISHPAGE_SHOWREADME "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Open Chrome Extension Page"
 !insertmacro MUI_PAGE_FINISH
 !insertmacro MUI_LANGUAGE 'English'

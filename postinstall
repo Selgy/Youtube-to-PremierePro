@@ -1,0 +1,69 @@
+#!/bin/bash
+# get the current user
+loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+# Enable PlayerDebugMode for Adobe CEP versions 8 to 11
+defaults write com.adobe.CSXS.8 PlayerDebugMode 1
+defaults write com.adobe.CSXS.9 PlayerDebugMode 1
+defaults write com.adobe.CSXS.10 PlayerDebugMode 1
+defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+
+
+CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
+
+# Other variables
+GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
+EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
+
+echo "Creating $CEP_EXTENSIONS_DIR..."
+mkdir -p "$CEP_EXTENSIONS_DIR" && echo "Directory created successfully." || { echo "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
+echo "Downloading com.selgy.youtubetopremiere from GitHub..."
+curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "Download successful." || { echo "Failed to download from GitHub"; exit 1; }
+echo "Installing com.selgy.youtubetopremiere..."
+unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
+# Removing existing installation if it exists
+TARGET_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere"
+SOURCE_DIR="$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere"
+if [ -d "$TARGET_DIR" ]; then
+    echo "Existing installation found. Removing..."
+    rm -rf "$TARGET_DIR" && echo "Existing directory removed." || { echo "Failed to remove existing directory"; exit 1; }
+fi
+mv -f "$SOURCE_DIR" "$TARGET_DIR" && echo "Installation successful." || { echo "Failed to install"; exit 1; }
+# Delete the intermediate folder from GitHub
+rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
+# Delete the downloaded ZIP file
+rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
+
+echo "Copying executable to $TARGET_DIR/exec..."
+cp -R "$EXECUTABLE_PATH/"* "$TARGET_DIR/exec" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+EXEC_DIR="$TARGET_DIR/exec"
+echo "Creating $EXEC_DIR..."
+mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+
+echo "Copying executable to $EXEC_DIR..."
+cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+
+# If a user is logged in, perform operations in user context
+if [ -n "$loggedInUser" ]; then
+    # Get the uid of the logged-in user
+    uid=$(id -u "$loggedInUser")
+    FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+    mkdir -p "$FFMPEG_BIN_DIR"
+    curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+    unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+    rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
+    # Change ownership of FFmpeg binary
+    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
+    launchctl asuser "$uid" bash -c "
+        echo 'About to change ownership' >> '$LOG_FILE';
+        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
+        echo 'Ownership change attempted' >> '$LOG_FILE';
+    "
+fi
+echo "Cleanup started..."
+# Force delete the directories
+sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
+sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
+echo "Cleanup completed."
+# Open the web page in the default browser
+echo "Opening the web page in the default browser..."
+open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl"
