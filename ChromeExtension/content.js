@@ -270,7 +270,7 @@ function createPremiereProButton() {
     let button = document.getElementById('send-to-premiere-button');
     if (!button) {
         button = document.createElement('button');
-        button.innerText = 'Premiere Pro';
+        button.innerText = 'Full video';
         button.id = 'send-to-premiere-button';
         button.style.cssText = buttonStyles;
         button.onmouseenter = () => button.style.backgroundColor = '#1E1E59';
@@ -292,7 +292,7 @@ function createClipButton() {
     let button = document.getElementById('clip-button');
     if (!button) {
         button = document.createElement('button');
-        button.innerText = 'Clip';
+        button.innerText = 'Clip video';
         button.id = 'clip-button';
         button.style.cssText = buttonStyles;
         button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';

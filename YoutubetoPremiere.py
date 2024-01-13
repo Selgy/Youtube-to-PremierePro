@@ -21,6 +21,8 @@ import shutil
 
 should_shutdown = False
 
+
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
                     handlers=[logging.StreamHandler()])
@@ -44,6 +46,8 @@ else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
 
+
+LOCK_FILE_PATH = os.path.join(script_dir, 'app.lock')
 
 
 if platform.system() == 'Windows':
@@ -87,6 +91,17 @@ def add_security_headers(response):
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
     response.headers['Access-Control-Allow-Credentials'] = 'true'  # Add this line
     return response
+
+def is_already_running():
+    return os.path.exists(LOCK_FILE_PATH)
+
+def create_lock_file():
+    with open(LOCK_FILE_PATH, 'w') as lock_file:
+        lock_file.write("")
+
+def delete_lock_file():
+    if os.path.exists(LOCK_FILE_PATH):
+        os.remove(LOCK_FILE_PATH)
 
 
 @app.errorhandler(404)
@@ -432,40 +447,50 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
 
-    # Determine the final download path
     final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
         return None
 
     sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
-    base_filename = f"{sanitized_title}.mp4"
-    output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
+    base_filename = f"{sanitized_title}"
+    output_filename = generate_new_filename(final_download_path, base_filename, 'mp4')
     sanitized_output_template = os.path.join(final_download_path, output_filename)
 
-    # Set youtube_dl options
     ydl_opts = {
+        'format': f'bestvideo[height<=?{resolution}]+bestaudio/best',
         'outtmpl': sanitized_output_template,
         'ffmpeg_location': ffmpeg_path,
         'progress_hooks': [progress_hook],
-        'writesubtitles': False,
-        'writeautomaticsub': False,
-        'writethumbnail': False,
-        'nooverwrites': False,
-        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     }
 
-    # Download the video
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        result = ydl.download([video_url])
-        if result == 0 and os.path.exists(sanitized_output_template):
-            logging.info(f"Video downloaded successfully: {sanitized_output_template}")
-            import_video_to_premiere(sanitized_output_template)
-            play_notification_sound()
-            socketio.emit('download-complete')
-        else:
-            logging.error("Download failed with youtube_dl.")
+        ydl.download([video_url])
+
+    downloaded_file_path = f"{sanitized_output_template}.mkv"  # Adjust according to youtube-dl's naming
+    if os.path.exists(downloaded_file_path):
+        # Convert to MP4 if necessary
+        ffmpeg_convert_command = [
+            ffmpeg_path, '-i', downloaded_file_path, '-c:v', 'libx264', '-preset', 'medium', '-crf', '23',
+            '-c:a', 'aac', '-b:a', '192k', sanitized_output_template
+        ]
+        try:
+            subprocess.run(ffmpeg_convert_command, check=True)
+            os.remove(downloaded_file_path)  # Remove the original video
+            logging.info(f'Video converted to MP4 and saved to {sanitized_output_template}')
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during video conversion to MP4: {e}', exc_info=True)
             return None
+    else:
+        logging.error("Video download failed.")
+        return None
+
+    logging.info(f"Video downloaded and processed successfully: {sanitized_output_template}")
+    import_video_to_premiere(sanitized_output_template)
+    play_notification_sound()
+    socketio.emit('download-complete')
+
+
 
 
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
@@ -538,15 +563,24 @@ def main():
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
     
+    # Check if the application is already running
+    if is_already_running():
+        logging.error("Application is already running. Exiting.")
+        sys.exit(1)
+    else:
+        create_lock_file()  # Create a lock file to indicate the app is running
+
     server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
     server_thread.start()
 
     premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
     premiere_monitor_thread.start()
 
-    while not should_shutdown:
-        time.sleep(1)  # Wait for the shutdown signal
-
+    try:
+        while not should_shutdown:
+            time.sleep(1)  # Wait for the shutdown signal
+    finally:
+        delete_lock_file()  # Delete the lock file when shutting down
 
     print("Shutting down the application.")
     os._exit(0)
