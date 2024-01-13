@@ -124,19 +124,6 @@ function handleError(error) {
 // sendURL('clip'); // For clip segment download
 
 
-function handleResponse(response) {
-    if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
-    }
-    return response.text().then(data => {
-        console.log('Success:', data);
-    });
-}
-
-function handleError(error) {
-    console.error('Error:', error);
-}
-
 
 function isVideoPage() {
     return window.location.href.includes('/watch?v=');
