@@ -17,6 +17,7 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 import subprocess
+import shutil
 
 should_shutdown = False
 
@@ -431,7 +432,6 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
 
-    # Determine the final download path
     final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
@@ -440,31 +440,64 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
     sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     base_filename = f"{sanitized_title}.mp4"
     output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
-    sanitized_output_template = os.path.join(final_download_path, output_filename)
 
-    # Set youtube_dl options
-    ydl_opts = {
-        'outtmpl': sanitized_output_template,
-        'ffmpeg_location': ffmpeg_path,
-        'progress_hooks': [progress_hook],
-        'writesubtitles': False,
-        'writeautomaticsub': False,
-        'writethumbnail': False,
-        'nooverwrites': False,
-        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
-    }
+    if download_mp3:
+        # Set file names for download and conversion
+        m4a_output_filename = output_filename[:-4] + '.m4a'
+        wav_output_filename = generate_new_filename(final_download_path, output_filename[:-4], 'wav')
 
-    # Download the video
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        result = ydl.download([video_url])
-        if result == 0 and os.path.exists(sanitized_output_template):
-            logging.info(f"Video downloaded successfully: {sanitized_output_template}")
-            import_video_to_premiere(sanitized_output_template)
-            play_notification_sound()
-            socketio.emit('download-complete')
-        else:
-            logging.error("Download failed with youtube_dl.")
-            return None
+        ydl_opts = {
+            'format': 'bestaudio[ext=m4a]',
+            'outtmpl': os.path.join(final_download_path, m4a_output_filename),
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            result = ydl.download([video_url])
+            if result == 0:
+                full_m4a_path = os.path.join(final_download_path, m4a_output_filename)
+                full_wav_path = os.path.join(final_download_path, wav_output_filename)
+                convert_to_wav(full_m4a_path, full_wav_path)
+                
+                # Delete the original .m4a file
+                if os.path.exists(full_m4a_path):
+                    os.remove(full_m4a_path)
+
+                sanitized_output_template = full_wav_path
+            else:
+                logging.error("Download failed with youtube_dl.")
+                return None
+
+    else:
+        sanitized_output_template = os.path.join(final_download_path, output_filename)
+        ydl_opts = {
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+            'outtmpl': sanitized_output_template,
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+            'writesubtitles': False,
+            'writeautomaticsub': False,
+            'writethumbnail': False,
+            'nooverwrites': False
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            result = ydl.download([video_url])
+            if result != 0:
+                logging.error("Download failed with youtube_dl.")
+                return None
+
+    # Import the video or audio to Premiere Pro
+    import_video_to_premiere(sanitized_output_template)
+    play_notification_sound()
+    socketio.emit('download-complete')
+
+
 
 
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
@@ -530,38 +563,9 @@ def run_server():
         socketio.stop()
 
 
-def terminate_existing_instance(process_name):
-    for process in psutil.process_iter(['pid', 'name']):
-        # Check if the process name matches your application's name
-        if process.info['name'] == process_name:
-            logging.info(f"Found existing instance of the application with PID: {process.info['pid']}")
-            try:
-                process.terminate()  # Send a terminate signal
-                process.wait(5)  # Wait for the process to terminate
-                logging.info("Existing instance has been terminated.")
-                return True
-            except psutil.NoSuchProcess:
-                logging.error("The process does not exist.")
-            except psutil.AccessDenied:
-                logging.error("Permission denied to terminate process.")
-            except psutil.TimeoutExpired:
-                logging.error("Timed out waiting for the process to terminate.")
-            break
-    return False
 
 def main():
     logging.info(f'Starting script execution. PID: {os.getpid()}')
-
-    process_name = 'youtubetopremiere.exe' if platform.system() == 'Windows' else 'youtubetopremiere'
-
-    if is_already_running():
-        logging.info("An instance of the script is already running. Attempting to close it.")
-        if not terminate_existing_instance(process_name):
-            logging.error("Existing instance could not be closed automatically. Please close it manually.")
-            return
-
-    create_lock_file()
-
     global settings_global
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
@@ -575,11 +579,32 @@ def main():
     while not should_shutdown:
         time.sleep(1)  # Wait for the shutdown signal
 
-    # When shutting down, remove the lock file
-    delete_lock_file()
+
     print("Shutting down the application.")
     os._exit(0)
 
 if __name__ == "__main__":
     main()
 
+
+ #def create_image():
+    # Check if running as a bundled application
+    #if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    #    # Bundled application, icon is in the temp directory
+    #    icon_path = os.path.join(sys._MEIPASS, 'icon.png')
+    #else:
+    #    # Not bundled, icon is in the script directory
+    #    icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
+    #print(f'Icon path: {icon_path}')  # Add this line
+    #image = Image.open(icon_path)
+    #return image
+ ##
+
+#def exit_action(icon, item):
+   # icon.stop()
+   # os._exit(0) 
+
+#def run_tray_icon():
+   # image = create_image()
+  #  icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
+   # icon.run()
