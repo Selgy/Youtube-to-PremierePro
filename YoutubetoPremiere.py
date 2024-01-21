@@ -129,20 +129,17 @@ def is_premiere_running():
             return True
     return False
 
-def generate_new_filename(base_path, original_name, extension):
-    base_filename = f"{original_name}.{extension}"
+def generate_new_filename(base_path, original_name, extension, suffix=""):
+    base_filename = f"{original_name}{suffix}.{extension}"
     if not os.path.exists(os.path.join(base_path, base_filename)):
-        # If the base file does not exist, return it without a counter
         return base_filename
     
-    # If the base file exists, start the counter to generate a new name
     counter = 1
-    new_name = f"{original_name}_{counter}.{extension}"
+    new_name = f"{original_name}{suffix}_{counter}.{extension}"
     while os.path.exists(os.path.join(base_path, new_name)):
         counter += 1
-        new_name = f"{original_name}_{counter}.{extension}"
+        new_name = f"{original_name}{suffix}_{counter}.{extension}"
     return new_name
-
 
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
@@ -329,109 +326,94 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         return
 
     sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
-    base_filename = f"{sanitized_title}_clip"
-    unique_filename = generate_new_filename(download_path, base_filename, "mp4")
+    clip_suffix = "_clip"
 
-    clip_file_path = os.path.join(download_path, unique_filename)
-  # for video
-    mp3_file_path = os.path.join(download_path, unique_filename)  # base for audio
+    video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+    audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+    video_file_path = os.path.join(download_path, video_filename)
+    audio_file_path = os.path.join(download_path, audio_filename)
+
 
     if download_mp3:
-        # Download only the audio segment as MP3
-        ydl_opts = {
+        ydl_opts_audio = {
             'format': 'bestaudio[ext=m4a]/best',
-            'outtmpl': f"{mp3_file_path}.%(ext)s",  # Let youtube_dl handle the extension
+            'outtmpl': audio_file_path,
             'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False,
-            'postprocessors': [{
-                'key': 'FFmpegExtractAudio',
-                'preferredcodec': 'wav',
-                'preferredquality': '192',
-            }],
             'progress_hooks': [progress_hook],
         }
 
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with youtube_dl.YoutubeDL(ydl_opts_audio) as ydl:
             ydl.download([video_url])
 
-        original_mp3_file = f"{mp3_file_path}.wav"
-        temp_mp3_file = f"{mp3_file_path}_temp.wav"
+        temp_audio_file = f"{audio_file_path}_temp.wav"
 
-        ffmpeg_command = [
+        ffmpeg_command_audio = [
             ffmpeg_path,
             '-y',
-            '-i', original_mp3_file,
+            '-i', audio_file_path,
             '-ss', str(clip_start),
             '-t', str(clip_duration),
             '-acodec', 'pcm_s16le',
             '-ar', '44100',
             '-ac', '2',
-            temp_mp3_file
+            temp_audio_file
         ]
 
         try:
-            subprocess.run(ffmpeg_command, check=True)
-            os.remove(original_mp3_file)  # Remove the original full audio
-            os.rename(temp_mp3_file, original_mp3_file)  # Rename the trimmed file
-            logging.info(f'Trimmed audio saved to {original_mp3_file}')
-            import_video_to_premiere(original_mp3_file)
+            subprocess.run(ffmpeg_command_audio, check=True)
+            os.remove(audio_file_path)  # Remove the original full audio
+            os.rename(temp_audio_file, audio_file_path)  # Rename the trimmed file
+            logging.info(f'Trimmed audio saved to {audio_file_path}')
+            import_video_to_premiere(audio_file_path)
         except subprocess.CalledProcessError as e:
             logging.error(f'Error during audio clipping process: {e}', exc_info=True)
-            if os.path.exists(temp_mp3_file):
-                os.remove(temp_mp3_file)  # Clean up in case of error
+            if os.path.exists(temp_audio_file):
+                os.remove(temp_audio_file)  # Clean up in case of error
     else:
         # Download the video clip
-        ydl_opts = {
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best',
-            'outtmpl': clip_file_path,
+        ydl_opts_video = {
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best',
+            'outtmpl': video_file_path,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False,
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',
-            }]
         }
 
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
             ydl.download([video_url])
 
-        # Trim the video clip
-        ffmpeg_command = [
+        temp_video_file = f"{video_file_path}_temp.mp4"
+
+        ffmpeg_command_video = [
             ffmpeg_path,
             '-y',
-            '-i', clip_file_path,
+            '-i', video_file_path,
             '-ss', str(clip_start),
             '-t', str(clip_duration),
             '-c:v', 'copy',
             '-c:a', 'copy',
-            f"{clip_file_path}_temp.mp4"
+            temp_video_file
         ]
 
         try:
-            subprocess.run(ffmpeg_command, check=True)
-            os.remove(clip_file_path)  # Remove the original full video
-            os.rename(f"{clip_file_path}_temp.mp4", clip_file_path)  # Rename the trimmed video file
-            logging.info(f'Trimmed video saved to {clip_file_path}')
-            import_video_to_premiere(clip_file_path)
+            subprocess.run(ffmpeg_command_video, check=True)
+            os.remove(video_file_path)  # Remove the original full video
+            os.rename(temp_video_file, video_file_path)  # Rename the trimmed video file
+            logging.info(f'Trimmed video saved to {video_file_path}')
+            import_video_to_premiere(video_file_path)
         except subprocess.CalledProcessError as e:
             logging.error(f'Error during video clipping process: {e}', exc_info=True)
-            if os.path.exists(f"{clip_file_path}_temp.mp4"):
-                os.remove(f"{clip_file_path}_temp.mp4")  # Clean up in case of error
+            if os.path.exists(temp_video_file):
+                os.remove(temp_video_file)  # Clean up in case of error
+
     play_notification_sound()
     socketio.emit('download-complete')
+
 
 
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
 
+    # Determine the final download path
     final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
@@ -440,64 +422,31 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
     sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     base_filename = f"{sanitized_title}.mp4"
     output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
+    sanitized_output_template = os.path.join(final_download_path, output_filename)
 
-    if download_mp3:
-        # Set file names for download and conversion
-        m4a_output_filename = output_filename[:-4] + '.m4a'
-        wav_output_filename = generate_new_filename(final_download_path, output_filename[:-4], 'wav')
+    # Set youtube_dl options
+    ydl_opts = {
+        'outtmpl': sanitized_output_template,
+        'ffmpeg_location': ffmpeg_path,
+        'progress_hooks': [progress_hook],
+        'writesubtitles': False,
+        'writeautomaticsub': False,
+        'writethumbnail': False,
+        'nooverwrites': False,
+        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+    }
 
-        ydl_opts = {
-            'format': 'bestaudio[ext=m4a]',
-            'outtmpl': os.path.join(final_download_path, m4a_output_filename),
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False
-        }
-
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            result = ydl.download([video_url])
-            if result == 0:
-                full_m4a_path = os.path.join(final_download_path, m4a_output_filename)
-                full_wav_path = os.path.join(final_download_path, wav_output_filename)
-                convert_to_wav(full_m4a_path, full_wav_path)
-                
-                # Delete the original .m4a file
-                if os.path.exists(full_m4a_path):
-                    os.remove(full_m4a_path)
-
-                sanitized_output_template = full_wav_path
-            else:
-                logging.error("Download failed with youtube_dl.")
-                return None
-
-    else:
-        sanitized_output_template = os.path.join(final_download_path, output_filename)
-        ydl_opts = {
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': sanitized_output_template,
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'writesubtitles': False,
-            'writeautomaticsub': False,
-            'writethumbnail': False,
-            'nooverwrites': False
-        }
-
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            result = ydl.download([video_url])
-            if result != 0:
-                logging.error("Download failed with youtube_dl.")
-                return None
-
-    # Import the video or audio to Premiere Pro
-    import_video_to_premiere(sanitized_output_template)
-    play_notification_sound()
-    socketio.emit('download-complete')
-
-
+    # Download the video
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        result = ydl.download([video_url])
+        if result == 0 and os.path.exists(sanitized_output_template):
+            logging.info(f"Video downloaded successfully: {sanitized_output_template}")
+            import_video_to_premiere(sanitized_output_template)
+            play_notification_sound()
+            socketio.emit('download-complete')
+        else:
+            logging.error("Download failed with youtube_dl.")
+            return None
 
 
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
@@ -586,25 +535,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
- #def create_image():
-    # Check if running as a bundled application
-    #if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    #    # Bundled application, icon is in the temp directory
-    #    icon_path = os.path.join(sys._MEIPASS, 'icon.png')
-    #else:
-    #    # Not bundled, icon is in the script directory
-    #    icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
-    #print(f'Icon path: {icon_path}')  # Add this line
-    #image = Image.open(icon_path)
-    #return image
- ##
-
-#def exit_action(icon, item):
-   # icon.stop()
-   # os._exit(0) 
-
-#def run_tray_icon():
-   # image = create_image()
-  #  icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
-   # icon.run()
