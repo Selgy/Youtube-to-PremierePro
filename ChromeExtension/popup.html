@@ -7,76 +7,80 @@
             padding: 20px;
             background-color: #1e2057;
             color: #ffffff;
-            width: 340px; /* Adjusted for better proportion */
-            font-size: 16px; /* Readjusted for balance and readability */
-            line-height: 1.6; /* Improved line spacing for readability */
+            width: 340px;
+            font-size: 16px;
+            line-height: 1.6;
         }
         button, select, input {
-            width: calc(100% - 20px); /* Account for padding */
+            width: calc(100% - 20px);
             padding: 12px;
-            border-radius: 5px; /* Softened corners */
+            border-radius: 5px;
             font-size: 16px;
             border: none;
-            margin-bottom: 15px; /* Consistent spacing */
-            box-sizing: border-box; /* Include padding in width calculation */
+            margin-bottom: 15px;
+            box-sizing: border-box;
         }
         button {
-            background-color: #4e52ff; /* More vibrant button color */
+            background-color: #4e52ff;
             color: #ffffff;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-            transition: background-color 0.2s, box-shadow 0.2s; /* Smooth transition */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s, box-shadow 0.2s;
         }
         button:hover, button:focus {
-            background-color: #6e72ff; /* Slightly lighter on hover/focus */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Larger shadow on hover/focus */
+            background-color: #6e72ff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
         select, input {
             background-color: #2e2f77;
             color: #ffffff;
-            border: 1px solid #3e41a8; /* Subtle border */
+            border: 1px solid #3e41a8;
         }
         label {
             display: block;
-            margin-bottom: 10px; /* More breathing space */
-            font-weight: 500; /* Slightly bolder labels */
+            margin-bottom: 10px;
+            font-weight: 500;
         }
         .checkbox-container {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            justify-content: flex-start; /* Align items to the start */
-            width: 100%; /* Ensure full width */
+            justify-content: flex-start;
+            width: 100%;
         }
         .checkbox-container label {
-            flex: 0 0 auto; /* Don't grow, don't shrink, based on content */
-            margin-right: 10px; /* Space between label and checkbox */
-            white-space: nowrap; /* Prevent text wrapping */
+            flex: 0 0 auto;
+            margin-right: 10px;
+            white-space: nowrap;
         }
         .checkbox-container input {
-            flex: 0 1 auto; /* Don't grow, allow shrink */
-            transform: scale(1.3); /* Slightly larger checkbox */
+            flex: 0 1 auto;
+            transform: scale(1.3);
         }
         
         #message {
-                position: fixed;
-                top: 50%; /* Center vertically */
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: #9093ff;
-                padding: 10px;
-                display: none; /* initially hidden */
-                border-radius: 4px;
-                transition: opacity 0.5s;
-                color: #0f005d;
-                font-size: 18px;
-                z-index: 1000; /* High z-index to ensure it's on top */
-                width: auto; /* Auto width to only be as wide as needed */
-                max-width: calc(100% - 40px); /* Maximum width */
-                box-sizing: border-box; /* Box-sizing to include padding in width */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #9093ff;
+            padding: 10px;
+            display: none;
+            border-radius: 4px;
+            transition: opacity 0.5s;
+            color: #0f005d;
+            font-size: 18px;
+            z-index: 1000;
+            width: auto;
+            max-width: calc(100% - 40px);
+            box-sizing: border-box;
         }
-                #mainContent { display: none; } /* Initially hide main content */
 
+        #mainContent { display: none; }
+        
+        #licenseSection, #mainContent {
+             display: none;
+}
         #licenseSection {
             text-align: center;
             padding: 20px;
@@ -90,49 +94,47 @@
             display: none;
         }
 
-        /* Style to hide the license section */
         .hidden { display: none; }
-
 
         .clip-settings {
             margin-bottom: 20px;
-            display: flex; /* Use flex to align items in a row */
-            align-items: center; /* Vertically center items */
+            display: flex;
+            align-items: center;
         }
 
         .clip-settings label {
-            margin-right: 10px; /* Space between label and dropdowns */
+            margin-right: 10px;
         }
 
         .input-container {
-            margin-right: 10px; /* Space between dropdowns */
+            margin-right: 10px;
         }
 
         .input-container:last-child {
-            margin-right: 0; /* No margin for the last dropdown */
+            margin-right: 0;
         }
 
         .input-container select {
-            min-width: 100px; /* Adjust width as needed */
+            min-width: 100px;
         }
 
         #last-paths-dropdown {
             display: none;
             position: absolute;
-            left: 0; /* Align to the left of the container */
-            top: 100%; /* Align directly below the input field */
+            left: 0;
+            top: 100%;
             background-color: white;
             list-style-type: none;
             padding: 5px;
-            margin-top: -100px; /* Pull the dropdown up slightly to close the gap */
+            margin-top: -100px;
             border: 1px solid #ddd;
-            z-index: 1000; /* Ensure it's on top */
-            max-height: 200px; /* Maximum height with scroll */
-            overflow-y: auto; /* Scroll for overflow */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Visibility shadow */
-            width: calc(100% - 35px); /* Match width with input field */
-            box-sizing: border-box; /* Include padding and border in width */
-            overflow-x: hidden; /* Hide horizontal scrollbar */
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            width: calc(100% - 35px);
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         #last-paths-dropdown li {
@@ -141,89 +143,85 @@
             background-color: #2e2f77;
             color: white;
             border-bottom: 1px solid #ddd;
-            font-size: 14px; /* Reduced font size for better fit */
-            white-space: nowrap; /* Prevent text wrapping */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflow text */
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         #last-paths-dropdown li:hover {
             background-color: #4e52ff;
         }
 
-
-        /* Input container adjustment */
         .input-container {
-            flex-grow: 1; /* Take available horizontal space */
-            position: relative; /* For absolute positioning of dropdown */
+            flex-grow: 1;
+            position: relative;
         }
 
-
-
     </style>
-        </head>
-        <body>
-        <div id="licenseSection">
+</head>
+<body>
+    <div id="licenseSection">
         <h2>Enter Your License Key</h2>
         <input type="text" id="licenseKey" placeholder="Enter your key here">
         <button id="submitKey">Submit</button>
         <p id="errorMessage">Invalid Key. Please try again.</p>
-        </div>
+    </div>
 
-        <div id="mainContent">
+    <div id="mainContent">
         <label for="resolution">Resolution:</label>
         <select id="resolution">
-        <option value="1080" selected>1080p</option>
-        <option value="720">720p</option>
-        <option value="480">480p</option>
-        <option value="360">360p</option>
-    </select>
+            <option value="1080" selected>1080p</option>
+            <option value="720">720p</option>
+            <option value="480">480p</option>
+            <option value="360">360p</option>
+        </select>
 
-    <label for="framerate">Frame Rate:</label>
-    <select id="framerate">
-        <option value="60">60 fps</option>
-        <option value="30" selected>30 fps</option>
-    </select>
+        <label for="framerate">Frame Rate:</label>
+        <select id="framerate">
+            <option value="60">60 fps</option>
+            <option value="30" selected>30 fps</option>
+        </select>
 
-    <label for="download-path">Download Path:</label>
-    <div style="position: relative; display: flex; align-items: center;">
-        <input type="text" id="download-path" placeholder="Enter path here" style="flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;"/>
-        <button id="show-last-paths" style="width: 30px; height: 30px; padding: 0; line-height: 30px; text-align: center; border-radius: 5px; font-size: 16px; margin-left: 5px;">&#9660;</button>
-        <ul id="last-paths-dropdown" style="display: none; position: absolute; right: 0; top: 100%; background-color: white; list-style-type: none; padding: 0; margin: 0; border: 1px solid #ddd; z-index: 100;">
-            <!-- Paths will be added here -->
-        </ul>
-    </div>
-    <p id="path-info" style="color: #c0c0ff; font-size: 10px; margin-top: -10px; margin-bottom: 20px;">
-        If left empty, the video will be saved in a folder next to the currently open Premiere Pro project.
-    </p>
+        <label for="download-path">Download Path:</label>
+        <div style="position: relative; display: flex; align-items: center;">
+            <input type="text" id="download-path" placeholder="Enter path here" style="flex-grow: 1; border-top-right-radius: 0; border-bottom-right-radius: 0;"/>
+            <button id="show-last-paths" style="width: 30px; height: 30px; padding: 0; line-height: 30px; text-align: center; border-radius: 5px; font-size: 16px; margin-left: 5px;">&#9660;</button>
+            <ul id="last-paths-dropdown" style="display: none; position: absolute; right: 0; top: 100%; background-color: white; list-style-type: none; padding: 0; margin: 0; border: 1px solid #ddd; z-index: 100;">
+                <!-- Paths will be added here -->
+            </ul>
+        </div>
+        <p id="path-info" style="color: #c0c0ff; font-size: 10px; margin-top: -10px; margin-bottom: 20px;">
+            If left empty, the video will be saved in a folder next to the currently open Premiere Pro project.
+        </p>
 
-    <div class="clip-settings">
-        <label>Clip Settings:</label>
-        <div class="input-container">
-            <select id="seconds-before">
-                <option value="15">-15 sec</option>
-                <option value="30">-30 sec</option>
-                <option value="60">-1 min</option>
-                <option value="120">-2 min</option>
-            </select>
+        <div class="clip-settings">
+            <label>Clip Settings:</label>
+            <div class="input-container">
+                <select id="seconds-before">
+                    <option value="15">-15 sec</option>
+                    <option value="30">-30 sec</option>
+                    <option value="60">-1 min</option>
+                    <option value="120">-2 min</option>
+                </select>
+            </div>
+            
+            <div class="input-container">
+                <select id="seconds-after">
+                        <option value="15">+15 sec</option>
+                        <option value="30">+30 sec</option>
+                        <option value="60">+1 min</option>
+                        <option value="120">+2 min</option>
+                </select>
+            </div>
         </div>
         
-        <div class="input-container">
-            <select id="seconds-after">
-                    <option value="15">+15 sec</option>
-                    <option value="30">+30 sec</option>
-                    <option value="60">+1 min</option>
-                    <option value="120">+2 min</option>
-            </select>
+
+        <div class="checkbox-container">
+            <label for="download-mp3">Audio Only:</label>
+            <input type="checkbox" id="download-mp3">
         </div>
     </div>
-    
-
-    <div class="checkbox-container">
-        <label for="download-mp3">Audio Only:</label>
-        <input type="checkbox" id="download-mp3">
-    </div>
-</div>
     <script src="popup.js"></script>
     <script src="script.js"></script>
 </body>

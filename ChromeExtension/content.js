@@ -20,7 +20,7 @@ let lastClickedButton = null;
 // Function to create the button
 function createButton() {
     const button = document.createElement('button');
-    button.innerText = 'Premiere Pro';
+    button.innerText = 'Full video';
     button.id = 'send-to-premiere-button';
     button.style.cssText = buttonStyles;
     button.onclick = sendURL;
@@ -131,7 +131,7 @@ function isVideoPage() {
 
 function createClipButton() {
     const button = document.createElement('button');
-    button.innerText = 'Clip';
+    button.innerText = 'Clip video';
     button.id = 'clip-button';
     button.style.cssText = buttonStyles;
     button.onclick = sendClipRequest;

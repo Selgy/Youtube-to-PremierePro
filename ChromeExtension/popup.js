@@ -1,6 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM fully loaded and parsed');
     const licenseKey = await getLicenseKey();
+    console.log('License Key:', licenseKey);
+    
+    
     if (licenseKey) {
         const isValid = await validateGumroadLicense(licenseKey);
         toggleContentVisibility(isValid);
@@ -9,10 +12,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     document.getElementById('submitKey').addEventListener('click', async () => {
+        console.log('Submit Key button clicked');
         const key = document.getElementById('licenseKey').value;
+        console.log('Entered Key:', key);
         const isValid = await validateGumroadLicense(key);
+        console.log('New Key Validation Result:', isValid);
+
         if (isValid) {
             chrome.storage.sync.set({ licenseKey: key }, () => {
+                console.log('License Key saved:', key);
                 toggleContentVisibility(true);
             });
         } else {
@@ -24,19 +32,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function getLicenseKey() {
     return new Promise(resolve => {
         chrome.storage.sync.get(['licenseKey'], function(result) {
+            console.log('Retrieved License Key from Storage:', result.licenseKey);
             resolve(result.licenseKey);
         });
     });
 }
 
 async function validateGumroadLicense(key) {
-    // First check if the provided key is the test key
-    if (key === "chipi chipi chapa chapa") {
-        return true; // Test key is always valid
-    }
-
+    console.log('Validating Gumroad License:', key);
     try {
-        // Make the API call if the key is not the test key
         const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
             method: 'POST',
             headers: {
@@ -48,25 +52,28 @@ async function validateGumroadLicense(key) {
             }),
         });
 
+        console.log('API Response:', response);
+
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
-        
+
         const data = await response.json();
-        return data.success; // The key is valid if 'success' is true
+        console.log('API Response Data:', data);
+        return data.success;
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error in validateGumroadLicense:', error);
         return false;
     }
 }
 
 
-
 function toggleContentVisibility(isValid) {
+    console.log('Toggling content visibility. Is Valid:', isValid);
     if (isValid) {
         document.getElementById('licenseSection').style.display = 'none';
         document.getElementById('mainContent').style.display = 'block';
-        loadSettings();
+        // ... load settings or other initializations ...
     } else {
         document.getElementById('licenseSection').style.display = 'block';
         document.getElementById('mainContent').style.display = 'none';
@@ -74,7 +81,7 @@ function toggleContentVisibility(isValid) {
 }
 
 function loadSettings() {
-    // Load settings with default values for new options
+    console.log('Loading settings');
     const settings = JSON.parse(localStorage.getItem('settings')) || {
         resolution: '1080p',
         framerate: '30',

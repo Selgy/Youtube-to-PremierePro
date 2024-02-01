@@ -12,7 +12,7 @@
     <key>CFBundleVersion</key>
     <string>1.1.0</string> <!-- Change this for each version -->
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string> <!-- Human-readable version number -->
+    <string>1.1.0</string> <!-- Human-readable version number -->
 
     <!-- Path to the main executable -->
     <key>CFBundleExecutable</key>
@@ -32,7 +32,7 @@
 
     <!-- Required for macOS applications -->
     <key>LSMinimumSystemVersion</key>
-    <string>10.10</string> <!-- Minimum macOS version required -->
+    <string>10</string> <!-- Minimum macOS version required -->
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSMainNibFile</key>

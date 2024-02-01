@@ -2,6 +2,9 @@
 # get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 # Enable PlayerDebugMode for Adobe CEP versions 8 to 11
+
+defaults write com.adobe.CSXS.6 PlayerDebugMode 1
+defaults write com.adobe.CSXS.7 PlayerDebugMode 1
 defaults write com.adobe.CSXS.8 PlayerDebugMode 1
 defaults write com.adobe.CSXS.9 PlayerDebugMode 1
 defaults write com.adobe.CSXS.10 PlayerDebugMode 1
@@ -52,7 +55,6 @@ if [ -n "$loggedInUser" ]; then
     unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
     rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
     # Change ownership of FFmpeg binary
-    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
     launchctl asuser "$uid" bash -c "
         echo 'About to change ownership' >> '$LOG_FILE';
         chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
@@ -66,4 +68,4 @@ sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applic
 echo "Cleanup completed."
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
-open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl"
+open "https://chromewebstore.google.com/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb"
