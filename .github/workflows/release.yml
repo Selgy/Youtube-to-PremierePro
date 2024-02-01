@@ -293,7 +293,7 @@ jobs:
       with:
             draft: ${{ github.ref == 'refs/heads/master' }}
             prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V2.1
+            tag_name: V1.1
             files: |
               YoutubetoPremiere_Mac.pkg
 
