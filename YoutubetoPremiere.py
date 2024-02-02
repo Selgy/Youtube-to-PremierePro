@@ -111,9 +111,11 @@ def root():
 
 @app.route('/settings', methods=['POST'])
 def update_settings():
+    global settings_global  # Add this line to declare the global variable
     new_settings = request.get_json()
     with open(SETTINGS_FILE, 'w') as f:
         json.dump(new_settings, f, indent=4)
+    settings_global = new_settings  # Update settings_global with the new settings
     return jsonify(success=True), 200
 
 @app.route('/get-video-url', methods=['GET'])
@@ -141,9 +143,11 @@ def generate_new_filename(base_path, original_name, extension, suffix=""):
         new_name = f"{original_name}{suffix}_{counter}.{extension}"
     return new_name
 
+
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
-    global video_url_global
+    global settings_global  # Declare the global variable
+    settings_global = load_settings() 
     data = request.get_json()
     settings = load_settings()
     # Log the incoming data for debugging
@@ -463,6 +467,16 @@ def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
+
+@app.route('/load-settings', methods=['GET'])
+def load_settings_from_file():
+    global settings_global  # Add this line to declare the global variable
+    if os.path.exists(SETTINGS_FILE):
+        with open(SETTINGS_FILE, 'r') as f:
+            settings = json.load(f)
+        settings_global = settings  # Update settings_global with the loaded settings
+        return jsonify(success=True, settings=settings), 200
+    return jsonify(error=f'Settings file not found: {SETTINGS_FILE}'), 404
 
 
 
