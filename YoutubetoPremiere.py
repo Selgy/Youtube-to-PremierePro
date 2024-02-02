@@ -10,14 +10,53 @@ from flask import Flask, request, jsonify
 from flask_socketio import SocketIO, emit
 import json
 import threading
-import pystray
 from PIL import Image, ImageDraw 
 import re
 import psutil
 import tkinter as tk
 from tkinter import messagebox
+import platform
+import subprocess
+import shutil
 
-appdata_path = os.environ['APPDATA']
+should_shutdown = False
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
+
+if getattr(sys, 'frozen', False):
+    # The application is frozen by PyInstaller
+    script_dir = os.path.dirname(sys.executable)
+else:
+    # The application is running in a normal Python environment
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+if platform.system() == 'Windows':
+    # For Windows, assuming FFmpeg binary is bundled at the specified path
+    ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
+elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
+    # For macOS, assuming FFmpeg binary is bundled at the root of the application
+    ffmpeg_path = os.path.join(script_dir, '_internal', 'ffmpeg', 'bin', 'ffmpeg')
+    os.chmod(ffmpeg_path, 0o755)  # Ensure FFmpeg is executable
+else:
+    # Handle other operating systems or raise an exception
+    raise Exception("Unsupported operating system")
+
+
+
+if platform.system() == 'Windows':
+    appdata_path = os.environ['APPDATA']
+elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
+    appdata_path = os.path.expanduser('~/Library/Application Support')
+    os.chmod(appdata_path, 0o755)
+elif platform.system() == 'Linux':
+    appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+else:
+    # Handle other operating systems or raise an exception
+    raise Exception("Unsupported operating system")
+
 settings_path = os.path.join(appdata_path, 'YoutubetoPremiere', 'settings.json')
 
 
@@ -35,11 +74,11 @@ SETTINGS_FILE = settings_path
 #logging.getLogger().addHandler(log_handler)
 
 app = Flask(__name__)
-CORS(app) 
+CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
-video_url_global = None  # Define a global variable to store the video URL
-settings_global = None  # Define a global variable to store the settings
+video_url_global = None  # Global variable to store the video URL
+settings_global = None  # Global variable to store the settings
 
 @app.after_request
 def add_security_headers(response):
@@ -92,25 +131,61 @@ def is_premiere_running():
             return True
     return False
 
+def generate_new_filename(base_path, original_name, extension, suffix=""):
+    base_filename = f"{original_name}{suffix}.{extension}"
+    if not os.path.exists(os.path.join(base_path, base_filename)):
+        return base_filename
+    
+    counter = 1
+    new_name = f"{original_name}{suffix}_{counter}.{extension}"
+    while os.path.exists(os.path.join(base_path, new_name)):
+        counter += 1
+        new_name = f"{original_name}{suffix}_{counter}.{extension}"
+    return new_name
+
+
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
     global settings_global  # Declare the global variable
     settings_global = load_settings() 
     data = request.get_json()
-    video_url_global = data.get('videoUrl')
-    logging.info(f'Video URL received: {video_url_global}')
+    settings = load_settings()
+    # Log the incoming data for debugging
+    logging.info(f"Received data: {data}")
 
-    # Ensure settings have been received before attempting to download the video
+    # Error handling for missing data
+    if not data:
+        logging.error("No data received in request.")
+        return jsonify(error="No data provided"), 400
+
+    video_url_global = data.get('videoUrl')
+    current_time = data.get('currentTime')
+    download_type = data.get('downloadType')
+
+    try:
+        # Retrieve secondsBefore and secondsAfter from request or settings
+        seconds_before = int(data.get('secondsBefore', settings['secondsBefore']))
+        seconds_after = int(data.get('secondsAfter', settings['secondsAfter']))
+    except (ValueError, TypeError):
+        logging.error("Invalid secondsBefore or secondsAfter values.")
+        return jsonify(error="Invalid time settings"), 400
+
+
+    # Error handling for invalid or missing download type
+    if download_type not in ['clip', 'full']:
+        logging.error(f"Invalid download type: {download_type}")
+        return jsonify(error="Invalid download type"), 400
+
+    # Load settings and get the values
     settings = load_settings()
     if settings is None:
         logging.error("Settings not received from the extension.")
-        return jsonify(error="Settings not received"), 500 
+        return jsonify(error="Settings not received"), 500
 
-    # Get the settings values
-    resolution = settings['resolution']
-    framerate = settings['framerate']
-    download_path = settings['downloadPath']
-    download_mp3 = settings['downloadMP3'] 
+    resolution = settings.get('resolution')
+    framerate = settings.get('framerate')
+    download_path = data.get('downloadPath', settings.get('downloadPath', '')).strip()
+    download_mp3 = settings.get('downloadMP3')
 
     # Check if Adobe Premiere Pro is running
     if not is_premiere_running():
@@ -119,12 +194,17 @@ def handle_video_url():
         messagebox.showerror("Error", "Adobe Premiere Pro is not running")
         return jsonify(error="Adobe Premiere Pro is not running"), 400
 
-    # Initiate the download of the video
-    download_video(video_url_global, resolution, framerate, download_path, download_mp3) 
+    # Execute the appropriate function based on download type
+    if download_type == 'clip':
+        clip_start = max(0, current_time - seconds_before)
+        clip_end = current_time + seconds_after
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
 
-    response = jsonify(success=True)
-    response.headers.add('Access-Control-Allow-Origin', request.headers.get('Origin'))
-    return response, 200
+    elif download_type == 'full':
+        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
+
+    return jsonify(success=True), 200
+
 
 def read_settings_from_local():
     global settings_global
@@ -133,31 +213,54 @@ def read_settings_from_local():
         sys.exit(1)
     return settings_global
 
+LOCK_FILE_PATH = os.path.join(script_dir, 'script.lock')
+
+def is_already_running():
+    return os.path.exists(LOCK_FILE_PATH)
+
+def create_lock_file():
+    with open(LOCK_FILE_PATH, 'w') as lock_file:
+        lock_file.write("")
+
+def delete_lock_file():
+    if os.path.exists(LOCK_FILE_PATH):
+        os.remove(LOCK_FILE_PATH)
+
 
 def import_video_to_premiere(video_path):
-    if os.path.exists(video_path):
-        logging.info(f'File already exists: {video_path}. Overwriting...')
+    if not os.path.exists(video_path):
+        logging.error(f'File does not exist: {video_path}')
+        return
+
     try:
         logging.info('Attempting to import video to Premiere...')
         proj = pymiere.objects.app.project
-        logging.info('Got project object: %s', proj)
         root_bin = proj.rootItem
-        logging.info('Got root bin: %s', root_bin)
+
+        # Import file
         proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
         logging.info(f'Video imported to Premiere successfully: {video_path}')
+
+        # Open clip in source monitor
+        pymiere.objects.app.sourceMonitor.openFilePath(video_path)
+        logging.info('Clip opened in source monitor.')
+
     except Exception as e:
-        logging.error(f'Error importing video: {e}', exc_info=True)
+        logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
+
+
 
 
 def sanitize_title(title):
-    # Replace known problematic characters
-    sanitized_title = (title.replace(":", " -")
-                             .replace("|", "-")
-                             .replace("：", " -")  
-                             .replace("｜", "-")
-                             .replace('*', '#'))
-                             
+    # Allow Unicode letters, numbers, and specific special characters
+    pattern = '[^\w \(\)\,\"\&\.\;\!\€\$\-\_]+'
     
+    # Replace unwanted characters with a space
+    sanitized_title = re.sub(pattern, ' ', title)
+
+    # Normalize whitespace (replace multiple spaces with a single space)
+    sanitized_title = re.sub(r'\s+', ' ', sanitized_title).strip()
+
     return sanitized_title
 
 def progress_hook(d):
@@ -177,26 +280,155 @@ def get_default_ydl_opts():
         'nooverwrites': False,
     }
 
-def download_video(video_url, resolution, framerate, download_path, download_mp3):
-    ydl_opts = get_default_ydl_opts()
-    logging.info(f'Starting download of {video_url} with resolution {resolution}, framerate {framerate}, download path {download_path}')
-    download_path = os.path.join(download_path, '')
+def convert_to_wav(m4a_path, wav_path):
+    ffmpeg_command = [ffmpeg_path, '-y', '-i', m4a_path, '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '2', wav_path]
+    try:
+        subprocess.call(ffmpeg_command)
+        logging.info(f'Converted {m4a_path} to {wav_path}')
+    except Exception as e:
+        logging.error(f'Error converting {m4a_path} to WAV: {e}', exc_info=True)
 
-    with youtube_dl.YoutubeDL({'quiet': True}) as ydl:
-        info_dict = ydl.extract_info(video_url, download=False)
-    
-    video_title = sanitize_title(info_dict['title'])
-
-    sanitized_output_template = f'{download_path}{video_title}.%(ext)s'
-
-
-    if getattr(sys, 'frozen', False):
-        script_dir = os.path.dirname(sys.executable)
+def get_default_download_path():
+    # Get the path of the current Premiere Pro project
+    project_dir_path = get_current_project_path()
+    if project_dir_path:
+        default_path = os.path.join(project_dir_path, 'YoutubeToPremiere_download')
+        if not os.path.exists(default_path):
+            os.makedirs(default_path)
+        return default_path
     else:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
+        logging.error("No active Premiere Pro project found.")
+        return None
 
-    ffmpeg_path = os.path.join(script_dir, 'ffmpeg')
-    
+def get_current_project_path():
+    try:
+        proj = pymiere.objects.app.project
+        if proj and proj.path:
+            project_file_path = proj.path
+            project_dir_path = os.path.dirname(project_file_path)
+            logging.info(f"Project directory path: {project_dir_path}")
+            return project_dir_path
+        else:
+            logging.warning("No active project found in Premiere Pro")
+            return None
+    except Exception as e:
+        logging.error(f'Error getting project path: {e}', exc_info=True)
+        return None
+
+
+def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after):
+    clip_duration = clip_end - clip_start
+    logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
+
+    # Ensure that clip_duration is being calculated correctly
+    logging.info(f"Clip duration calculated as: {clip_duration} seconds")
+
+    logging.info(f"Starting download and process clip for URL: {video_url} with clip_start: {clip_start} and clip_duration: {clip_duration}")
+    download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
+    if download_path is None:
+        logging.error("No active Premiere Pro project found.")
+        return
+
+    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
+    clip_suffix = "_clip"
+
+    video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+    audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+    video_file_path = os.path.join(download_path, video_filename)
+    audio_file_path = os.path.join(download_path, audio_filename)
+
+
+    if download_mp3:
+        ydl_opts_audio = {
+            'format': 'bestaudio[ext=m4a]/best',
+            'outtmpl': audio_file_path,
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts_audio) as ydl:
+            ydl.download([video_url])
+
+        temp_audio_file = f"{audio_file_path}_temp.wav"
+
+        ffmpeg_command_audio = [
+            ffmpeg_path,
+            '-y',
+            '-i', audio_file_path,
+            '-ss', str(clip_start),
+            '-t', str(clip_duration),
+            '-acodec', 'pcm_s16le',
+            '-ar', '44100',
+            '-ac', '2',
+            temp_audio_file
+        ]
+
+        try:
+            subprocess.run(ffmpeg_command_audio, check=True)
+            os.remove(audio_file_path)  # Remove the original full audio
+            os.rename(temp_audio_file, audio_file_path)  # Rename the trimmed file
+            logging.info(f'Trimmed audio saved to {audio_file_path}')
+            import_video_to_premiere(audio_file_path)
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during audio clipping process: {e}', exc_info=True)
+            if os.path.exists(temp_audio_file):
+                os.remove(temp_audio_file)  # Clean up in case of error
+    else:
+        # Download the video clip
+        ydl_opts_video = {
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best',
+            'outtmpl': video_file_path,
+            'ffmpeg_location': ffmpeg_path,
+            'progress_hooks': [progress_hook],
+        }
+
+        with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
+            ydl.download([video_url])
+
+        temp_video_file = f"{video_file_path}_temp.mp4"
+
+        ffmpeg_command_video = [
+            ffmpeg_path,
+            '-y',
+            '-i', video_file_path,
+            '-ss', str(clip_start),
+            '-t', str(clip_duration),
+            '-c:v', 'copy',
+            '-c:a', 'copy',
+            temp_video_file
+        ]
+
+        try:
+            subprocess.run(ffmpeg_command_video, check=True)
+            os.remove(video_file_path)  # Remove the original full video
+            os.rename(temp_video_file, video_file_path)  # Rename the trimmed video file
+            logging.info(f'Trimmed video saved to {video_file_path}')
+            import_video_to_premiere(video_file_path)
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during video clipping process: {e}', exc_info=True)
+            if os.path.exists(temp_video_file):
+                os.remove(temp_video_file)  # Clean up in case of error
+
+    play_notification_sound()
+    socketio.emit('download-complete')
+
+
+
+def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+    logging.info(f"Starting video download for URL: {video_url}")
+
+    # Determine the final download path
+    final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
+    if final_download_path is None:
+        logging.error("No active Premiere Pro project found.")
+        return None
+
+    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
+    base_filename = f"{sanitized_title}.mp4"
+    output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
+    sanitized_output_template = os.path.join(final_download_path, output_filename)
+
+    # Set youtube_dl options
     ydl_opts = {
         'outtmpl': sanitized_output_template,
         'ffmpeg_location': ffmpeg_path,
@@ -205,46 +437,32 @@ def download_video(video_url, resolution, framerate, download_path, download_mp3
         'writeautomaticsub': False,
         'writethumbnail': False,
         'nooverwrites': False,
+        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     }
 
-    if download_mp3:  # change this to something like download_audio
-        ydl_opts.update({
-            'format': f'bestaudio[ext=m4a]/best',
-            # ... other options
-        })
-    else:
-        ydl_opts.update({
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<=1080][fps<=30]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-            'outtmpl': f'{download_path}{video_title}.%(ext)s',
-        })
-
-    logging.info(f'download_mp3: {download_mp3}')  # Log the value of download_mp3
-    logging.info(f'ydl_opts before download: {ydl_opts}') 
-    print(ydl_opts)  # Add this line to print the ydl_opts dictionary to the console
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([video_url])
+    # Download the video
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         result = ydl.download([video_url])
+        if result == 0 and os.path.exists(sanitized_output_template):
+            logging.info(f"Video downloaded successfully: {sanitized_output_template}")
+            import_video_to_premiere(sanitized_output_template)
+            play_notification_sound()
+            socketio.emit('download-complete')
+        else:
+            logging.error("Download failed with youtube_dl.")
+            return None
 
-    logging.info(f'download_mp3: {download_mp3}')
 
-    if result == 0:
-        video_title = sanitize_title(info_dict['title'])
-        file_extension = "m4a" if download_mp3 else "mp4"
-        video_filename = os.path.join(download_path, f"{video_title}.{file_extension}")
-        import_video_to_premiere(video_filename)
-    else:
-        logging.error(f'Failed to download video from {video_url}')
-
-    if os.path.exists(video_filename):
-        time.sleep(2)
-        logging.info(f'Download and import completed successfully for {video_url}')
-    else:
-        logging.error("Video download failed.")
-
-def play_notification_sound(volume=0.5):  # Default volume set to 50%
+def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
-    pygame.mixer.music.load("notification_sound.mp3")  # Load your notification sound file
+
+    # Check the operating system and set the path for the notification sound
+    if platform.system() == 'Darwin':  # Darwin is the system name for macOS
+        notification_sound_path = os.path.join(script_dir, '_internal', 'notification_sound.mp3')
+    else:
+        notification_sound_path = "notification_sound.mp3"
+
+    pygame.mixer.music.load(notification_sound_path)  # Load the notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
@@ -261,69 +479,73 @@ def load_settings_from_file():
     return jsonify(error=f'Settings file not found: {SETTINGS_FILE}'), 404
 
 
+
 def load_settings():
+    # Default settings structure
+    default_settings = {
+        'resolution': '1080',
+        'framerate': '30',
+        'downloadPath': '',
+        'downloadMP3': False,
+        'secondsBefore': '15',
+        'secondsAfter': '15'
+    }
+
     if os.path.exists(SETTINGS_FILE):
         with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
-        logging.info(f'Loaded settings: {settings}')
-        logging.info(f'Settings file contents: {settings}')  # Log the loaded settings
-        return settings
-    logging.error(f'Settings file not found: {SETTINGS_FILE}')  # Log an error if the file is not found
-    return None
+    else:
+        settings = default_settings
+        with open(SETTINGS_FILE, 'w') as f:
+            json.dump(settings, f, indent=4)
+
+    logging.info(f'Loaded settings: {settings}')
+    return settings
+
+
+def is_premiere_running():
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
+            return True
+    return False
+
+def monitor_premiere_and_shutdown():
+    global should_shutdown
+    while True:
+        time.sleep(5)
+        if not is_premiere_running():
+            logging.info("Adobe Premiere Pro is not running. Initiating shutdown.")
+            should_shutdown = True
+            break
+
+def run_server():
+    with app.app_context():
+        while not should_shutdown:
+            socketio.sleep(1)  # Allows the server to check for the shutdown flag
+        logging.info("Stopping the Flask-SocketIO server.")
+        socketio.stop()
+
+
 
 def main():
-    logging.info('Script starting...')  # Log the starting of the script
+    logging.info(f'Starting script execution. PID: {os.getpid()}')
     global settings_global
     settings_global = load_settings()  # Load settings from file
-    logging.info('Settings loaded: %s', settings_global)  # Log the loaded settings
-    try:
-        # Start the Flask server in a separate thread
-        from threading import Thread
-        logging.info('Starting server thread...')  # Log before starting the server thread
-        server_thread = Thread(target=lambda: socketio.run(app, host='localhost', port=3001))
-        server_thread.start()
-        logging.info('Server thread started')  # Log after starting the server thread
-    except Exception as e:
-        logging.exception(f'An error occurred: {e}')
+    logging.info('Settings loaded: %s', settings_global)
+    
+    server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
+    server_thread.start()
 
-    else:
-        # Stop the server when done
-        server_thread.join()
+    premiere_monitor_thread = threading.Thread(target=monitor_premiere_and_shutdown)
+    premiere_monitor_thread.start()
 
-def create_image():
-    # Check if running as a bundled application
-    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-        # Bundled application, icon is in the temp directory
-        icon_path = os.path.join(sys._MEIPASS, 'icon.png')
-    else:
-        # Not bundled, icon is in the script directory
-        icon_path = os.path.join(os.path.dirname(__file__), 'icon.png')
-    print(f'Icon path: {icon_path}')  # Add this line
-    image = Image.open(icon_path)
-    return image
+    while not should_shutdown:
+        time.sleep(1)  # Wait for the shutdown signal
 
 
-def exit_action(icon, item):
-    icon.stop()
-    os._exit(0) 
-
-def run_tray_icon():
-    image = create_image()
-    icon = pystray.Icon("test_icon", image, "Youtube to ¨Premiere pro", menu=pystray.Menu(pystray.MenuItem('Exit', exit_action)))
-    icon.run()
+    print("Shutting down the application.")
+    os._exit(0)
 
 if __name__ == "__main__":
-    logging.info('Script starting...')
-    settings_global = load_settings()  # Load settings from file
-    logging.info('Settings loaded: %s', settings_global)
-    try:
-        # Start the Flask server in a separate thread
-        server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
-        server_thread.start()
+    main()
 
-        # Call run_tray_icon directly on the main thread
-        run_tray_icon()
-    except Exception as e:
-        logging.exception(f'An unhandled exception occurred: {e}')
-    finally:
-        server_thread.join()

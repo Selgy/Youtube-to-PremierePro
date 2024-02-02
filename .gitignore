@@ -1,11 +1,10 @@
 ScriptInstaller.nsi
-StartServer.bat
-ffmpeg
+ffmpeg_win
 venv
 YoutubetoPremiere Installer.exe
 YoutubetoPremiere.exe
 _Internal
 build
 youtubetoPremiere.spec
-icon.ico
 YoutubetoPremiere-WinInstaller.exe
+com.youtubetopremiere.YoutubetoPremiere.plist

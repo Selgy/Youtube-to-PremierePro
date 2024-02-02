@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Allow network access -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- Allow file access -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+    <!-- Allow audio input, if necessary -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+    <!-- Allow screen recording, if necessary -->
+    <key>com.apple.security.screen-recording</key>
+    <true/>
+    <!-- Allow AppleScript, if necessary -->
+    <key>com.apple.security.scripting-targets</key>
+    <dict/>
+</dict>
+</plist>
