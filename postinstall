@@ -68,4 +68,4 @@ sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applic
 echo "Cleanup completed."
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
-open "https://chromewebstore.google.com/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb"
+open "https://chromewebstore.google.com/detail/youtube-to-premiere-pro-v2/fnhpeiohcfobchjffmgfdeobphhmaibb"
