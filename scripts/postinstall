@@ -4,12 +4,13 @@
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 
 # Enable PlayerDebugMode for Adobe CEP versions  to 11
-defaults write com.adobe.CSXS.6 PlayerDebugMode 1
-defaults write com.adobe.CSXS.7 PlayerDebugMode 1
-defaults write com.adobe.CSXS.8 PlayerDebugMode 1
-defaults write com.adobe.CSXS.9 PlayerDebugMode 1
-defaults write com.adobe.CSXS.10 PlayerDebugMode 1
-defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.6 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.7 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.8 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.9 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.10 PlayerDebugMode 1
+sudo defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+sudo defaults read com.adobe.CSXS.11 PlayerDebugMode
 
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
