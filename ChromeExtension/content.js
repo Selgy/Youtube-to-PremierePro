@@ -97,7 +97,7 @@ function sendURL(downloadType, additionalData = {}) {
         .catch(handleError)
         .finally(() => {
             isRequestInProgress = false; // Reset the flag when request is complete
-            button.innerText = downloadType === 'full' ? 'Premiere Pro' : 'Clip';
+            button.innerText = downloadType === 'full' ? 'Full video' : 'Clip video';
         });
     } else {
         console.error('No video URL found.');

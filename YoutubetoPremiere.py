@@ -316,10 +316,6 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
 
-    # Ensure that clip_duration is being calculated correctly
-    logging.info(f"Clip duration calculated as: {clip_duration} seconds")
-
-    logging.info(f"Starting download and process clip for URL: {video_url} with clip_start: {clip_start} and clip_duration: {clip_duration}")
     download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if download_path is None:
         logging.error("No active Premiere Pro project found.")
@@ -327,87 +323,48 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
 
     sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     clip_suffix = "_clip"
-
     video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
     audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
     video_file_path = os.path.join(download_path, video_filename)
     audio_file_path = os.path.join(download_path, audio_filename)
-
-
+    clip_duration = clip_end - clip_start
     if download_mp3:
         ydl_opts_audio = {
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': audio_file_path,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
+            'external_downloader': ffmpeg_path,
+            'external_downloader_args': {
+                'ffmpeg_i': [f'-ss', str(clip_start), f'-t', str(clip_duration)],
+            },
         }
 
         with youtube_dl.YoutubeDL(ydl_opts_audio) as ydl:
             ydl.download([video_url])
 
-        temp_audio_file = f"{audio_file_path}_temp.wav"
+        convert_to_wav(audio_file_path, audio_file_path)
+        import_video_to_premiere(audio_file_path)
 
-        ffmpeg_command_audio = [
-            ffmpeg_path,
-            '-y',
-            '-i', audio_file_path,
-            '-ss', str(clip_start),
-            '-t', str(clip_duration),
-            '-acodec', 'pcm_s16le',
-            '-ar', '44100',
-            '-ac', '2',
-            temp_audio_file
-        ]
-
-        try:
-            subprocess.run(ffmpeg_command_audio, check=True)
-            os.remove(audio_file_path)  # Remove the original full audio
-            os.rename(temp_audio_file, audio_file_path)  # Rename the trimmed file
-            logging.info(f'Trimmed audio saved to {audio_file_path}')
-            import_video_to_premiere(audio_file_path)
-        except subprocess.CalledProcessError as e:
-            logging.error(f'Error during audio clipping process: {e}', exc_info=True)
-            if os.path.exists(temp_audio_file):
-                os.remove(temp_audio_file)  # Clean up in case of error
     else:
-        # Download the video clip
         ydl_opts_video = {
             'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best',
             'outtmpl': video_file_path,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
+            'external_downloader': ffmpeg_path,
+            'external_downloader_args': {
+                'ffmpeg_i': [f'-ss', str(clip_start), f'-t', str(clip_duration)],
+            },
         }
 
         with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
             ydl.download([video_url])
 
-        temp_video_file = f"{video_file_path}_temp.mp4"
-
-        ffmpeg_command_video = [
-            ffmpeg_path,
-            '-y',
-            '-i', video_file_path,
-            '-ss', str(clip_start),
-            '-t', str(clip_duration),
-            '-c:v', 'copy',
-            '-c:a', 'copy',
-            temp_video_file
-        ]
-
-        try:
-            subprocess.run(ffmpeg_command_video, check=True)
-            os.remove(video_file_path)  # Remove the original full video
-            os.rename(temp_video_file, video_file_path)  # Rename the trimmed video file
-            logging.info(f'Trimmed video saved to {video_file_path}')
-            import_video_to_premiere(video_file_path)
-        except subprocess.CalledProcessError as e:
-            logging.error(f'Error during video clipping process: {e}', exc_info=True)
-            if os.path.exists(temp_video_file):
-                os.remove(temp_video_file)  # Clean up in case of error
+        import_video_to_premiere(video_file_path)
 
     play_notification_sound()
     socketio.emit('download-complete')
-
 
 
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
