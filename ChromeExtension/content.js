@@ -163,11 +163,11 @@ function sendCurrentTimeToServer(timeSettings) {
         } else {
             console.log('Timecode sent successfully:', data);
         }
-        document.getElementById('clip-button').innerText = 'Clip';  // Reset button text after processing
+        document.getElementById('clip-button').innerText = 'Clip video';  // Reset button text after processing
     })
     .catch(error => {
         console.error('Error sending current time:', error);
-        document.getElementById('clip-button').innerText = 'Clip';  // Reset button text in case of error
+        document.getElementById('clip-button').innerText = 'Clip video';  // Reset button text in case of error
     });
 }
 
@@ -212,14 +212,14 @@ socket.on('percentage', (data) => {
 socket.on('download-complete', () => {
     const button = document.getElementById('send-to-premiere-button');
     if (button) {
-        button.innerText = 'Premiere Pro';  // Reset the button text
+        button.innerText = 'Full video';  // Reset the button text
     }
 });
 
 socket.on('download-complete', () => {
     const clipButton = document.getElementById('clip-button');
     if (clipButton) {
-        clipButton.innerText = 'Clip';  // Reset the button text
+        clipButton.innerText = 'Clip video';  // Reset the button text
     }
 });
 

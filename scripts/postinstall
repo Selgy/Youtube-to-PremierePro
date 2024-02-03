@@ -61,11 +61,15 @@ if [ -n "$loggedInUser" ]; then
     rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
     # Change ownership of FFmpeg binary
+    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
     launchctl asuser "$uid" bash -c "
         echo 'About to change ownership' >> '$LOG_FILE';
         chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
         echo 'Ownership change attempted' >> '$LOG_FILE';
     "
+    # Delete the log file after the operation is complete
+    rm -f "$LOG_FILE" && echo "Log file deleted successfully." || { echo "Failed to delete log file"; exit 1; }
+
 fi
 
 echo "Cleanup started..."
