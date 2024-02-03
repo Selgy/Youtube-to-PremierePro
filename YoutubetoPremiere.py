@@ -348,16 +348,20 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
 
     else:
         ydl_opts_video = {
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best',
+            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=m4a]/best',  
             'outtmpl': video_file_path,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
             'external_downloader': ffmpeg_path,
             'external_downloader_args': {
-                'ffmpeg_i': [f'-ss', str(clip_start), f'-t', str(clip_duration)],
+                'ffmpeg_i': ['-ss', str(clip_start), '-t', str(clip_duration)],
             },
+            'postprocessors': [{
+                'key': 'FFmpegVideoConvertor',
+                'preferedformat': 'mp4',  # This ensures the final file is in MP4 format
+            }],
         }
-
+        
         with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
             ydl.download([video_url])
 
