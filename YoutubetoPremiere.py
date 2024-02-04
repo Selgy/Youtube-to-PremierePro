@@ -159,9 +159,7 @@ def handle_video_url():
     current_time = data.get('currentTime')
     download_type = data.get('downloadType')
 
-    # Extract video information after video_url_global is set
-    video_info = yt.YoutubeDL().extract_info(video_url_global, download=False)
-    sanitized_title = sanitize_title(video_info['title'])
+
 
     # Load settings here
     settings = load_settings()
@@ -202,10 +200,10 @@ def handle_video_url():
     if download_type == 'clip':
         clip_start = max(0, current_time - seconds_before)
         clip_end = current_time + seconds_after
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after, sanitized_title)
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
 
     elif download_type == 'full':
-        download_video(video_url_global, resolution, framerate, download_path, download_mp3, sanitized_title)
+        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
     return jsonify(success=True), 200
 
 
@@ -319,7 +317,8 @@ def get_current_project_path():
         return None
 
 
-def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after, sanitized_title):
+def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after):
+
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
 
@@ -328,13 +327,17 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         logging.error("No active Premiere Pro project found.")
         return
 
-    clip_suffix = "_clip"
-    video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
-    audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
-    video_file_path = os.path.join(download_path, video_filename)
-    audio_file_path = os.path.join(download_path, audio_filename)
+
 
     if download_mp3:
+        video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+        sanitized_title = sanitize_title(video_info['title'])
+        clip_suffix = "_clip"
+        video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+        audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+        video_file_path = os.path.join(download_path, video_filename)
+        audio_file_path = os.path.join(download_path, audio_filename)
+
         ydl_opts_audio = {
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': audio_file_path,
@@ -371,9 +374,17 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
                 os.remove(temp_audio_file)  # Clean up in case of error
 
     else:
+        video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+        sanitized_title = sanitize_title(video_info['title'])
+        clip_suffix = "_clip"
+        video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+        audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+        video_file_path = os.path.join(download_path, video_filename)
+        audio_file_path = os.path.join(download_path, audio_filename)
         clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
         clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
 
+        # Construct the yt_dlp command line command
         yt_dlp_command = [
             'yt-dlp',
             '-f', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
@@ -384,19 +395,21 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             video_url
         ]
 
-
-        # Run the command
-        subprocess.run(yt_dlp_command)
-
-        import_video_to_premiere(video_file_path)
+        try:
+            subprocess.run(yt_dlp_command, check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"An error occurred: {e}")
+            # Handle the error appropriately
+    import_video_to_premiere(video_file_path)
 
     play_notification_sound()
     socketio.emit('download-complete')
 
 
-def download_video(video_url, resolution, framerate, user_download_path, download_mp3, sanitized_title):
+def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
-
+    video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+    sanitized_title = sanitize_title(video_info['title'])
     # Determine the final download path
     final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if final_download_path is None:
