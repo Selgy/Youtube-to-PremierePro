@@ -83,3 +83,12 @@ echo "Cleanup completed."
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
 open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
+
+
+EXECUTABLE="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/YoutubetoPremiere"
+if [ -f "$EXECUTABLE" ]; then
+    echo "Launching YoutubetoPremiere..."
+    open "$EXECUTABLE"
+else
+    echo "YoutubetoPremiere executable not found."
+fi
