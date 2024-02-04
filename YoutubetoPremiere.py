@@ -371,27 +371,19 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
                 os.remove(temp_audio_file)  # Clean up in case of error
 
     else:
-        # Log the original clip start and end times
-        logging.info(f"Original clip start time (in seconds): {clip_start}")
-        logging.info(f"Original clip end time (in seconds): {clip_end}")
-
-        # Format time as HH:MM:SS
         clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
         clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
-
-        # Log the formatted clip start and end times
-        logging.info(f"Formatted clip start time (HH:MM:SS): {clip_start_str}")
-        logging.info(f"Formatted clip end time (HH:MM:SS): {clip_end_str}")
 
         yt_dlp_command = [
             'yt-dlp',
             '-f', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
             '--ffmpeg-location', ffmpeg_path,
             '--download-sections', f'*{clip_start_str}-{clip_end_str}',
-            '--force-keyframes-at-cuts',
             '--output', video_file_path,
+            '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy', 
             video_url
         ]
+
 
         # Run the command
         subprocess.run(yt_dlp_command)
