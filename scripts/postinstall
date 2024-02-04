@@ -12,7 +12,7 @@ for csxs_version in {6..11}; do
 done
 
 # Define the user's Adobe CEP extensions directory
-CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
+CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
@@ -83,23 +83,3 @@ echo "Cleanup completed."
 echo "Opening the web page in the default browser..."
 open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
 
-EXECUTABLE="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/YoutubetoPremiere"
-if [ -f "$EXECUTABLE" ]; then
-    echo "Launching YoutubetoPremiere..."
-    open "$EXECUTABLE"
-else
-    echo "YoutubetoPremiere executable not found."
-fi
-
-# Define user-specific Adobe CEP extensions directory
-USER_CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
-
-# Ensure the user-specific CEP extensions directory exists
-mkdir -p "$USER_CEP_EXTENSIONS_DIR" && echo "User-specific CEP extensions directory verified." || { echo "Failed to verify user-specific CEP extensions directory"; exit 1; }
-
-# Move the com.selgy.youtubetopremiere folder
-if [ -d "$TARGET_DIR" ]; then
-    mv -f "$TARGET_DIR" "$USER_CEP_EXTENSIONS_DIR" && echo "Moved com.selgy.youtubetopremiere to user-specific CEP directory." || { echo "Failed to move com.selgy.youtubetopremiere"; exit 1; }
-else
-    echo "com.selgy.youtubetopremiere directory not found in global CEP extensions directory."
-fi
