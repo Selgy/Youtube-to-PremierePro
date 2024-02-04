@@ -17,7 +17,8 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 import subprocess
-import shutil
+from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
+import yt_dlp as yt
 
 should_shutdown = False
 
@@ -145,7 +146,7 @@ def generate_new_filename(base_path, original_name, extension, suffix=""):
 def handle_video_url():
     global video_url_global
     data = request.get_json()
-    settings = load_settings()
+
     # Log the incoming data for debugging
     logging.info(f"Received data: {data}")
 
@@ -157,6 +158,13 @@ def handle_video_url():
     video_url_global = data.get('videoUrl')
     current_time = data.get('currentTime')
     download_type = data.get('downloadType')
+
+    # Extract video information after video_url_global is set
+    video_info = yt.YoutubeDL().extract_info(video_url_global, download=False)
+    sanitized_title = sanitize_title(video_info['title'])
+
+    # Load settings here
+    settings = load_settings()
 
     try:
         # Retrieve secondsBefore and secondsAfter from request or settings
@@ -194,11 +202,10 @@ def handle_video_url():
     if download_type == 'clip':
         clip_start = max(0, current_time - seconds_before)
         clip_end = current_time + seconds_after
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after, sanitized_title)
 
     elif download_type == 'full':
-        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
-
+        download_video(video_url_global, resolution, framerate, download_path, download_mp3, sanitized_title)
     return jsonify(success=True), 200
 
 
@@ -312,7 +319,7 @@ def get_current_project_path():
         return None
 
 
-def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after):
+def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after, sanitized_title):
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
 
@@ -321,49 +328,73 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         logging.error("No active Premiere Pro project found.")
         return
 
-    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     clip_suffix = "_clip"
     video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
     audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
     video_file_path = os.path.join(download_path, video_filename)
     audio_file_path = os.path.join(download_path, audio_filename)
-    clip_duration = clip_end - clip_start
+
     if download_mp3:
         ydl_opts_audio = {
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': audio_file_path,
             'ffmpeg_location': ffmpeg_path,
             'progress_hooks': [progress_hook],
-            'external_downloader': ffmpeg_path,
-            'external_downloader_args': {
-                'ffmpeg_i': [f'-ss', str(clip_start), f'-t', str(clip_duration)],
-            },
         }
 
         with youtube_dl.YoutubeDL(ydl_opts_audio) as ydl:
             ydl.download([video_url])
 
-        convert_to_wav(audio_file_path, audio_file_path)
-        import_video_to_premiere(audio_file_path)
+        temp_audio_file = f"{audio_file_path}_temp.wav"
+
+        ffmpeg_command_audio = [
+            ffmpeg_path,
+            '-y',
+            '-i', audio_file_path,
+            '-ss', str(clip_start),
+            '-t', str(clip_duration),
+            '-acodec', 'pcm_s16le',
+            '-ar', '44100',
+            '-ac', '2',
+            temp_audio_file
+        ]
+
+        try:
+            subprocess.run(ffmpeg_command_audio, check=True)
+            os.remove(audio_file_path)  # Remove the original full audio
+            os.rename(temp_audio_file, audio_file_path)  # Rename the trimmed file
+            logging.info(f'Trimmed audio saved to {audio_file_path}')
+            import_video_to_premiere(audio_file_path)
+        except subprocess.CalledProcessError as e:
+            logging.error(f'Error during audio clipping process: {e}', exc_info=True)
+            if os.path.exists(temp_audio_file):
+                os.remove(temp_audio_file)  # Clean up in case of error
 
     else:
-        ydl_opts_video = {
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps<={framerate}]+bestaudio[ext=m4a]/best[ext=m4a]/best',  
-            'outtmpl': video_file_path,
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-            'external_downloader': ffmpeg_path,
-            'external_downloader_args': {
-                'ffmpeg_i': ['-ss', str(clip_start), '-t', str(clip_duration)],
-            },
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': 'mp4',  # This ensures the final file is in MP4 format
-            }],
-        }
-        
-        with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
-            ydl.download([video_url])
+        # Log the original clip start and end times
+        logging.info(f"Original clip start time (in seconds): {clip_start}")
+        logging.info(f"Original clip end time (in seconds): {clip_end}")
+
+        # Format time as HH:MM:SS
+        clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
+        clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
+
+        # Log the formatted clip start and end times
+        logging.info(f"Formatted clip start time (HH:MM:SS): {clip_start_str}")
+        logging.info(f"Formatted clip end time (HH:MM:SS): {clip_end_str}")
+
+        yt_dlp_command = [
+            'yt-dlp',
+            '-f', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
+            '--ffmpeg-location', ffmpeg_path,
+            '--download-sections', f'*{clip_start_str}-{clip_end_str}',
+            '--force-keyframes-at-cuts',
+            '--output', video_file_path,
+            video_url
+        ]
+
+        # Run the command
+        subprocess.run(yt_dlp_command)
 
         import_video_to_premiere(video_file_path)
 
@@ -371,7 +402,7 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
     socketio.emit('download-complete')
 
 
-def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+def download_video(video_url, resolution, framerate, user_download_path, download_mp3, sanitized_title):
     logging.info(f"Starting video download for URL: {video_url}")
 
     # Determine the final download path
@@ -380,7 +411,6 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         logging.error("No active Premiere Pro project found.")
         return None
 
-    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     base_filename = f"{sanitized_title}.mp4"
     output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
     sanitized_output_template = os.path.join(final_download_path, output_filename)
