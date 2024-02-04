@@ -1,16 +1,21 @@
 #!/bin/bash
 
-# get the current user
+# Get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+
+# Exit if no user is logged in
+if [ -z "$loggedInUser" ]; then
+    echo "No user logged in. Exiting script."
+    exit 1
+fi
 
 # Get the UID of the logged-in user
 uid=$(id -u "$loggedInUser")
 
 # Enable PlayerDebugMode for Adobe CEP versions 6 to 11 in user context
 for csxs_version in {6..11}; do
-    launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
+    defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
 done
-
 
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
@@ -50,40 +55,16 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# If a user is logged in, perform operations in user context
-if [ -n "$loggedInUser" ]; then
-    # Get the uid of the logged-in user
-    uid=$(id -u "$loggedInUser")
-
-    FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
-    mkdir -p "$FFMPEG_BIN_DIR"
-    curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
-    unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-    rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
-
-    # Change ownership of FFmpeg binary
-    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
-    launchctl asuser "$uid" bash -c "
-        echo 'About to change ownership' >> '$LOG_FILE';
-        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
-        echo 'Ownership change attempted' >> '$LOG_FILE';
-    "
-    # Delete the log file after the operation is complete
-    rm -f "$LOG_FILE" && echo "Log file deleted successfully." || { echo "Failed to delete log file"; exit 1; }
-
-fi
-
-echo "Cleanup started..."
-# Force delete the directories
-sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
-sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
-
-echo "Cleanup completed."
+# Download and set up FFmpeg
+FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+mkdir -p "$FFMPEG_BIN_DIR"
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
 open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
-
 
 EXECUTABLE="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/YoutubetoPremiere"
 if [ -f "$EXECUTABLE" ]; then
