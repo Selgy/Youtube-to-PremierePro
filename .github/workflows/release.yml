@@ -364,7 +364,6 @@ jobs:
         --hidden-import=gevent `
         --hidden-import=engineio.async_drivers.threading `
         --hidden-import=pygame.freetype `
-        --hidden-import=encodings.utf_16_le `
         --hidden-import=os `
         --hidden-import=time `
         --hidden-import=pygame.mixer `
@@ -377,13 +376,11 @@ jobs:
         --hidden-import=flask_socketio `
         --hidden-import=json `
         --hidden-import=threading `
-        --hidden-import=PIL.Image, PIL.ImageDraw `
+        --hidden-import=PIL `
         --hidden-import=re `
         --hidden-import=psutil `
         --hidden-import=tkinter `
         --hidden-import=subprocess `
-        --hidden-import=yt_dlp.postprocessor.ffmpeg.FFmpegExtractAudioPP `
-        --hidden-import=yt_dlp as yt `
         --add-binary "./ffmpeg/ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
         --add-data "./icon.png;." `
         --add-data "./notification_sound.mp3;." `
