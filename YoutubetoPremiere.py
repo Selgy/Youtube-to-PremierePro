@@ -383,12 +383,7 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         audio_file_path = os.path.join(download_path, audio_filename)
         clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
         clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
-        if platform.system() == 'Windows':
-            ffmpeg_path = r"C:\Program Files\Common Files\Adobe\CEP\extensions\com.selgy.youtubetopremiere\exec\ffmpeg_win\bin\ffmpeg.exe"
-        elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
-            ffmpeg_path = r"/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/ffmpeg/bin/ffmpeg"
-
-
+        
         # Construct the yt_dlp command line command
         yt_dlp_command = [
             'yt-dlp',
