@@ -383,7 +383,7 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         audio_file_path = os.path.join(download_path, audio_filename)
         clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
         clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
-        
+
         # Construct the yt_dlp command line command
         yt_dlp_command = [
             'yt-dlp',
@@ -395,14 +395,12 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             video_url
         ]
 
-        logging.info(f"Executing subprocess with command: {' '.join(yt_dlp_command)}")
-
         try:
-            subprocess_output = subprocess.run(yt_dlp_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-            logging.info(f"Subprocess output: {subprocess_output.stdout}")
+            subprocess.run(yt_dlp_command, check=True)
         except subprocess.CalledProcessError as e:
-            logging.error(f"Subprocess error: {e}")
-            logging.error(f"Subprocess stderr: {e.stderr}")
+            logging.error(f"yt-dlp command failed: {e}")
+
+        import_video_to_premiere(video_file_path)
 
         logging.info(f"Video download completed: {video_file_path}")
         import_video_to_premiere(video_file_path)
