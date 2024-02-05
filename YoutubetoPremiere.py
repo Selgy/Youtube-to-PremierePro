@@ -452,18 +452,21 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
 
-    # Check the operating system and set the path for the notification sound
-    if platform.system() == 'Darwin':  # Darwin is the system name for macOS
-        notification_sound_path = os.path.join(script_dir, '_internal', 'notification_sound.mp3')
+    # Determine if the script is running in a bundled executable
+    if getattr(sys, 'frozen', False):
+        # If it's an executable, use the _MEIPASS directory
+        base_path = sys._MEIPASS
     else:
-        notification_sound_path = "notification_sound.mp3"
+        # Otherwise, use the regular script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    notification_sound_path = os.path.join(base_path, 'notification_sound.mp3')
 
     pygame.mixer.music.load(notification_sound_path)  # Load the notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
     pygame.mixer.music.play()
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
-
 
 
 def load_settings():
