@@ -200,7 +200,7 @@ def handle_video_url():
     if download_type == 'clip':
         clip_start = max(0, current_time - seconds_before)
         clip_end = current_time + seconds_after
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
+        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path)
 
     elif download_type == 'full':
         download_video(video_url_global, resolution, framerate, download_path, download_mp3)
