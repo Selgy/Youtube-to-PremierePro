@@ -400,10 +400,9 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         except subprocess.CalledProcessError as e:
             print(f"An error occurred: {e}")
             # Handle the error appropriately
-    import_video_to_premiere(video_file_path)
-
-    play_notification_sound()
-    socketio.emit('download-complete')
+        import_video_to_premiere(video_file_path)
+        play_notification_sound()
+        socketio.emit('download-complete')
 
 
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
