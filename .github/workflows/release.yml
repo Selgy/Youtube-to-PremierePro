@@ -104,6 +104,7 @@ jobs:
         --hidden-import=pygame \
         --hidden-import=PIL \
         --hidden-import=flask \
+        --add-binary "./_include/yt-dlp:./" \
         --hidden-import=flask_cors \
         --hidden-import=flask_socketio \
         --hidden-import=yt_dlp \
@@ -367,12 +368,13 @@ jobs:
         --hidden-import=os `
         --hidden-import=time `
         --hidden-import=pygame.mixer `
-        --hidden-import=yt_dlp `
+        --hidden-import=yt-dlp `
         --hidden-import=pymiere `
         --hidden-import=sys `
         --hidden-import=logging `
         --hidden-import=flask_cors `
         --hidden-import=flask `
+        --add-binary "./_include/yt-dlp.exe;./_include/"
         --hidden-import=flask_socketio `
         --hidden-import=json `
         --hidden-import=threading `
@@ -381,11 +383,12 @@ jobs:
         --hidden-import=psutil `
         --hidden-import=tkinter `
         --hidden-import=subprocess `
-        --add-binary "./ffmpeg/ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
+        --add-binary ".ffmpeg/ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
         --add-data "./icon.png;." `
         --add-data "./notification_sound.mp3;." `
         --icon "./icon.ico" `
-        YoutubetoPremiere.py 
+        YoutubetoPremiere.py
+      
       
     
     - name: Install NSIS

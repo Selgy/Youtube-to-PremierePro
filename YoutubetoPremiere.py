@@ -384,22 +384,32 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
         clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
         clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
 
-        # Construct the yt_dlp command line command
+
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+
+        # Check the operating system
+        if platform.system() == "Windows":
+            # For Windows, yt-dlp is inside the '_include' directory
+            yt_dlp_filename = "yt-dlp.exe"
+            yt_dlp_path = os.path.join(base_path, '_include', yt_dlp_filename)
+        else:
+            # For macOS (and potentially other Unix-like systems), yt-dlp is at the root
+            yt_dlp_filename = "yt-dlp"
+            yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
+
+        # Construct the yt_dlp command line command using the dynamically determined path
         yt_dlp_command = [
-            'yt-dlp',
+            yt_dlp_path,
             '-f', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
-            '--ffmpeg-location', ffmpeg_path,
+            '--ffmpeg-location', ffmpeg_path,  # Ensure this path is also correctly set
             '--download-sections', f'*{clip_start_str}-{clip_end_str}',
             '--output', video_file_path,
             '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy', 
             video_url
         ]
-
-        logging.info(f"ffmpeg path: {ffmpeg_path}")
-        logging.info(f"yt_dlp command: {' '.join(yt_dlp_command)}")
-        logging.info(f"Executing subprocess with command: {' '.join(yt_dlp_command)}")
         try:
-            result = subprocess.run(yt_dlp_command, capture_output=True, text=True)
+            env = os.environ.copy()
+            result = subprocess.run(yt_dlp_command, capture_output=True, text=True, env=env)
             logging.info(f"stdout: {result.stdout}")
             if result.stderr:
                 logging.error(f"stderr: {result.stderr}")
