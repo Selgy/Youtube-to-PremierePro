@@ -394,12 +394,15 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy', 
             video_url
         ]
-
+        logging.info(f"Executing subprocess with command: {' '.join(yt_dlp_command)}")
         try:
-            subprocess.run(yt_dlp_command, check=True)
+            result = subprocess.run(yt_dlp_command, capture_output=True, text=True)
+            logging.info(f"stdout: {result.stdout}")
+            if result.stderr:
+                logging.error(f"stderr: {result.stderr}")
         except subprocess.CalledProcessError as e:
-            logging.error(f"yt-dlp command failed: {e}")
-
+            logging.error(f"An error occurred while executing yt-dlp: {e}")
+        
         import_video_to_premiere(video_file_path)
 
         logging.info(f"Video download completed: {video_file_path}")
