@@ -400,14 +400,22 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             video_url
         ]
 
+        logging.info(f"Executing subprocess with command: {' '.join(yt_dlp_command)}")
+
         try:
-            subprocess.run(yt_dlp_command, check=True)
+            subprocess_output = subprocess.run(yt_dlp_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            logging.info(f"Subprocess output: {subprocess_output.stdout}")
         except subprocess.CalledProcessError as e:
-            print(f"An error occurred: {e}")
-            # Handle the error appropriately
+            logging.error(f"Subprocess error: {e}")
+            logging.error(f"Subprocess stderr: {e.stderr}")
+
+        logging.info(f"Video download completed: {video_file_path}")
         import_video_to_premiere(video_file_path)
+        logging.info("Import to Premiere Pro completed")
         play_notification_sound()
         socketio.emit('download-complete')
+
+    logging.info("Download and processing of clip completed")
 
 
 def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
