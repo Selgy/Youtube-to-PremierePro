@@ -405,6 +405,7 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             '--download-sections', f'*{clip_start_str}-{clip_end_str}',
             '--output', video_file_path,
             '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy', 
+            '--no-check-certificate', 
             video_url
         ]
         try:
