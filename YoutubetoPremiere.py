@@ -449,7 +449,7 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         'writeautomaticsub': False,
         'writethumbnail': False,
         'nooverwrites': False,
-        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     }
 
     # Download the video

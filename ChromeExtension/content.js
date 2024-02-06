@@ -11,7 +11,7 @@ const buttonStyles = `
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
     margin-left: 5px;
-    width: 120px; /* Fixed width */
+    width: 100px; /* Fixed width */
     text-align: center; /* Center the text inside the button */
 `;
 
