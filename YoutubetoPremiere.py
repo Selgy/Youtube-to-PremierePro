@@ -185,7 +185,7 @@ def handle_video_url():
         return jsonify(error="Settings not received"), 500
 
     resolution = settings.get('resolution')
-    framerate = settings.get('framerate')
+    #framerate = settings.get('framerate')
     download_path = data.get('downloadPath', settings.get('downloadPath', '')).strip()
     download_mp3 = settings.get('downloadMP3')
 
@@ -200,10 +200,10 @@ def handle_video_url():
     if download_type == 'clip':
         clip_start = max(0, current_time - seconds_before)
         clip_end = current_time + seconds_after
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path)
+        download_and_process_clip(video_url_global, resolution, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path)
 
     elif download_type == 'full':
-        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
+        download_video(video_url_global, resolution, download_path, download_mp3)
     return jsonify(success=True), 200
 
 
@@ -317,7 +317,7 @@ def get_current_project_path():
         return None
 
 
-def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path):
+def download_and_process_clip(video_url, resolution, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path):
 
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
@@ -426,7 +426,7 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
     logging.info("Download and processing of clip completed")
 
 
-def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+def download_video(video_url, resolution, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
     video_info = yt.YoutubeDL().extract_info(video_url, download=False)
     sanitized_title = sanitize_title(video_info['title'])
@@ -489,7 +489,6 @@ def load_settings():
     # Default settings structure
     default_settings = {
         'resolution': '1080',
-        'framerate': '30',
         'downloadPath': '',
         'downloadMP3': False,
         'secondsBefore': '15',
