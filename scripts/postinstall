@@ -49,30 +49,22 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# If a user is logged in, perform operations in user context
-if [ -n "$loggedInUser" ]; then
-    # Get the uid of the logged-in user
-    uid=$(id -u "$loggedInUser")
+# Change ownership and permissions of FFmpeg binary and yt-dlp
+FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 
-    FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
-    YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
+# Ensure directories exist
+mkdir -p "$FFMPEG_BIN_DIR"
+mkdir -p "$YT_DLP_DIR"
 
-    mkdir -p "$FFMPEG_BIN_DIR"
-    curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
-    unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-    rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
+# Download and unpack FFmpeg
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
-    # Change ownership of FFmpeg binary and yt-dlp
-    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_ytdlp_chown_log.txt"
-    launchctl asuser "$uid" bash -c "
-        echo 'About to change ownership' >> '$LOG_FILE';
-        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' '$YT_DLP_DIR/yt-dlp' >> '$LOG_FILE' 2>&1;
-        echo 'Ownership change attempted' >> '$LOG_FILE';
-    "
-    # Delete the log file after the operation is complete
-    rm -f "$LOG_FILE" && echo "Log file deleted successfully." || { echo "Failed to delete log file"; exit 1; }
-
-fi
+# Set ownership to the logged-in user, and set execute permissions
+chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
+chmod +x "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 
 echo "Cleanup started..."
 # Force delete the directories
