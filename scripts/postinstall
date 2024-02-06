@@ -55,16 +55,18 @@ if [ -n "$loggedInUser" ]; then
     uid=$(id -u "$loggedInUser")
 
     FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+    YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
+
     mkdir -p "$FFMPEG_BIN_DIR"
     curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
     unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
     rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
-    # Change ownership of FFmpeg binary
-    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
+    # Change ownership of FFmpeg binary and yt-dlp
+    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_ytdlp_chown_log.txt"
     launchctl asuser "$uid" bash -c "
         echo 'About to change ownership' >> '$LOG_FILE';
-        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
+        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' '$YT_DLP_DIR/yt-dlp' >> '$LOG_FILE' 2>&1;
         echo 'Ownership change attempted' >> '$LOG_FILE';
     "
     # Delete the log file after the operation is complete
