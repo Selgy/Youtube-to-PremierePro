@@ -1,7 +1,16 @@
 #!/bin/bash
 
-# Get the current user
+# Check for Rosetta 2 and install if not present
+if /usr/sbin/softwareupdate --install-rosetta --agree-to-license; then
+    echo "Rosetta 2 is installed successfully."
+else
+    echo "Failed to install Rosetta 2. Exiting script."
+    exit 1
+fi
+
+# get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+
 
 # Get the UID of the logged-in user
 uid=$(id -u "$loggedInUser")
@@ -16,7 +25,6 @@ CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
-# Create necessary directories
 echo "Creating $CEP_EXTENSIONS_DIR..."
 mkdir -p "$CEP_EXTENSIONS_DIR" && echo "Directory created successfully." || { echo "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
 
@@ -26,7 +34,7 @@ curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetoprem
 echo "Installing com.selgy.youtubetopremiere..."
 unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
 
-# Remove existing installation if it exists
+# Removing existing installation if it exists
 TARGET_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere"
 SOURCE_DIR="$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere"
 
@@ -43,7 +51,6 @@ rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Interm
 # Delete the downloaded ZIP file
 rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
 
-# Create exec directory
 EXEC_DIR="$TARGET_DIR/exec"
 echo "Creating $EXEC_DIR..."
 mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
@@ -51,8 +58,7 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# Determine CPU architecture for FFmpeg
-ARCH=$(uname -m)
+# Change ownership and permissions of FFmpeg binary and yt-dlp
 FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
 YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 
@@ -60,19 +66,8 @@ YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 mkdir -p "$FFMPEG_BIN_DIR"
 mkdir -p "$YT_DLP_DIR"
 
-# Download and unpack the appropriate FFmpeg based on architecture
-if [ "$ARCH" = "x86_64" ]; then
-    # Intel architecture
-    FFMPEG_URL="https://evermeet.cx/pub/ffmpeg/ffmpeg-6.1.1.zip"
-elif [ "$ARCH" = "arm64" ]; then
-    # Apple Silicon architecture
-    FFMPEG_URL="https://www.osxexperts.net/ffmpeg611arm.zip"
-else
-    echo "Unsupported architecture"
-    exit 1
-fi
-
-curl -L "$FFMPEG_URL" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+# Download and unpack FFmpeg
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-113991-g49707b0590.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
 
@@ -81,7 +76,7 @@ chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 chmod +x "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 
 echo "Cleanup started..."
-# Force delete directories
+# Force delete the directories
 sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
 sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
 
@@ -90,3 +85,4 @@ echo "Cleanup completed."
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
 open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
+
