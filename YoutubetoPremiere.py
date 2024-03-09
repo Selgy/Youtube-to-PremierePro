@@ -98,6 +98,12 @@ def page_not_found(e):
 def internal_server_error(e):
     return jsonify(error=str(e)), 500
 
+@app.route('/get-version', methods=['GET'])
+def get_version():
+    return jsonify(version='2.0.6')  # Replace '1.0.0' with your actual version
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def root():
     if request.method == 'GET':
