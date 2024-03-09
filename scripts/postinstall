@@ -66,10 +66,13 @@ YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 mkdir -p "$FFMPEG_BIN_DIR"
 mkdir -p "$YT_DLP_DIR"
 
-# Download and unpack FFmpeg
+# Download and unpack FFmpeg and yt-dlp
 curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-113991-g49707b0590.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip" # Remove the ZIP file
+
+# Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
+xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"
 
 # Set ownership to the logged-in user, and set execute permissions
 chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
