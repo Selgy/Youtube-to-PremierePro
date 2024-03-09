@@ -27,6 +27,7 @@ logging.basicConfig(level=logging.INFO,
                     handlers=[logging.StreamHandler()])
 
 
+# Determine the script directory
 if getattr(sys, 'frozen', False):
     # The application is frozen by PyInstaller
     script_dir = os.path.dirname(sys.executable)
@@ -34,24 +35,47 @@ else:
     # The application is running in a normal Python environment
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
+# Get CPU architecture for macOS
+cpu_architecture = ''
+if platform.system() == 'Darwin':
+    cpu_architecture = subprocess.check_output(['uname', '-m']).strip().decode()
+
+# Set the FFmpeg path based on the operating system and CPU architecture
 if platform.system() == 'Windows':
     # For Windows, assuming FFmpeg binary is bundled at the specified path
     ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
-elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
-    # For macOS, assuming FFmpeg binary is bundled at the root of the application
-    ffmpeg_path = os.path.join(script_dir, '_internal', 'ffmpeg', 'bin', 'ffmpeg')
+elif platform.system() == 'Darwin':
+    # For macOS, select FFmpeg binary based on CPU architecture
+    if cpu_architecture == 'x86_64':
+        # Intel Mac
+        ffmpeg_path = os.path.join(script_dir, 'ffmpeg_intel', 'bin', 'ffmpeg')
+    elif cpu_architecture == 'arm64':
+        # Apple Silicon Mac
+        ffmpeg_path = os.path.join(script_dir, 'ffmpeg_arm', 'bin', 'ffmpeg')
     os.chmod(ffmpeg_path, 0o755)  # Ensure FFmpeg is executable
 else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
 
 
+# Get CPU architecture
+cpu_architecture = subprocess.check_output(['uname', '-m']).strip().decode()
 
+# Determine the application data path based on the operating system and architecture
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
 elif platform.system() == 'Darwin':  # Darwin is the system name for macOS
     appdata_path = os.path.expanduser('~/Library/Application Support')
-    os.chmod(appdata_path, 0o755)
+    os.chmod(appdata_path, 0o755)  # Make sure the permissions are set correctly
+
+    # Additional logic for macOS based on CPU architecture (if needed)
+    if cpu_architecture == 'x86_64':
+        # Intel Mac specific logic (if any)
+        pass
+    elif cpu_architecture == 'arm64':
+        # Apple Silicon specific logic (if any)
+        pass
+
 elif platform.system() == 'Linux':
     appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 else:
