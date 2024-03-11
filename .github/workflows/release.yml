@@ -285,7 +285,7 @@ jobs:
 
 
     - name: Rename PKG file
-      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac.pkg
+      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac_arm64.pkg
         
 
     - name: Upload executables to asset
@@ -298,7 +298,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere_Mac.pkg
+              YoutubetoPremiere_Mac_arm64.pkg
 
   mac-build-intel:
     runs-on: macos-latest
@@ -579,7 +579,7 @@ jobs:
 
 
     - name: Rename PKG file
-      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac.pkg
+      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac_x64.pkg
         
 
     - name: Upload executables to asset
@@ -592,7 +592,7 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere_Mac.pkg
+              YoutubetoPremiere_Mac_x64.pkg
 
 
   win-build:
