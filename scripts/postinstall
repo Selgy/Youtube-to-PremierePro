@@ -1,12 +1,6 @@
 #!/bin/bash
 
-# Check for Rosetta 2 and install if not present
-if /usr/sbin/softwareupdate --install-rosetta --agree-to-license; then
-    echo "Rosetta 2 is installed successfully."
-else
-    echo "Failed to install Rosetta 2. Exiting script."
-    exit 1
-fi
+
 
 # get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
