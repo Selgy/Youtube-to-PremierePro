@@ -74,18 +74,18 @@ jobs:
     - name: Set DYLD_LIBRARY_PATH
       run: |
                 echo "Setting DYLD_LIBRARY_PATH to include Python library path"
-                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         
 
     - name: Sign Python Library
       run: |
             echo "Signing Python library..."
-            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib/libpython3.10.dylib
     
     - name: Verify Signed Python Library
       run: |
             echo "Verifying signed Python library..."
-            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib/libpython3.10.dylib
               
     
     - name: Build Application with PyInstaller
