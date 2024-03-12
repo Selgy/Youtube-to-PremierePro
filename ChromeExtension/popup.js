@@ -111,22 +111,30 @@ function showVersionMismatchMessage(message = 'Update available.') {
 
 function openUpdateLink() {
     const os = window.navigator.platform.toLowerCase();
+    const userAgent = window.navigator.userAgent.toLowerCase();
     let updateUrl = '';
-
+  
     if (os.indexOf('mac') !== -1) {
-        // Mac OS detected
-        updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac.pkg';
+      // Mac OS detected
+      if (userAgent.indexOf('arm64') !== -1) {
+        // Apple Silicon (ARM64) detected
+        updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac_arm64.pkg';
+      } else {
+        // Intel (x64) detected
+        updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac_x64.pkg';
+      }
     } else if (os.indexOf('win') !== -1) {
-        // Windows OS detected
-        updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiereInstaller.exe';
+      // Windows OS detected
+      updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiereInstaller.exe';
     } else {
-        // If the OS is neither Mac nor Windows, you can choose to do nothing or handle it differently
-        console.log('Unsupported OS for automatic download.');
-        return;
+      // If the OS is neither Mac nor Windows, you can choose to do nothing or handle it differently
+      console.log('Unsupported OS for automatic download.');
+      return;
     }
-
+  
     window.open(updateUrl, '_blank'); // Open the URL in a new tab
-}
+  }
+  
 
 async function validateGumroadLicense(key) {
     console.log('Validating Gumroad License:', key);
