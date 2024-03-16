@@ -19,6 +19,8 @@ import platform
 import subprocess
 from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
+import string
+
 
 should_shutdown = False
 
@@ -259,14 +261,12 @@ def import_video_to_premiere(video_path):
 
 
 def sanitize_title(title):
-    # Allow Unicode letters, numbers, and specific special characters
-    pattern = '[^\w \(\)\,\"\&\.\;\!\€\$\-\_]+'
-    
-    # Replace unwanted characters with a space
-    sanitized_title = re.sub(pattern, ' ', title)
+    # Remove invalid characters for filenames
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    sanitized_title = ''.join(c for c in title if c in valid_chars)
 
-    # Normalize whitespace (replace multiple spaces with a single space)
-    sanitized_title = re.sub(r'\s+', ' ', sanitized_title).strip()
+    # Remove leading and trailing whitespaces
+    sanitized_title = sanitized_title.strip()
 
     return sanitized_title
 
