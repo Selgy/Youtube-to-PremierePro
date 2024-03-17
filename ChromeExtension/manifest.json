@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Youtube to Premiere pro V2",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "",
   "permissions": ["activeTab", "storage"], 
   "host_permissions": ["https://www.youtube.com/*"],

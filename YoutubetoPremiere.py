@@ -102,7 +102,7 @@ def internal_server_error(e):
 
 @app.route('/get-version', methods=['GET'])
 def get_version():
-    return jsonify(version='2.0.6')  # Replace '1.0.0' with your actual version
+    return jsonify(version='2.0.7')  # Replace '1.0.0' with your actual version
 
 
 
