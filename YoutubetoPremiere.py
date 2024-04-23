@@ -416,21 +416,27 @@ def download_and_process_clip(video_url, resolution, user_download_path, clip_st
         ]
         try:
             env = os.environ.copy()
-            result = subprocess.run(yt_dlp_command, capture_output=True, text=True, env=env)
+            result = subprocess.run(yt_dlp_command, capture_output=True, text=True, env=env, check=True)
             logging.info(f"stdout: {result.stdout}")
-            if result.stderr:
-                logging.error(f"stderr: {result.stderr}")
         except subprocess.CalledProcessError as e:
+            # Log both stdout and stderr for better troubleshooting
             logging.error(f"An error occurred while executing yt-dlp: {e}")
+            logging.error(f"stdout: {e.stdout}")
+            logging.error(f"stderr: {e.stderr}")
 
-        logging.info(f"Video download completed: {video_file_path}")
-        import_video_to_premiere(video_file_path)
-        logging.info("Import to Premiere Pro completed")
-        play_notification_sound()
-        socketio.emit('download-complete')
+        # After attempting to download, check if the video file exists before proceeding
+        if os.path.exists(video_file_path):
+            logging.info(f"Video download completed: {video_file_path}")
+            import_video_to_premiere(video_file_path)
+            logging.info("Import to Premiere Pro completed")
+            play_notification_sound()
+            socketio.emit('download-complete')
+        else:
+            logging.error(f"Failed to download video: {video_file_path}")
+            # Optionally, you might want to send a failure notification or handle the error in a specific way
+            socketio.emit('download-failed', {'message': 'Failed to download video.'})
 
-    logging.info("Download and processing of clip completed")
-
+        logging.info("Download and processing of clip completed")
 
 def download_video(video_url, resolution, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
