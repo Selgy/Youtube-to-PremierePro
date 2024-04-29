@@ -1,4 +1,4 @@
-import os
+
 import time
 import pygame.mixer
 import yt_dlp as youtube_dl
@@ -20,9 +20,11 @@ import subprocess
 from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
 import string
+import os
+os.environ['FLASK_RUN_HOST'] = 'localhost'
+
 
 should_shutdown = False
-encoding = 'utf-8'
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
@@ -497,7 +499,6 @@ def play_notification_sound(volume=0.4):  # Default volume set to 50%
         pygame.time.Clock().tick(10)
 
 
-# Load settings function with encoding
 def load_settings():
     # Default settings structure
     default_settings = {
@@ -509,11 +510,11 @@ def load_settings():
     }
 
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, 'r', encoding=encoding) as f:
+        with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
     else:
         settings = default_settings
-        with open(SETTINGS_FILE, 'w', encoding=encoding) as f:
+        with open(SETTINGS_FILE, 'w') as f:
             json.dump(settings, f, indent=4)
 
     logging.info(f'Loaded settings: {settings}')
@@ -544,13 +545,15 @@ def run_server():
 
 
 
-# Main function
 def main():
     logging.info(f'Starting script execution. PID: {os.getpid()}')
     global settings_global
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
     
+    # Set the SERVER_NAME configuration variable
+    app.config['SERVER_NAME'] = 'localhost:3001'
+
     server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
     server_thread.start()
 
