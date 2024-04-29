@@ -643,7 +643,7 @@ jobs:
       
       
     - name: Install PyInstaller
-      run: pip install pyinstaller==6.4.0
+      run: pip install pyinstaller
 
 
     - name: Build Application with PyInstaller
