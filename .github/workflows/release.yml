@@ -626,7 +626,7 @@ jobs:
     - name: Download FFmpeg
       run: |
         mkdir ffmpeg
-        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
+        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.1.1-full_build.7z -o ffmpeg.7z
 
     - name: Extract FFmpeg
       run: |
@@ -634,7 +634,7 @@ jobs:
 
     - name: Rename FFmpeg Folder
       run: |
-        mv ./ffmpeg/ffmpeg-6.0-full_build ./ffmpeg_win
+        mv ./ffmpeg/ffmpeg-6.1.1-full_build ./ffmpeg_win
 
     - name: Find ffmpeg.exe
       shell: pwsh
