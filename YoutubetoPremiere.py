@@ -21,14 +21,27 @@ from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
 import string
 import os
-os.environ['FLASK_RUN_HOST'] = 'localhost'
 
 
 should_shutdown = False
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
+# Configure basic logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(stream=sys.stdout)  # Direct output to sys.stdout
+    ]
+)
+
+
+
+# Ensure that the handler is explicitly set to use UTF-8 encoding
+for handler in logging.getLogger().handlers:
+    if isinstance(handler, logging.StreamHandler):
+        handler.setStream(sys.stdout)  # Ensures that the log output goes to standard out
+
+
 
 
 if getattr(sys, 'frozen', False):
