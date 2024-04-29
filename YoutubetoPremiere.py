@@ -1,4 +1,4 @@
-
+import os
 import time
 import pygame.mixer
 import yt_dlp as youtube_dl
@@ -20,28 +20,13 @@ import subprocess
 from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
 import string
-import os
 
 
 should_shutdown = False
 
-# Configure basic logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(stream=sys.stdout)  # Direct output to sys.stdout
-    ]
-)
-
-
-
-# Ensure that the handler is explicitly set to use UTF-8 encoding
-for handler in logging.getLogger().handlers:
-    if isinstance(handler, logging.StreamHandler):
-        handler.setStream(sys.stdout)  # Ensures that the log output goes to standard out
-
-
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
 
 
 if getattr(sys, 'frozen', False):
@@ -564,9 +549,6 @@ def main():
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
     
-    # Set the SERVER_NAME configuration variable
-    app.config['SERVER_NAME'] = 'localhost:3001'
-
     server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
     server_thread.start()
 
@@ -576,8 +558,10 @@ def main():
     while not should_shutdown:
         time.sleep(1)  # Wait for the shutdown signal
 
+
     print("Shutting down the application.")
     os._exit(0)
 
 if __name__ == "__main__":
     main()
+
