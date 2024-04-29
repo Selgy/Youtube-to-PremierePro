@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('License Key:', licenseKey);
     
     if (licenseKey) {
-        const isValid = await validateGumroadLicense(licenseKey);
+        // Updated to use validateLicenseKey instead of validateGumroadLicense
+        const isValid = await validateLicenseKey(licenseKey);
         toggleContentVisibility(isValid);
     } else {
         toggleContentVisibility(false);
@@ -17,9 +18,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Submit Key button clicked');
         const key = document.getElementById('licenseKey').value;
         console.log('Entered Key:', key);
-        const isValid = await validateGumroadLicense(key);
+        const isValid = await validateLicenseKey(key);
         console.log('New Key Validation Result:', isValid);
-
+    
         if (isValid) {
             chrome.storage.sync.set({ licenseKey: key }, () => {
                 console.log('License Key saved:', key);
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('errorMessage').style.display = 'block';
         }
     });
-
+    
     // Call the function to check for version mismatch
     await checkVersionMismatch();
 });
@@ -136,6 +137,38 @@ function openUpdateLink() {
   }
   
 
+  async function validateLicenseKey(key) {
+    console.log('Validating License Key:', key);
+    // Assuming you have the logic for Gumroad validation here
+    const isValidGumroad = await validateGumroadLicense(key); 
+    const isValidShopify = await validateShopifyLicense(key);
+    return isValidGumroad || isValidShopify;
+}
+
+async function validateShopifyLicense(key) {
+    console.log('Validating Shopify License:', key);
+    const apiToken = 'eHyU10yFizUV5qUJaFS8koE1nIx2UCDFNSoPVdDRJDI7xtunUK6ZWe40vfwp';
+    const endpoint = `https://app-easy-product-downloads.fr/api/get-license-key?license_key=${encodeURIComponent(key)}&api_token=${encodeURIComponent(apiToken)}`;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        console.log('Shopify API Response Data:', data);
+        return data.status === 'success';
+    } catch (error) {
+        console.error('Error in validateShopifyLicense:', error);
+        return false;
+    }
+}
+
+
 async function validateGumroadLicense(key) {
     console.log('Validating Gumroad License:', key);
     try {
@@ -145,7 +178,7 @@ async function validateGumroadLicense(key) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                product_id: '9yYJT15dJO3wB4Z74N-EUg==', // Replace with your actual product_id
+                product_id: '9yYJT15dJO3wB4Z74N-EUg==', 
                 license_key: key
             }),
         });
@@ -180,8 +213,7 @@ function toggleContentVisibility(isValid) {
 function loadSettings() {
     console.log('Loading settings');
     const settings = JSON.parse(localStorage.getItem('settings')) || {
-        resolution: '1080p',
-        framerate: '30',
+        resolution: '1080',
         downloadPath: '',
         downloadMP3: false,
         secondsBefore: 15, // Default value for seconds before
@@ -190,7 +222,6 @@ function loadSettings() {
 
     // Apply the settings to the form
     document.getElementById('resolution').value = settings.resolution;
-    document.getElementById('framerate').value = settings.framerate;
     document.getElementById('download-path').value = settings.downloadPath;
     document.getElementById('download-mp3').checked = settings.downloadMP3;
     document.getElementById('seconds-before').value = settings.secondsBefore;
