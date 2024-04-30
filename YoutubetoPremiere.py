@@ -20,7 +20,10 @@ import subprocess
 from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
 import string
+import io
 
+# Set the default encoding to utf-8
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 should_shutdown = False
 
@@ -120,9 +123,8 @@ def root():
 
 @app.route('/settings', methods=['POST'])
 def update_settings():
-    new_settings = request.get_json()
-    with open(SETTINGS_FILE, 'w') as f:
-        json.dump(new_settings, f, indent=4)
+    data = request.get_json(force=True)  # Use force=True to ignore mimetype and always treat as JSON
+    # process the data
     return jsonify(success=True), 200
 
 @app.route('/get-video-url', methods=['GET'])
@@ -508,11 +510,11 @@ def load_settings():
     }
 
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, 'r') as f:
+        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
             settings = json.load(f)
     else:
         settings = default_settings
-        with open(SETTINGS_FILE, 'w') as f:
+        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
             json.dump(settings, f, indent=4)
 
     logging.info(f'Loaded settings: {settings}')
