@@ -27,13 +27,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 should_shutdown = False
 
-# Configure logging with both console and file output
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
-                    handlers=[
-                        logging.StreamHandler(),
-                        logging.FileHandler('server.log', mode='a')  # Append mode
-                    ])
+                    handlers=[logging.StreamHandler()])
 
 
 if getattr(sys, 'frozen', False):
@@ -54,7 +50,7 @@ else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
 
-
+log_file_path = os.path.join(script_dir, 'server.log')
 
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
@@ -83,6 +79,7 @@ SETTINGS_FILE = settings_path
 #log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 #logging.getLogger().addHandler(log_handler)
 
+# Flask setup
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
@@ -116,14 +113,15 @@ def get_version():
 @app.route('/', methods=['GET', 'POST'])
 def root():
     if request.method == 'GET':
+        logging.info("GET request received at /")
         return "Premiere is alive", 200
     elif request.method == 'POST':
         data = request.get_json()
-        # ... process the data
+        logging.info(f"POST request received at / with data: {data}")
         return jsonify(success=True), 200
     else:
+        logging.error(f"Method not allowed for the request: {request.method}")
         return "Method not allowed", 405
-
 
 @app.route('/settings', methods=['POST'])
 def update_settings():
