@@ -27,9 +27,13 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 should_shutdown = False
 
+# Configure logging with both console and file output
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
-                    handlers=[logging.StreamHandler()])
+                    handlers=[
+                        logging.StreamHandler(),
+                        logging.FileHandler('server.log', mode='a')  # Append mode
+                    ])
 
 
 if getattr(sys, 'frozen', False):
