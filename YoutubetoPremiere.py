@@ -27,6 +27,10 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 should_shutdown = False
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
+                    handlers=[logging.StreamHandler()])
+
 
 if getattr(sys, 'frozen', False):
     # The application is frozen by PyInstaller
@@ -47,13 +51,6 @@ else:
     raise Exception("Unsupported operating system")
 
 log_file_path = os.path.join(script_dir, 'server.log')
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(funcName)s - %(message)s',
-                    handlers=[
-                        logging.StreamHandler(),
-                        logging.FileHandler(log_file_path, mode='a')  # Append mode
-                    ])
 
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
