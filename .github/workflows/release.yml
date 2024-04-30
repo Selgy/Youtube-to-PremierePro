@@ -672,7 +672,7 @@ jobs:
         --hidden-import=logging `
         --hidden-import=flask_cors `
         --hidden-import=flask `
-        --add-binary "./_include/yt-dlp.exe;./_include/" `
+        --add-binary "_Include\yt-dlp.exe;_Include/"
         --hidden-import=flask_socketio `
         --hidden-import=json `
         --hidden-import=threading `
