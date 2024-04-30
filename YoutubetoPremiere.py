@@ -20,10 +20,7 @@ import subprocess
 from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
 import yt_dlp as yt
 import string
-import io
 
-# Set the default encoding to utf-8
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 should_shutdown = False
 
@@ -50,7 +47,7 @@ else:
     # Handle other operating systems or raise an exception
     raise Exception("Unsupported operating system")
 
-log_file_path = os.path.join(script_dir, 'server.log')
+
 
 if platform.system() == 'Windows':
     appdata_path = os.environ['APPDATA']
@@ -79,7 +76,6 @@ SETTINGS_FILE = settings_path
 #log_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 #logging.getLogger().addHandler(log_handler)
 
-# Flask setup
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
@@ -113,20 +109,20 @@ def get_version():
 @app.route('/', methods=['GET', 'POST'])
 def root():
     if request.method == 'GET':
-        logging.info("GET request received at /")
         return "Premiere is alive", 200
     elif request.method == 'POST':
         data = request.get_json()
-        logging.info(f"POST request received at / with data: {data}")
+        # ... process the data
         return jsonify(success=True), 200
     else:
-        logging.error(f"Method not allowed for the request: {request.method}")
         return "Method not allowed", 405
+
 
 @app.route('/settings', methods=['POST'])
 def update_settings():
-    data = request.get_json(force=True)  # Use force=True to ignore mimetype and always treat as JSON
-    # process the data
+    new_settings = request.get_json()
+    with open(SETTINGS_FILE, 'w') as f:
+        json.dump(new_settings, f, indent=4)
     return jsonify(success=True), 200
 
 @app.route('/get-video-url', methods=['GET'])
@@ -512,11 +508,11 @@ def load_settings():
     }
 
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+        with open(SETTINGS_FILE, 'r') as f:
             settings = json.load(f)
     else:
         settings = default_settings
-        with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
+        with open(SETTINGS_FILE, 'w') as f:
             json.dump(settings, f, indent=4)
 
     logging.info(f'Loaded settings: {settings}')
