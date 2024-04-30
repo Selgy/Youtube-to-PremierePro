@@ -666,7 +666,7 @@ jobs:
         --hidden-import=os `
         --hidden-import=time `
         --hidden-import=pygame.mixer `
-        --hidden-import=yt-dlp `
+        --hidden-import=yt_dlp `
         --hidden-import=pymiere `
         --hidden-import=sys `
         --hidden-import=logging `
