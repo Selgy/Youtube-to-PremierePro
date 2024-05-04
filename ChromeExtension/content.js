@@ -15,20 +15,31 @@ const buttonStyles = `
     text-align: center; /* Center the text inside the button */
 `;
 
+
 let lastClickedButton = null;
 
-// Function to create the button
+
 function createButton() {
     const button = document.createElement('button');
-    button.innerText = 'Full video';
+    button.textContent = 'Full video';
     button.id = 'send-to-premiere-button';
     button.style.cssText = buttonStyles;
+    button.setAttribute('role', 'button');
+    button.setAttribute('aria-label', 'Send to Premiere Pro');
     button.onclick = sendURL;
-    button.onmouseenter = () => button.style.backgroundColor = '#1E1E59';
-    button.onmouseleave = () => button.style.backgroundColor = '#00005B';
+    button.onmouseenter = (event) => event.target.style.backgroundColor = '#1E1E59';
+    button.onmouseleave = (event) => event.target.style.backgroundColor = '#00005B';
+    button.addEventListener('click', () => {
+      button.disabled = true;
+    });
+  
+    socket.on('download-complete', () => {
+      button.disabled = false;
+    });
+  
     return button;
-}
-
+  }
+  
 let currentVideoUrl = '';  // Add this line to keep track of the current video URL
 let lastUrl = window.location.href;  // Store the current URL
 
@@ -46,7 +57,7 @@ function sendClipRequest() {
     if (videoPlayer) {
         const currentTime = videoPlayer.currentTime;
         sendURL('clip', { currentTime: currentTime });  // Pass currentTime in an object
-        button.innerText = 'Processing...';
+        button.innerText = 'Processing';
     } else {
         console.error('No video player found.');
     }
@@ -130,15 +141,15 @@ function isVideoPage() {
 }
 
 function createClipButton() {
-    const button = document.createElement('button');
-    button.innerText = 'Clip video';
-    button.id = 'clip-button';
-    button.style.cssText = buttonStyles;
-    button.onclick = sendClipRequest;
-    button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';
-    button.onmouseleave = () => button.style.backgroundColor = '#00005B';
-    button.onclick = sendClipRequest; // This should only call sendClipRequest
-    return button;
+  const button = document.createElement('button');
+  button.textContent = 'Clip video';
+  button.id = 'clip-button';
+  button.style.cssText = buttonStyles;
+  button.onclick = sendClipRequest;
+  button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';
+  button.onmouseleave = () => button.style.backgroundColor = '#00005B';
+  button.onclick = sendClipRequest; // This should only call sendClipRequest
+  return button;
 }
 
 
@@ -203,7 +214,7 @@ socket.on('percentage', (data) => {
     }
 
     if (button) {
-        button.innerText = `Downloading ${data.percentage}`;
+        button.innerText = `${data.percentage}`;
     }
 });
 

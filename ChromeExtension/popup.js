@@ -1,39 +1,43 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Perform version check immediately after the popup loads
     await checkVersionMismatch();
-
+  
     console.log('DOM fully loaded and parsed');
-    const licenseKey = await getLicenseKey();
-    console.log('License Key:', licenseKey);
-    
-    if (licenseKey) {
-        // Updated to use validateLicenseKey instead of validateGumroadLicense
-        const isValid = await validateLicenseKey(licenseKey);
-        toggleContentVisibility(isValid);
+  
+    const { licenseKey, isLicenseValidated } = await getLicenseKeyAndValidationStatus();
+  
+    if (isLicenseValidated) {
+      toggleContentVisibility(true);
+    } else if (licenseKey) {
+      const isValid = await validateLicenseKey(licenseKey);
+      if (isValid) {
+        await setLicenseValidationStatus(true);
+      }
+      toggleContentVisibility(isValid);
     } else {
-        toggleContentVisibility(false);
+      toggleContentVisibility(false);
     }
-
+  
     document.getElementById('submitKey').addEventListener('click', async () => {
-        console.log('Submit Key button clicked');
-        const key = document.getElementById('licenseKey').value;
-        console.log('Entered Key:', key);
-        const isValid = await validateLicenseKey(key);
-        console.log('New Key Validation Result:', isValid);
-    
-        if (isValid) {
-            chrome.storage.sync.set({ licenseKey: key }, () => {
-                console.log('License Key saved:', key);
-                toggleContentVisibility(true);
-            });
-        } else {
-            document.getElementById('errorMessage').style.display = 'block';
-        }
+      console.log('Submit Key button clicked');
+      const key = document.getElementById('licenseKey').value;
+      console.log('Entered Key:', key);
+      const isValid = await validateLicenseKey(key);
+      console.log('New Key Validation Result:', isValid);
+  
+      if (isValid) {
+        chrome.storage.sync.set({ licenseKey: key }, () => {
+          console.log('License Key saved:', key);
+          toggleContentVisibility(true);
+        });
+      } else {
+        document.getElementById('errorMessage').style.display = 'block';
+      }
     });
-    
-    // Call the function to check for version mismatch
-    await checkVersionMismatch();
-});
+  
+    // Call the function to check for version mismatch (removed)
+    // await checkVersionMismatch();
+  });
 
 async function getLicenseKey() {
     return new Promise(resolve => {
@@ -172,31 +176,36 @@ async function validateShopifyLicense(key) {
 async function validateGumroadLicense(key) {
     console.log('Validating Gumroad License:', key);
     try {
-        const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                product_id: '9yYJT15dJO3wB4Z74N-EUg==', 
-                license_key: key
-            }),
-        });
-
-        console.log('API Response:', response);
-
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+      const response = await fetch('https://api.gumroad.com/v2/licenses/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          product_id: '9yYJT15dJO3wB4Z74N-EUg==',
+          license_key: key
+        }),
+      });
+  
+      if (!response.ok) {
+        // Handle the specific error related to the Gumroad API response status
+        if (response.status === 404) {
+          console.error('Gumroad license not found. Trying Shopify validation...');
+          return false;
+        } else {
+          throw new Error('Network response was not ok');
         }
-
-        const data = await response.json();
-        console.log('API Response Data:', data);
-        return data.success;
+      }
+  
+      const data = await response.json();
+      console.log('API Response Data:', data);
+      return data.success;
     } catch (error) {
-        console.error('Error in validateGumroadLicense:', error);
-        return false;
+      console.error('Error in validateGumroadLicense:', error);
+      return false;
     }
-}
+  }
+  
 
 function toggleContentVisibility(isValid) {
     console.log('Toggling content visibility. Is Valid:', isValid);
@@ -226,4 +235,22 @@ function loadSettings() {
     document.getElementById('download-mp3').checked = settings.downloadMP3;
     document.getElementById('seconds-before').value = settings.secondsBefore;
     document.getElementById('seconds-after').value = settings.secondsAfter;
+}
+
+async function getLicenseKeyAndValidationStatus() {
+  return new Promise(resolve => {
+    chrome.storage.sync.get(['licenseKey', 'isLicenseValidated'], function(result) {
+      console.log('Retrieved License Key and Validation Status from Storage:', result);
+      resolve(result);
+    });
+  });
+}
+
+async function setLicenseValidationStatus(isValid) {
+  return new Promise(resolve => {
+    chrome.storage.sync.set({ isLicenseValidated: isValid }, () => {
+      console.log('License Validation Status saved:', isValid);
+      resolve();
+    });
+  });
 }
