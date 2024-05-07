@@ -306,10 +306,16 @@ jobs:
     needs: mac-build-apple-silicon
     steps:
 
+    - name: Set up Homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+  
     - name: Install and link gettext
       run: |
         brew install gettext
         brew link --force gettext
+
+
+
 
     - name: Checkout code
       uses: actions/checkout@v4

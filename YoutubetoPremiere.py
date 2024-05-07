@@ -527,12 +527,21 @@ def is_premiere_running():
 
 def monitor_premiere_and_shutdown():
     global should_shutdown
-    while True:
-        time.sleep(5)
-        if not is_premiere_running():
-            logging.info("Adobe Premiere Pro is not running. Initiating shutdown.")
-            should_shutdown = True
+
+    # Find the process ID of Premiere Pro
+    premiere_pro_process = None
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
+            premiere_pro_process = process
             break
+
+    if premiere_pro_process:
+        # Wait for the Premiere Pro process to terminate
+        premiere_pro_process.wait()
+        logging.info("Adobe Premiere Pro has been closed. Initiating shutdown.")
+        should_shutdown = True
+    else:
+        logging.info("Adobe Premiere Pro is not running.")
 
 def run_server():
     with app.app_context():
@@ -544,11 +553,10 @@ def run_server():
 
 
 def main():
-    logging.info(f'Starting script execution. PID: {os.getpid()}')
     global settings_global
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
-    
+
     server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
     server_thread.start()
 
@@ -557,7 +565,6 @@ def main():
 
     while not should_shutdown:
         time.sleep(1)  # Wait for the shutdown signal
-
 
     print("Shutting down the application.")
     os._exit(0)
