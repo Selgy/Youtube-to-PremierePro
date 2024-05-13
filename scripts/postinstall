@@ -1,16 +1,21 @@
 #!/bin/bash
 
+
+
 # get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 
-# Enable PlayerDebugMode for Adobe CEP versions 8 to 11
-defaults write com.adobe.CSXS.8 PlayerDebugMode 1
-defaults write com.adobe.CSXS.9 PlayerDebugMode 1
-defaults write com.adobe.CSXS.10 PlayerDebugMode 1
-defaults write com.adobe.CSXS.11 PlayerDebugMode 1
+
+# Get the UID of the logged-in user
+uid=$(id -u "$loggedInUser")
+
+# Enable PlayerDebugMode for Adobe CEP versions 6 to 11 in user context
+for csxs_version in {6..11}; do
+    launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
+done
 
 # Define the user's Adobe CEP extensions directory
-CEP_EXTENSIONS_DIR="/Users/$loggedInUser/Library/Application Support/Adobe/CEP/extensions"
+CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
@@ -47,25 +52,25 @@ mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "F
 echo "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
 
-# If a user is logged in, perform operations in user context
-if [ -n "$loggedInUser" ]; then
-    # Get the uid of the logged-in user
-    uid=$(id -u "$loggedInUser")
+# Change ownership and permissions of FFmpeg binary and yt-dlp
+FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
+YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 
-    FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
-    mkdir -p "$FFMPEG_BIN_DIR"
-    curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-112969-g5475f665f6.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
-    unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-    rm "$FFMPEG_BIN_DIR/ffmpeg.zip"
+# Ensure directories exist
+mkdir -p "$FFMPEG_BIN_DIR"
+mkdir -p "$YT_DLP_DIR"
 
-    # Change ownership of FFmpeg binary
-    LOG_FILE="/Users/$loggedInUser/Desktop/ffmpeg_chown_log.txt"
-    launchctl asuser "$uid" bash -c "
-        echo 'About to change ownership' >> '$LOG_FILE';
-        chown -v '$loggedInUser' '$FFMPEG_BIN_DIR/ffmpeg' >> '$LOG_FILE' 2>&1;
-        echo 'Ownership change attempted' >> '$LOG_FILE';
-    "
-fi
+# Download and unpack FFmpeg and yt-dlp
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-113991-g49707b0590.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip" # Remove the ZIP file
+
+# Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
+xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"
+
+# Set ownership to the logged-in user, and set execute permissions
+chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
+chmod +x "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 
 echo "Cleanup started..."
 # Force delete the directories
@@ -76,4 +81,5 @@ echo "Cleanup completed."
 
 # Open the web page in the default browser
 echo "Opening the web page in the default browser..."
-open "https://chromewebstore.google.com/u/2/detail/youtube-to-premiere-pro/lhoepckbiamgobehojaibapoddjpfmfo"
+open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
+

@@ -6,9 +6,8 @@ on:
       - Pre-released
 
 jobs:
-  mac-build:
-    runs-on: macos-latest
-    needs: win-build
+  mac-build-apple-silicon:
+    runs-on: macos-14
     steps:
 
     - name: Checkout code
@@ -18,7 +17,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: 3.8.8
+        python-version: 3.10.11
+        architecture: arm64
 
     - name: Sync clock
       run: sudo sntp -sS time.windows.com
@@ -28,7 +28,9 @@ jobs:
       run: python -m pip install --upgrade pip setuptools wheel
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: |
+          pip install -r requirements.txt
+          pip install python-dotenv  # Install dotenv module
 
 
     - name: Create and Configure Keychain
@@ -74,18 +76,18 @@ jobs:
     - name: Set DYLD_LIBRARY_PATH
       run: |
                 echo "Setting DYLD_LIBRARY_PATH to include Python library path"
-                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
         
 
     - name: Sign Python Library
       run: |
             echo "Signing Python library..."
-            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib/libpython3.10.dylib
     
     - name: Verify Signed Python Library
       run: |
             echo "Verifying signed Python library..."
-            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.10.11/arm64/lib/libpython3.10.dylib
               
     
     - name: Build Application with PyInstaller
@@ -104,12 +106,14 @@ jobs:
         --hidden-import=pygame \
         --hidden-import=PIL \
         --hidden-import=flask \
+        --add-binary "./_include/yt-dlp:./" \
         --hidden-import=flask_cors \
         --hidden-import=flask_socketio \
         --hidden-import=yt_dlp \
         --hidden-import=pymiere \
         --hidden-import=psutil \
         --hidden-import=tkinter \
+        --hidden-import=yt_dlp \
         --add-data "./notification_sound.mp3:." \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
@@ -282,7 +286,7 @@ jobs:
 
 
     - name: Rename PKG file
-      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac.pkg
+      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac_arm64.pkg
         
 
     - name: Upload executables to asset
@@ -295,14 +299,317 @@ jobs:
             prerelease: ${{ github.ref != 'refs/heads/master' }}
             tag_name: V1.1
             files: |
-              YoutubetoPremiere_Mac.pkg
+              YoutubetoPremiere_Mac_arm64.pkg
+
+  mac-build-intel:
+    runs-on: macos-latest
+    needs: mac-build-apple-silicon
+    steps:
+
+    - name: Set up Homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+  
+    - name: Install and link gettext
+      run: |
+        brew install gettext
+        brew link --force gettext
 
 
 
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8.8
+        architecture: x64
+
+    - name: Sync clock
+      run: sudo sntp -sS time.windows.com
+
+
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip setuptools wheel
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+
+    - name: Create and Configure Keychain
+      env:
+              BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+              P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+              BUILD_PROVISION_PROFILE_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
+              KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+                # create variables
+                CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+                PP_PATH=$RUNNER_TEMP/build_pp.mobileprovision
+                KEYCHAIN_PATH=$RUNNER_TEMP/SelgykeyAPP.keychain-db
+        
+                # import certificate and provisioning profile from secrets
+                echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+                echo -n "$BUILD_PROVISION_PROFILE_BASE64" | base64 --decode -o $PP_PATH
+        
+                # create temporary keychain
+                security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+                security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+                security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+        
+                # import certificate to keychain
+                security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+                security list-keychain -d user -s $KEYCHAIN_PATH
+        
+                # Apply provisioning profile
+                mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+                cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
+        
+                # Find certificate in custom keychain
+                echo "Finding certificate in SelgykeyAPP keychain:"
+                security find-certificate -a $KEYCHAIN_PATH
+        
+                # List all identities in custom keychain
+                echo "Listing all identities in SelgykeyAPP keychain:"
+                security find-identity -p codesigning $KEYCHAIN_PATH
+
+
+
+
+    - name: Set DYLD_LIBRARY_PATH
+      run: |
+                echo "Setting DYLD_LIBRARY_PATH to include Python library path"
+                echo "DYLD_LIBRARY_PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        
+
+    - name: Sign Python Library
+      run: |
+            echo "Signing Python library..."
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+    
+    - name: Verify Signed Python Library
+      run: |
+            echo "Verifying signed Python library..."
+            codesign --verify --verbose /Users/runner/hostedtoolcache/Python/3.8.8/x64/lib/libpython3.8.dylib
+              
+    
+    - name: Build Application with PyInstaller
+      run: |
+        pip install --upgrade pyinstaller
+        pyinstaller --onedir --clean --debug=all \
+        --hidden-import=engineio.async_drivers.eventlet \
+        --hidden-import=engineio.async_drivers.gevent_uwsgi \
+        --hidden-import=engineio.async_drivers.gevent \
+        --hidden-import=engineio.async_drivers.threading \
+        --hidden-import=engineio.async_drivers \
+        --hidden-import=gevent \
+        --hidden-import=websocket \
+        --hidden-import=websockets \
+        --hidden-import=wsproto \
+        --hidden-import=pygame \
+        --hidden-import=PIL \
+        --hidden-import=flask \
+        --add-binary "./_include/yt-dlp:./" \
+        --hidden-import=flask_cors \
+        --hidden-import=flask_socketio \
+        --hidden-import=yt_dlp \
+        --hidden-import=pymiere \
+        --hidden-import=psutil \
+        --hidden-import=tkinter \
+        --hidden-import=yt_dlp \
+        --add-data "./notification_sound.mp3:." \
+        --icon "./icon.icns" \
+        YoutubetoPremiere.py
+        ls -la ./dist/
+  
+
+        
+    - name: Verify Executable Contents
+      run: |
+              echo "Verifying executable contents..."
+              ls -la ./dist/YoutubetoPremiere
+      shell: /bin/bash -e {0}
+      env:
+          pythonLocation: /Users/runner/hostedtoolcache/Python/3.8.8/x64 
+
+    - name: Re-sign and Verify Executable
+      run: |
+            codesign --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" --timestamp --options runtime --force --verbose ./dist/YoutubetoPremiere
+            codesign --verify --verbose --deep ./dist/YoutubetoPremiere
+
+    - name: Make Executable
+      run: |
+        chmod +x ./dist/YoutubetoPremiere
+
+    - name: Sign all binaries
+      run: |
+          find ./dist -type f -exec codesign --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" {} \;
+
+        
+    - name: Sign the Application
+      run: |
+              # Set shell to stop on error
+              set -e
+          
+              # Extract and print the name of the certificate
+              CERTIFICATE_NAME="Developer ID Application: mickael ducatez (9H8DB46V75)"
+              echo "Certificate Name: $CERTIFICATE_NAME"
+          
+              # Print the keychain path
+              echo "Keychain Path: $KEYCHAIN_PATH"
+          
+              # List contents of dist directory for debugging
+              echo "Listing contents of dist directory:"
+              ls -la dist
+          
+              # Use the certificate name to sign the application
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere"
+              codesign --deep --timestamp --options runtime --force --verify --verbose --sign "Developer ID Application: mickael ducatez (9H8DB46V75)" "./dist/YoutubetoPremiere/YoutubetoPremiere"          
+
+    - name: "Notarize app bundle"
+      env:
+        MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+        MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+        MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      run: |
+        echo "Create keychain profile"
+        xcrun notarytool store-credentials "notarytool-profile" --apple-id "$MACOS_NOTARIZATION_APPLE_ID" --team-id "$MACOS_NOTARIZATION_TEAM_ID" --password "$MACOS_NOTARIZATION_PWD"
+
+        echo "Creating temp notarization archive"
+        ditto -c -k --keepParent "./dist/YoutubetoPremiere" "notarization.zip"
+
+        echo "Notarize app"
+        NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
+        NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
+        
+        if [[ $NOTARIZATION_ID == "null" ]]; then
+            echo "Notarization submission failed."
+            echo "Output: $NOTARIZATION_OUTPUT"
+            exit 1
+        fi
+
+        # Check Notarization Status
+        echo "Checking Notarization Status for $NOTARIZATION_ID"
+        xcrun notarytool info $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+
+        # Fetch and display the notarization log
+        echo "Fetching notarization log for $NOTARIZATION_ID..."
+        xcrun notarytool log $NOTARIZATION_ID --keychain-profile "notarytool-profile"
+
+
+    - name: Make postinstall script executable
+      run: sudo chmod +x ./scripts/postinstall
+
+ 
+            
+    - name: Prepare PKG content
+      run: |
+        mkdir pkgroot
+        cp -R "./dist/YoutubetoPremiere" "./pkgroot/"
+        cp -R "./com.selgy.youtubetopremiere" "./pkgroot/com.selgy.youtubetopremiere"
+    
+    - name: Create and Sign PKG
+      env:
+          INSTALLER_CERTIFICATE_BASE64: ${{ secrets.INSTALLER_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.INSTALLER_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      run: |
+          # Create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/installer_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/Selgykey.keychain-db
+
+          # Decode and import installer certificate from secrets
+          echo -n "$INSTALLER_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # Create temporary keychain for installer certificate
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+
+          # Set the keychain for codesigning
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
+          PACKAGE_VERSION="1.1"
+          PKG_ROOT="./pkgroot"
+          OUTPUT_PKG="YoutubetoPremiere.pkg"
+          SCRIPTS_DIR="./scripts"
+          ls -la pkgroot/
+
+          pkgbuild --root "$PKG_ROOT" \
+          --identifier "$PACKAGE_IDENTIFIER" \
+          --version "$PACKAGE_VERSION" \
+          --install-location "/Applications" \
+          --scripts "$SCRIPTS_DIR" \
+          "$OUTPUT_PKG"
+
+          # Sign the package with the installer certificate
+          PRODUCTSIGN_IDENTITY=$(security find-identity -v -p basic "$KEYCHAIN_PATH" | grep 'Developer ID Installer' | head -n 1 | awk '{print $2}')
+          productsign --sign "$PRODUCTSIGN_IDENTITY" "$OUTPUT_PKG" "signed_$OUTPUT_PKG"
+
+          # Verify the signed package
+          pkgutil --check-signature "signed_$OUTPUT_PKG"
+
+          # Remove temporary keychain
+          security delete-keychain $KEYCHAIN_PATH
+
+    - name: Notarize PKG Installer
+      env:
+                PROD_MACOS_NOTARIZATION_APPLE_ID: ${{ secrets.APPLE_ID }}
+                PROD_MACOS_NOTARIZATION_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+                PROD_MACOS_NOTARIZATION_PWD: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+      run: |
+                  # Store the notarization credentials
+                  echo "Create keychain profile for notarization"
+                  xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.APPLE_ID }}" --team-id "${{ secrets.APPLE_TEAM_ID }}" --password "${{ secrets.APP_SPECIFIC_PASSWORD }}"
+                  
+                  # Create a ZIP file of the .pkg for notarization
+                  echo "Creating temp notarization archive for PKG"
+                  ditto -c -k --keepParent "signed_YoutubetoPremiere.pkg" "notarization_pkg.zip"
+                  
+                  # Send the notarization request for the PKG and capture the NOTARIZATION_ID
+                  echo "Notarize PKG"
+                  NOTARIZATION_OUTPUT=$(xcrun notarytool submit "notarization_pkg.zip" --keychain-profile "notarytool-profile" --wait --output-format json)
+                  NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
+                  echo "Notarization ID for PKG: $NOTARIZATION_ID"
+                 
+    
+
+                      
+    - name: Get the release
+      id: get_release
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { owner, repo } = context.repo
+          const releases = await github.rest.repos.listReleases({ owner, repo })
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          return preRelease.upload_url
+
+
+    - name: Rename PKG file
+      run: mv signed_YoutubetoPremiere.pkg YoutubetoPremiere_Mac_x64.pkg
+        
+
+    - name: Upload executables to asset
+      id: upload-release-asset
+      uses: softprops/action-gh-release@v1
+      env:
+            GITHUB_TOKEN: ${{ secrets.GH_SECRET }}
+      with:
+            draft: ${{ github.ref == 'refs/heads/master' }}
+            prerelease: ${{ github.ref != 'refs/heads/master' }}
+            tag_name: V1.1
+            files: |
+              YoutubetoPremiere_Mac_x64.pkg
 
 
   win-build:
     runs-on: windows-latest
+  
 
     steps:
     - name: Checkout code
@@ -332,7 +639,7 @@ jobs:
     - name: Download FFmpeg
       run: |
         mkdir ffmpeg
-        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.0-full_build.7z -o ffmpeg.7z
+        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.1.1-full_build.7z -o ffmpeg.7z
 
     - name: Extract FFmpeg
       run: |
@@ -340,7 +647,7 @@ jobs:
 
     - name: Rename FFmpeg Folder
       run: |
-        mv ./ffmpeg/ffmpeg-6.0-full_build ./ffmpeg/ffmpeg_win
+        mv ./ffmpeg/ffmpeg-6.1.1-full_build ./ffmpeg_win
 
     - name: Find ffmpeg.exe
       shell: pwsh
@@ -352,25 +659,42 @@ jobs:
       run: pip install pyinstaller
 
 
-
     - name: Build Application with PyInstaller
       run: |
-            pyinstaller --onefile --clean --debug all `
-            --hidden-import=engineio.async_drivers.eventlet `
-            --hidden-import=engineio.async_drivers.gevent_uwsgi `
-            --hidden-import=engineio.async_drivers.gevent `
-            --hidden-import=engineio.async_drivers `
-            --hidden-import=gevent `
-            --hidden-import=engineio.async_drivers.threading `
-            --hidden-import=pygame.freetype `
-            --hidden-import=encodings.utf_16_le `
-            --add-binary "./ffmpeg/ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
-            --add-data "./icon.png;." `
-            --add-data "./notification_sound.mp3;." `
-            --icon "./icon.ico" `
-            YoutubetoPremiere.py 
+        pyinstaller --onefile --clean --debug all `
+        --hidden-import=engineio.async_drivers.eventlet `
+        --hidden-import=engineio.async_drivers.gevent_uwsgi `
+        --hidden-import=engineio.async_drivers.gevent `
+        --hidden-import=engineio.async_drivers `
+        --hidden-import=gevent `
+        --hidden-import=engineio.async_drivers.threading `
+        --hidden-import=pygame.freetype `
+        --hidden-import=os `
+        --hidden-import=time `
+        --hidden-import=pygame.mixer `
+        --hidden-import=yt_dlp `
+        --hidden-import=pymiere `
+        --hidden-import=sys `
+        --hidden-import=logging `
+        --hidden-import=flask_cors `
+        --hidden-import=flask `
+        --add-binary "_Include\yt-dlp.exe;_Include/" `
+        --hidden-import=flask_socketio `
+        --hidden-import=json `
+        --hidden-import=threading `
+        --hidden-import=PIL `
+        --hidden-import=re `
+        --hidden-import=psutil `
+        --hidden-import=tkinter `
+        --hidden-import=subprocess `
+        --add-binary "./ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
+        --add-data "./icon.png;." `
+        --add-data "./notification_sound.mp3;." `
+        --icon "./icon.ico" `
+        YoutubetoPremiere.py
+      
+      
     
-        
     - name: Install NSIS
       run: |
         choco install nsis

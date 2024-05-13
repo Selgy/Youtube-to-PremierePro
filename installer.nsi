@@ -36,7 +36,7 @@ Section 'Install YoutubetoPremiere' SEC01
     File 'dist\YoutubetoPremiere.exe'
     
     SetOutPath '$INSTDIR\exec\ffmpeg_win'
-    File /r 'ffmpeg\ffmpeg_win\*.*'
+    File /r 'ffmpeg_win\*.*'
     
     SetOutPath '$INSTDIR'
     File /r 'com.selgy.youtubetopremiere\*.*'

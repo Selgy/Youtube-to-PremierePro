@@ -8,3 +8,5 @@ build
 youtubetoPremiere.spec
 YoutubetoPremiere-WinInstaller.exe
 com.youtubetopremiere.YoutubetoPremiere.plist
+node_modules
+.venv

@@ -177,11 +177,6 @@
             <option value="360">360p</option>
         </select>
 
-        <label for="framerate">Frame Rate:</label>
-        <select id="framerate">
-            <option value="60">60 fps</option>
-            <option value="30" selected>30 fps</option>
-        </select>
 
         <label for="download-path">Download Path:</label>
         <div style="position: relative; display: flex; align-items: center;">
@@ -199,6 +194,7 @@
             <label>Clip Settings:</label>
             <div class="input-container">
                 <select id="seconds-before">
+                    <option value="0">0 sec</option>
                     <option value="15">-15 sec</option>
                     <option value="30">-30 sec</option>
                     <option value="60">-1 min</option>
@@ -208,6 +204,7 @@
             
             <div class="input-container">
                 <select id="seconds-after">
+                        <option value="0">0 sec</option>
                         <option value="15">+15 sec</option>
                         <option value="30">+30 sec</option>
                         <option value="60">+1 min</option>
@@ -215,12 +212,12 @@
                 </select>
             </div>
         </div>
-        
-
         <div class="checkbox-container">
             <label for="download-mp3">Audio Only:</label>
             <input type="checkbox" id="download-mp3">
         </div>
+        <p id="versionMismatchMessage" style="color: red; font-size: 12px; display: none;"></p>
+    </div>
     </div>
     <script src="popup.js"></script>
     <script src="script.js"></script>

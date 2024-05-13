@@ -17,7 +17,10 @@ import tkinter as tk
 from tkinter import messagebox
 import platform
 import subprocess
-import shutil
+from yt_dlp.postprocessor.ffmpeg import FFmpegExtractAudioPP
+import yt_dlp as yt
+import string
+
 
 should_shutdown = False
 
@@ -97,6 +100,12 @@ def page_not_found(e):
 def internal_server_error(e):
     return jsonify(error=str(e)), 500
 
+@app.route('/get-version', methods=['GET'])
+def get_version():
+    return jsonify(version='2.0.7')  # Replace '1.0.0' with your actual version
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def root():
     if request.method == 'GET':
@@ -111,11 +120,9 @@ def root():
 
 @app.route('/settings', methods=['POST'])
 def update_settings():
-    global settings_global  # Add this line to declare the global variable
     new_settings = request.get_json()
     with open(SETTINGS_FILE, 'w') as f:
         json.dump(new_settings, f, indent=4)
-    settings_global = new_settings  # Update settings_global with the new settings
     return jsonify(success=True), 200
 
 @app.route('/get-video-url', methods=['GET'])
@@ -143,13 +150,11 @@ def generate_new_filename(base_path, original_name, extension, suffix=""):
         new_name = f"{original_name}{suffix}_{counter}.{extension}"
     return new_name
 
-
 @app.route('/handle-video-url', methods=['POST'])
 def handle_video_url():
-    global settings_global  # Declare the global variable
-    settings_global = load_settings() 
+    global video_url_global
     data = request.get_json()
-    settings = load_settings()
+
     # Log the incoming data for debugging
     logging.info(f"Received data: {data}")
 
@@ -161,6 +166,11 @@ def handle_video_url():
     video_url_global = data.get('videoUrl')
     current_time = data.get('currentTime')
     download_type = data.get('downloadType')
+
+
+
+    # Load settings here
+    settings = load_settings()
 
     try:
         # Retrieve secondsBefore and secondsAfter from request or settings
@@ -183,7 +193,7 @@ def handle_video_url():
         return jsonify(error="Settings not received"), 500
 
     resolution = settings.get('resolution')
-    framerate = settings.get('framerate')
+    #framerate = settings.get('framerate')
     download_path = data.get('downloadPath', settings.get('downloadPath', '')).strip()
     download_mp3 = settings.get('downloadMP3')
 
@@ -198,11 +208,10 @@ def handle_video_url():
     if download_type == 'clip':
         clip_start = max(0, current_time - seconds_before)
         clip_end = current_time + seconds_after
-        download_and_process_clip(video_url_global, resolution, framerate, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after)
+        download_and_process_clip(video_url_global, resolution, download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path)
 
     elif download_type == 'full':
-        download_video(video_url_global, resolution, framerate, download_path, download_mp3)
-
+        download_video(video_url_global, resolution, download_path, download_mp3)
     return jsonify(success=True), 200
 
 
@@ -252,14 +261,12 @@ def import_video_to_premiere(video_path):
 
 
 def sanitize_title(title):
-    # Allow Unicode letters, numbers, and specific special characters
-    pattern = '[^\w \(\)\,\"\&\.\;\!\€\$\-\_]+'
-    
-    # Replace unwanted characters with a space
-    sanitized_title = re.sub(pattern, ' ', title)
+    # Remove invalid characters for filenames
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    sanitized_title = ''.join(c for c in title if c in valid_chars)
 
-    # Normalize whitespace (replace multiple spaces with a single space)
-    sanitized_title = re.sub(r'\s+', ' ', sanitized_title).strip()
+    # Remove leading and trailing whitespaces
+    sanitized_title = sanitized_title.strip()
 
     return sanitized_title
 
@@ -316,29 +323,27 @@ def get_current_project_path():
         return None
 
 
-def download_and_process_clip(video_url, resolution, framerate, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after):
+def download_and_process_clip(video_url, resolution, user_download_path, clip_start, clip_end, current_time, download_mp3, seconds_before, seconds_after,ffmpeg_path):
+
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, seconds_before={seconds_before}, seconds_after={seconds_after}, clip_duration={clip_duration}")
 
-    # Ensure that clip_duration is being calculated correctly
-    logging.info(f"Clip duration calculated as: {clip_duration} seconds")
-
-    logging.info(f"Starting download and process clip for URL: {video_url} with clip_start: {clip_start} and clip_duration: {clip_duration}")
     download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if download_path is None:
         logging.error("No active Premiere Pro project found.")
         return
 
-    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
-    clip_suffix = "_clip"
-
-    video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
-    audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
-    video_file_path = os.path.join(download_path, video_filename)
-    audio_file_path = os.path.join(download_path, audio_filename)
 
 
     if download_mp3:
+        video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+        sanitized_title = sanitize_title(video_info['title'])
+        clip_suffix = "_clip"
+        video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+        audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+        video_file_path = os.path.join(download_path, video_filename)
+        audio_file_path = os.path.join(download_path, audio_filename)
+
         ydl_opts_audio = {
             'format': 'bestaudio[ext=m4a]/best',
             'outtmpl': audio_file_path,
@@ -373,57 +378,76 @@ def download_and_process_clip(video_url, resolution, framerate, user_download_pa
             logging.error(f'Error during audio clipping process: {e}', exc_info=True)
             if os.path.exists(temp_audio_file):
                 os.remove(temp_audio_file)  # Clean up in case of error
+
     else:
-        # Download the video clip
-        ydl_opts_video = {
-            'format': f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best',
-            'outtmpl': video_file_path,
-            'ffmpeg_location': ffmpeg_path,
-            'progress_hooks': [progress_hook],
-        }
+        video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+        sanitized_title = sanitize_title(video_info['title'])
+        clip_suffix = "_clip"
+        video_filename = generate_new_filename(download_path, sanitized_title, 'mp4', clip_suffix)
+        audio_filename = generate_new_filename(download_path, sanitized_title, 'wav', clip_suffix)
+        video_file_path = os.path.join(download_path, video_filename)
+        audio_file_path = os.path.join(download_path, audio_filename)
+        clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
+        clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
 
-        with youtube_dl.YoutubeDL(ydl_opts_video) as ydl:
-            ydl.download([video_url])
 
-        temp_video_file = f"{video_file_path}_temp.mp4"
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
-        ffmpeg_command_video = [
-            ffmpeg_path,
-            '-y',
-            '-i', video_file_path,
-            '-ss', str(clip_start),
-            '-t', str(clip_duration),
-            '-c:v', 'copy',
-            '-c:a', 'copy',
-            temp_video_file
+        # Check the operating system
+        if platform.system() == "Windows":
+            # For Windows, yt-dlp is inside the '_include' directory
+            yt_dlp_filename = "yt-dlp.exe"
+            yt_dlp_path = os.path.join(base_path, '_include', yt_dlp_filename)
+        else:
+            # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
+            yt_dlp_filename = "yt-dlp"
+            yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
+
+        # Construct the yt_dlp command line command using the dynamically determined path
+        yt_dlp_command = [
+            yt_dlp_path,
+            '-f', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
+            '--ffmpeg-location', ffmpeg_path,  # Ensure this path is also correctly set
+            '--download-sections', f'*{clip_start_str}-{clip_end_str}',
+            '--output', video_file_path,
+            '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy', 
+            '--no-check-certificate', 
+            video_url
         ]
-
         try:
-            subprocess.run(ffmpeg_command_video, check=True)
-            os.remove(video_file_path)  # Remove the original full video
-            os.rename(temp_video_file, video_file_path)  # Rename the trimmed video file
-            logging.info(f'Trimmed video saved to {video_file_path}')
-            import_video_to_premiere(video_file_path)
+            env = os.environ.copy()
+            result = subprocess.run(yt_dlp_command, capture_output=True, text=True, env=env, check=True)
+            logging.info(f"stdout: {result.stdout}")
         except subprocess.CalledProcessError as e:
-            logging.error(f'Error during video clipping process: {e}', exc_info=True)
-            if os.path.exists(temp_video_file):
-                os.remove(temp_video_file)  # Clean up in case of error
+            # Log both stdout and stderr for better troubleshooting
+            logging.error(f"An error occurred while executing yt-dlp: {e}")
+            logging.error(f"stdout: {e.stdout}")
+            logging.error(f"stderr: {e.stderr}")
 
-    play_notification_sound()
-    socketio.emit('download-complete')
+        # After attempting to download, check if the video file exists before proceeding
+        if os.path.exists(video_file_path):
+            logging.info(f"Video download completed: {video_file_path}")
+            import_video_to_premiere(video_file_path)
+            logging.info("Import to Premiere Pro completed")
+            play_notification_sound()
+            socketio.emit('download-complete')
+        else:
+            logging.error(f"Failed to download video: {video_file_path}")
+            # Optionally, you might want to send a failure notification or handle the error in a specific way
+            socketio.emit('download-failed', {'message': 'Failed to download video.'})
 
+        logging.info("Download and processing of clip completed")
 
-
-def download_video(video_url, resolution, framerate, user_download_path, download_mp3):
+def download_video(video_url, resolution, user_download_path, download_mp3):
     logging.info(f"Starting video download for URL: {video_url}")
-
+    video_info = yt.YoutubeDL().extract_info(video_url, download=False)
+    sanitized_title = sanitize_title(video_info['title'])
     # Determine the final download path
     final_download_path = user_download_path.strip() if user_download_path.strip() else get_default_download_path()
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
         return None
 
-    sanitized_title = sanitize_title(youtube_dl.YoutubeDL().extract_info(video_url, download=False)['title'])
     base_filename = f"{sanitized_title}.mp4"
     output_filename = generate_new_filename(final_download_path, sanitized_title, 'mp4')
     sanitized_output_template = os.path.join(final_download_path, output_filename)
@@ -437,7 +461,7 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
         'writeautomaticsub': False,
         'writethumbnail': False,
         'nooverwrites': False,
-        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}][fps>={framerate}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]/best'
     }
 
     # Download the video
@@ -456,11 +480,15 @@ def download_video(video_url, resolution, framerate, user_download_path, downloa
 def play_notification_sound(volume=0.4):  # Default volume set to 50%
     pygame.mixer.init()
 
-    # Check the operating system and set the path for the notification sound
-    if platform.system() == 'Darwin':  # Darwin is the system name for macOS
-        notification_sound_path = os.path.join(script_dir, '_internal', 'notification_sound.mp3')
+    # Determine if the script is running in a bundled executable
+    if getattr(sys, 'frozen', False):
+        # If it's an executable, use the _MEIPASS directory
+        base_path = sys._MEIPASS
     else:
-        notification_sound_path = "notification_sound.mp3"
+        # Otherwise, use the regular script directory
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    notification_sound_path = os.path.join(base_path, 'notification_sound.mp3')
 
     pygame.mixer.music.load(notification_sound_path)  # Load the notification sound file
     pygame.mixer.music.set_volume(volume)  # Set the volume
@@ -468,23 +496,11 @@ def play_notification_sound(volume=0.4):  # Default volume set to 50%
     while pygame.mixer.music.get_busy():
         pygame.time.Clock().tick(10)
 
-@app.route('/load-settings', methods=['GET'])
-def load_settings_from_file():
-    global settings_global  # Add this line to declare the global variable
-    if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, 'r') as f:
-            settings = json.load(f)
-        settings_global = settings  # Update settings_global with the loaded settings
-        return jsonify(success=True, settings=settings), 200
-    return jsonify(error=f'Settings file not found: {SETTINGS_FILE}'), 404
-
-
 
 def load_settings():
     # Default settings structure
     default_settings = {
         'resolution': '1080',
-        'framerate': '30',
         'downloadPath': '',
         'downloadMP3': False,
         'secondsBefore': '15',
@@ -511,12 +527,21 @@ def is_premiere_running():
 
 def monitor_premiere_and_shutdown():
     global should_shutdown
-    while True:
-        time.sleep(5)
-        if not is_premiere_running():
-            logging.info("Adobe Premiere Pro is not running. Initiating shutdown.")
-            should_shutdown = True
+
+    # Find the process ID of Premiere Pro
+    premiere_pro_process = None
+    for process in psutil.process_iter(['pid', 'name']):
+        if process.info['name'] and 'Adobe Premiere Pro' in process.info['name']:
+            premiere_pro_process = process
             break
+
+    if premiere_pro_process:
+        # Wait for the Premiere Pro process to terminate
+        premiere_pro_process.wait()
+        logging.info("Adobe Premiere Pro has been closed. Initiating shutdown.")
+        should_shutdown = True
+    else:
+        logging.info("Adobe Premiere Pro is not running.")
 
 def run_server():
     with app.app_context():
@@ -528,11 +553,10 @@ def run_server():
 
 
 def main():
-    logging.info(f'Starting script execution. PID: {os.getpid()}')
     global settings_global
     settings_global = load_settings()  # Load settings from file
     logging.info('Settings loaded: %s', settings_global)
-    
+
     server_thread = threading.Thread(target=lambda: socketio.run(app, host='localhost', port=3001, allow_unsafe_werkzeug=True))
     server_thread.start()
 
@@ -541,7 +565,6 @@ def main():
 
     while not should_shutdown:
         time.sleep(1)  # Wait for the shutdown signal
-
 
     print("Shutting down the application.")
     os._exit(0)

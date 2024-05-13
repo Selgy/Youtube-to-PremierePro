@@ -38,7 +38,3 @@ Importez des vidéos YouTube directement dans Adobe Premiere Pro en un clic.
 ## Issue
 - Pour l'instant quand vous ouvrez chrome pour la première fois il faut actualiser la page une fois et ensuite le bouton sera disponible sur toutes les vidéos.
 - certaine vidéos ne peuvent pas ce télécharger à cause de certain charactère dans le titre.
-
-## Credits
-Thanks you for the help
-[BeezBeez](https://github.com/BeezBeez)

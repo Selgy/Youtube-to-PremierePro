@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load and initialize settings
     const settings = JSON.parse(localStorage.getItem('settings')) || {
         resolution: '1080p',
-        framerate: '30',
+        //framerate: '30',
         downloadPath: '',
         downloadMP3: false,
         secondsBefore: '15',
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize settings
     document.getElementById('resolution').value = settings.resolution;
-    document.getElementById('framerate').value = settings.framerate;
+    //document.getElementById('framerate').value = settings.framerate;
     document.getElementById('download-path').value = settings.downloadPath;
     document.getElementById('download-mp3').checked = settings.downloadMP3;
     document.getElementById('seconds-before').value = settings.secondsBefore;
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add event listeners for settings changes
     document.getElementById('resolution').addEventListener('change', saveAndSendSettings);
-    document.getElementById('framerate').addEventListener('change', saveAndSendSettings);
+    //document.getElementById('framerate').addEventListener('change', saveAndSendSettings);
     document.getElementById('download-path').addEventListener('change', function() {
         const newPath = document.getElementById('download-path').value;
         updateLastPaths(newPath); // Update the list of last paths
@@ -103,7 +103,7 @@ function selectPath(path) {
 function saveAndSendSettings() {
     const settings = {
         resolution: document.getElementById('resolution').value,
-        framerate: document.getElementById('framerate').value,
+        //framerate: document.getElementById('framerate').value,
         downloadPath: document.getElementById('download-path').value,
         downloadMP3: document.getElementById('download-mp3').checked,
         secondsBefore: document.getElementById('seconds-before').value,

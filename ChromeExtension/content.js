@@ -11,24 +11,35 @@ const buttonStyles = `
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease;
     margin-left: 5px;
-    width: 120px; /* Fixed width */
+    width: 100px; /* Fixed width */
     text-align: center; /* Center the text inside the button */
 `;
 
+
 let lastClickedButton = null;
 
-// Function to create the button
+
 function createButton() {
     const button = document.createElement('button');
-    button.innerText = 'Full video';
+    button.textContent = 'Video';
     button.id = 'send-to-premiere-button';
     button.style.cssText = buttonStyles;
+    button.setAttribute('role', 'button');
+    button.setAttribute('aria-label', 'Send to Premiere Pro');
     button.onclick = sendURL;
-    button.onmouseenter = () => button.style.backgroundColor = '#1E1E59';
-    button.onmouseleave = () => button.style.backgroundColor = '#00005B';
+    button.onmouseenter = (event) => event.target.style.backgroundColor = '#1E1E59';
+    button.onmouseleave = (event) => event.target.style.backgroundColor = '#00005B';
+    button.addEventListener('click', () => {
+      button.disabled = true;
+    });
+  
+    socket.on('download-complete', () => {
+      button.disabled = false;
+    });
+  
     return button;
-}
-
+  }
+  
 let currentVideoUrl = '';  // Add this line to keep track of the current video URL
 let lastUrl = window.location.href;  // Store the current URL
 
@@ -46,81 +57,81 @@ function sendClipRequest() {
     if (videoPlayer) {
         const currentTime = videoPlayer.currentTime;
         sendURL('clip', { currentTime: currentTime });  // Pass currentTime in an object
-        button.innerText = 'Processing...';
+        button.innerText = 'Processing';
     } else {
         console.error('No video player found.');
     }
 }
 
-function sendURL(downloadType, additionalData = {}) {
-    console.log("sendURL called with downloadType:", downloadType, "and URL:", currentVideoUrl);
-    const requestData = {
-        videoUrl: currentVideoUrl,
-        downloadType: downloadType, // This should be a string, either 'clip' or 'full'
-    };
-    console.log("sendURL called with downloadType:", downloadType);
-    if (isRequestInProgress) {
-        console.log("Request already in progress. Please wait.");
-        return;
-    }
-
-    isRequestInProgress = true; // Set the flag to true as a request is being made
-    const button = document.getElementById(downloadType === 'full' ? 'send-to-premiere-button' : 'clip-button');
-    if (!button) return;
-
-    if (downloadType === 'clip' && !additionalData.currentTime) {
-        console.error('Clip time not provided.');
-        isRequestInProgress = false;
-        return;
-    }
-
-    const videoId = new URLSearchParams(window.location.search).get('v');
-    if (videoId) {
-        const currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        const serverUrl = 'http://localhost:3001/handle-video-url';
-        button.innerText = 'Loading...';
-
-        const requestData = {
-            videoUrl: currentVideoUrl,
-            downloadType: downloadType, // 'clip' or 'full'
-            ...additionalData
-        };
-
-        fetch(serverUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData),
-        })
-        .then(handleResponse)
-        .catch(handleError)
-        .finally(() => {
-            isRequestInProgress = false; // Reset the flag when request is complete
-            button.innerText = downloadType === 'full' ? 'Premiere Pro' : 'Clip';
-        });
-    } else {
-        console.error('No video URL found.');
-        isRequestInProgress = false; // Reset the flag as no request was made
-    }
-}
-
-
-function handleResponse(response) {
-    if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
-    }
-    return response.text().then(data => {
-        console.log('Success:', data);
-    });
-}
-
-function handleError(error) {
+function handleError(error, button) {
     console.error('Error:', error);
+    button.textContent = 'Error';
+  }
+  
+
+  function sendURL(downloadType, additionalData = {}) {
+    const buttonId = downloadType === 'full' ? 'send-to-premiere-button' : 'clip-button';
+    console.log("sendURL called with downloadType:", downloadType, "and URL:", currentVideoUrl);
+  
+    if (isRequestInProgress) {
+      console.log("Request already in progress. Please wait.");
+      return;
+    }
+  
+    isRequestInProgress = true;
+    const button = document.getElementById(buttonId);
+    if (!button) {
+      console.error("Button not found:", buttonId);
+      isRequestInProgress = false;
+      return;
+    }
+  
+    button.innerText = 'Loading';
+    const videoId = new URLSearchParams(window.location.search).get('v');
+  
+    if (videoId) {
+      currentVideoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+      const serverUrl = 'http://localhost:3001/handle-video-url';
+      const requestData = {
+          videoUrl: currentVideoUrl,
+          downloadType: downloadType,
+          ...additionalData
+      };
+  
+      fetch(serverUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(requestData),
+      })
+      .then(response => handleResponse(response, buttonId))
+      .catch(error => handleError(error, button)) // Pass the button element here
+      .finally(() => {
+          isRequestInProgress = false;
+      });
+    } else {
+      console.error('No video URL found.');
+      handleError('No video URL found.', button) // Pass the button element here
+      isRequestInProgress = false;
+    }
+  }
+
+
+
+function handleResponse(response, buttonId) {
+    if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+    }
+    response.text().then(data => {
+        console.log('Success:', data);
+        const button = document.getElementById(buttonId);
+        button.innerText = buttonId === 'send-to-premiere-button' ? 'Video' : 'Clip';  // Reset the button text
+    }).catch(error => handleError(error, buttonId));
 }
+
+
 
 // Example usage:
-// sendURL('full'); // For full video download
+// sendURL('full'); // For Video download
 // sendURL('clip'); // For clip segment download
 
 
@@ -130,15 +141,15 @@ function isVideoPage() {
 }
 
 function createClipButton() {
-    const button = document.createElement('button');
-    button.innerText = 'Clip video';
-    button.id = 'clip-button';
-    button.style.cssText = buttonStyles;
-    button.onclick = sendClipRequest;
-    button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';
-    button.onmouseleave = () => button.style.backgroundColor = '#00005B';
-    button.onclick = sendClipRequest; // This should only call sendClipRequest
-    return button;
+  const button = document.createElement('button');
+  button.textContent = 'Clip';
+  button.id = 'clip-button';
+  button.style.cssText = buttonStyles;
+  button.onclick = sendClipRequest;
+  button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';
+  button.onmouseleave = () => button.style.backgroundColor = '#00005B';
+  button.onclick = sendClipRequest; // This should only call sendClipRequest
+  return button;
 }
 
 
@@ -203,7 +214,7 @@ socket.on('percentage', (data) => {
     }
 
     if (button) {
-        button.innerText = `Downloading ${data.percentage}`;
+        button.innerText = `${data.percentage}`;
     }
 });
 
@@ -212,7 +223,7 @@ socket.on('percentage', (data) => {
 socket.on('download-complete', () => {
     const button = document.getElementById('send-to-premiere-button');
     if (button) {
-        button.innerText = 'Premiere Pro';  // Reset the button text
+        button.innerText = 'Video';  // Reset the button text
     }
 });
 
@@ -257,7 +268,7 @@ function createPremiereProButton() {
     let button = document.getElementById('send-to-premiere-button');
     if (!button) {
         button = document.createElement('button');
-        button.innerText = 'Full video';
+        button.innerText = 'Video';
         button.id = 'send-to-premiere-button';
         button.style.cssText = buttonStyles;
         button.onmouseenter = () => button.style.backgroundColor = '#1E1E59';
@@ -279,7 +290,7 @@ function createClipButton() {
     let button = document.getElementById('clip-button');
     if (!button) {
         button = document.createElement('button');
-        button.innerText = 'Clip video';
+        button.innerText = 'Clip';
         button.id = 'clip-button';
         button.style.cssText = buttonStyles;
         button.onmouseenter = () => button.style.backgroundColor = '#2E2E5F';
