@@ -3,7 +3,7 @@ name: Build and Package
 on:
   push:
     branches:
-      - Pre-released
+      -master
 
 jobs:
   mac-build-apple-silicon:
@@ -283,7 +283,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -299,7 +299,7 @@ jobs:
       with:
             draft: ${{ github.ref == 'refs/heads/master' }}
             prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
+            tag_name: V2.1
             files: |
               YoutubetoPremiere_Mac_arm64.pkg
 
@@ -552,7 +552,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
-          PACKAGE_VERSION="1.1"
+          PACKAGE_VERSION="2.1"
           PKG_ROOT="./pkgroot"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
           SCRIPTS_DIR="./scripts"
@@ -605,7 +605,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -621,7 +621,7 @@ jobs:
       with:
             draft: ${{ github.ref == 'refs/heads/master' }}
             prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
+            tag_name: V2.1
             files: |
               YoutubetoPremiere_Mac_x64.pkg
 
@@ -741,7 +741,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const releases = await github.rest.repos.listReleases({ owner, repo });
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1');
+          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1');
           return preRelease ? preRelease.upload_url : null;
         github-token: ${{ secrets.GITHUB_TOKEN }}
         debug: false
@@ -758,6 +758,6 @@ jobs:
       with:
           draft: ${{ github.ref == 'refs/heads/master' }}
           prerelease: ${{ github.ref != 'refs/heads/master' }}
-          tag_name: V1.1
+          tag_name: V2.1
           files: |
               YoutubetoPremiere_Win.exe
