@@ -321,13 +321,19 @@ jobs:
     - name: Set environment variables for gettext and gnu-tar
       run: |
         echo "DYLD_LIBRARY_PATH=$(brew --prefix gettext)/lib:\$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-        echo "PATH=$(brew --prefix gettext)/bin:$(brew --prefix gnu-tar)/bin:\$PATH" >> $GITHUB_ENV
+        echo "PATH=$(brew --prefix gettext)/bin:$(brew --prefix gnu-tar)/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" >> $GITHUB_ENV
 
     - name: Verify gettext and gnu-tar installation
       run: |
         echo "Verifying gettext and gnu-tar installation..."
         ls -la $(brew --prefix gettext)/lib
         ls -la $(brew --prefix gnu-tar)/bin
+      shell: bash
+      env:
+        HOMEBREW_NO_INSTALL_FROM_API: 
+        DYLD_LIBRARY_PATH: /opt/homebrew/opt/gettext/lib:$DYLD_LIBRARY_PATH
+        PATH: /opt/homebrew/opt/gettext/bin:/opt/homebrew/opt/gnu-tar/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
 
 
     - name: Set up Python
