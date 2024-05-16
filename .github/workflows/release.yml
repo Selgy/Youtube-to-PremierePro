@@ -114,7 +114,8 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --hidden-import=yt_dlp \
-        --add-data "./notification_sound.mp3:." \
+        --add-data "./app/notification_sound.mp3;./" \
+        --add-data "./app/*.py;./app/" \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
@@ -420,7 +421,8 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --hidden-import=yt_dlp \
-        --add-data "./notification_sound.mp3:." \
+        --add-data "./app/notification_sound.mp3;./" \
+        --add-data "./app/*.py;./app/" \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
@@ -742,4 +744,4 @@ jobs:
           prerelease: ${{ github.ref != 'refs/heads/master' }}
           tag_name: V1.1
           files: |
-              YoutubetoPremiereInstaller.exe
+              YoutubetoPremiere_Win.exe

@@ -132,10 +132,10 @@ function openUpdateLink() {
 
   if (os.includes('mac')) {
     updateUrl = userAgent.includes('arm64') 
-      ? 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac_arm64.pkg'
-      : 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiere_Mac_x64.pkg';
+      ? 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V2.0.7/YoutubetoPremiere_Mac_arm64.pkg'
+      : 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V2.0.7/YoutubetoPremiere_Mac_x64.pkg';
   } else if (os.includes('win')) {
-    updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V1.1/YoutubetoPremiereInstaller.exe';
+    updateUrl = 'https://github.com/Selgy/Youtube-to-PremierePro/releases/download/V2.0.7/YoutubetoPremiere_Win.exe';
   } else {
     console.log('Unsupported OS for automatic download.');
     return;
