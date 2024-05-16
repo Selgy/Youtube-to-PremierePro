@@ -310,15 +310,24 @@ jobs:
     - name: Set up Homebrew
       uses: Homebrew/actions/setup-homebrew@master
 
-    - name: Install and link gettext
+    - name: Install necessary tools
       run: |
         brew install gettext
+        brew install gnu-tar
         brew link --force gettext
+        brew link --force gnu-tar
+      shell: bash
 
-    - name: Set DYLD_LIBRARY_PATH and PATH for gettext
+    - name: Set environment variables for gettext and gnu-tar
       run: |
         echo "DYLD_LIBRARY_PATH=$(brew --prefix gettext)/lib:\$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-        echo "PATH=$(brew --prefix gettext)/bin:\$PATH" >> $GITHUB_ENV
+        echo "PATH=$(brew --prefix gettext)/bin:$(brew --prefix gnu-tar)/bin:\$PATH" >> $GITHUB_ENV
+
+    - name: Verify gettext and gnu-tar installation
+      run: |
+        echo "Verifying gettext and gnu-tar installation..."
+        ls -la $(brew --prefix gettext)/lib
+        ls -la $(brew --prefix gnu-tar)/bin
 
 
     - name: Set up Python
@@ -331,14 +340,6 @@ jobs:
     - name: Sync clock
       run: sudo sntp -sS time.windows.com
 
-    - name: Verify gettext installation
-      run: ls -la $(brew --prefix gettext)/lib
-
-    - name: Set DYLD_LIBRARY_PATH
-      run: echo "DYLD_LIBRARY_PATH=$(brew --prefix gettext)/lib:\$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-
-    - name: Set PATH for Python
-      run: echo "PATH=/Users/runner/hostedtoolcache/Python/3.8.8/x64/bin:\$PATH" >> $GITHUB_ENV
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip setuptools wheel
