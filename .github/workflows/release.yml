@@ -273,7 +273,7 @@ jobs:
                   NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
                   echo "Notarization ID for PKG: $NOTARIZATION_ID"
                  
-    
+     
 
                       
     - name: Get the release
