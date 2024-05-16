@@ -7,7 +7,9 @@ on:
 
 jobs:
   mac-build-apple-silicon:
+    needs: mac-build-intel
     runs-on: macos-14
+    
     steps:
 
     - name: Checkout code
@@ -303,7 +305,7 @@ jobs:
 
   mac-build-intel:
     runs-on: macos-latest
-    needs: mac-build-apple-silicon
+
     steps:
     - name: Set up Homebrew
       uses: Homebrew/actions/setup-homebrew@master
@@ -312,16 +314,23 @@ jobs:
       run: |
         brew install gettext
         brew link --force gettext
-        export PATH="/usr/local/opt/gettext/bin:$PATH"
 
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - name: Set DYLD_LIBRARY_PATH and PATH for gettext
+      run: |
+        echo "DYLD_LIBRARY_PATH=$(brew --prefix gettext)/lib:\$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "PATH=$(brew --prefix gettext)/bin:\$PATH" >> $GITHUB_ENV
+
+    - name: Verify gettext installation
+      run: |
+        echo "Verifying gettext installation..."
+        ls -la $(brew --prefix gettext)/lib
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.8.8
         architecture: x64
+
 
     - name: Sync clock
       run: sudo sntp -sS time.windows.com
