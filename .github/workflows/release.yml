@@ -608,7 +608,7 @@ jobs:
               YoutubetoPremiere_Mac_x64.pkg
 
 
-  build:
+  Win-build:
     runs-on: windows-latest
 
     steps:
@@ -687,8 +687,9 @@ jobs:
         --hidden-import=subprocess `
         --add-binary "./ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
         --add-data "./app/notification_sound.mp3;./app/" `
+        --add-data "./app/*.py;./app/" `
         --icon "./icon.ico" `
-        server.py
+        YoutubetoPremiere.py
 
     - name: Install NSIS
       run: choco install nsis
