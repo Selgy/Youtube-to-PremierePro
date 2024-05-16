@@ -3,8 +3,8 @@ name: Build and Package
 on:
   push:
     branches:
-      - pre-release
-
+      - Pre-released
+      
 jobs:
   mac-build-apple-silicon:
     runs-on: macos-14
