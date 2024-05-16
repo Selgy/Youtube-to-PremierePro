@@ -4,6 +4,7 @@ import logging
 import yt_dlp as youtube_dl
 import re
 from flask import jsonify
+import sys
 import platform
 import time
 from app.utils import (
@@ -56,6 +57,8 @@ def handle_video_url(request, settings, socketio):
 
     return jsonify(success=True), 200
 
+
+
 def download_and_process_clip(video_url, resolution, download_path, clip_start, clip_end, download_mp3, ffmpeg_path, socketio):
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, clip_duration={clip_duration}")
@@ -74,11 +77,17 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     clip_start_str = time.strftime('%H:%M:%S', time.gmtime(clip_start))
     clip_end_str = time.strftime('%H:%M:%S', time.gmtime(clip_end))
 
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+
     # Check the operating system
-    if platform.system() == 'Windows':
-        yt_dlp_path = 'yt-dlp.exe'
+    if platform.system() == "Windows":
+        # For Windows, yt-dlp is inside the '_include' directory
+        yt_dlp_filename = "yt-dlp.exe"
+        yt_dlp_path = os.path.join(base_path, '_include', yt_dlp_filename)
     else:
-        yt_dlp_path = 'yt-dlp'
+        # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
+        yt_dlp_filename = "yt-dlp"
+        yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
 
     yt_dlp_command = [
         yt_dlp_path,
