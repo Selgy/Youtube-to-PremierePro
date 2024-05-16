@@ -114,11 +114,10 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --hidden-import=yt_dlp \
-        --add-data "./app/notification_sound.mp3;./" \
-        --add-data "./app/*.py;./app/" \
+        --add-data "./app/notification_sound.mp3:./" \
+        --add-data "./app/*.py:./app/" \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
-        ls -la ./dist/
   
 
         
