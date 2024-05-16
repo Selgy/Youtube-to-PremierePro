@@ -686,7 +686,7 @@ jobs:
         --hidden-import=tkinter `
         --hidden-import=subprocess `
         --add-binary "./ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
-        --add-data "./app/notification_sound.mp3;./app/" `
+        --add-data "./app/notification_sound.mp3;./" `
         --add-data "./app/*.py;./app/" `
         --icon "./icon.ico" `
         YoutubetoPremiere.py
