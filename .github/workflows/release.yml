@@ -304,7 +304,7 @@ jobs:
               YoutubetoPremiere_Mac_arm64.pkg
 
   mac-build-intel:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
     - name: Determine Homebrew path
       id: homebrew-path
