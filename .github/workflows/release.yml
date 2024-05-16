@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - Pre-released
-      
+
 jobs:
   mac-build-apple-silicon:
     runs-on: macos-14
@@ -283,7 +283,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1')
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -605,7 +605,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1')
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -741,7 +741,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const releases = await github.rest.repos.listReleases({ owner, repo });
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V2.1');
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1');
           return preRelease ? preRelease.upload_url : null;
         github-token: ${{ secrets.GITHUB_TOKEN }}
         debug: false
