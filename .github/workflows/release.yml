@@ -307,6 +307,9 @@ jobs:
     runs-on: macos-13
 
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+
     - name: Set up Homebrew
       uses: Homebrew/actions/setup-homebrew@master
 
