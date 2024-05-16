@@ -3,7 +3,7 @@ name: Build and Package
 on:
   push:
     branches:
-      -master
+      - pre-release
 
 jobs:
   mac-build-apple-silicon:
