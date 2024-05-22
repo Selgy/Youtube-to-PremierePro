@@ -83,7 +83,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     if platform.system() == "Windows":
         # For Windows, yt-dlp is inside the '_include' directory
         yt_dlp_filename = "yt-dlp.exe"
-        yt_dlp_path = os.path.join(base_path, '_include', yt_dlp_filename)
+        yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
     else:
         # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
         yt_dlp_filename = "yt-dlp"
