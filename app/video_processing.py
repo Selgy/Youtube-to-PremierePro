@@ -87,7 +87,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     else:
         # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
         yt_dlp_filename = "yt-dlp"
-        yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
+        yt_dlp_path = os.path.join(base_path, 'app', yt_dlp_filename)
 
     yt_dlp_command = [
         yt_dlp_path,
