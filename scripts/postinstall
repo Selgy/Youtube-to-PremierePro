@@ -61,7 +61,7 @@ mkdir -p "$FFMPEG_BIN_DIR"
 mkdir -p "$YT_DLP_DIR"
 
 # Download and unpack FFmpeg and yt-dlp
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-113991-g49707b0590.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-115189-g0664cbd732.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip" # Remove the ZIP file
 
