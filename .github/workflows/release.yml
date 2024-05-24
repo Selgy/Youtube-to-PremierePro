@@ -428,7 +428,7 @@ jobs:
         --hidden-import=pygame \
         --hidden-import=PIL \
         --hidden-import=flask \
-        --add-binary "./app/_include/yt-dlp:app/" \
+        --add-binary "./app/_include/yt-dlp:./" \
         --hidden-import=flask_cors \
         --hidden-import=flask_socketio \
         --hidden-import=yt_dlp \
