@@ -1,17 +1,25 @@
 #!/bin/bash
 
+# Function to log messages
+log() {
+    local message="$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') $message"
+}
 
+log "Starting the installation script."
 
 # get the current user
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
-
+log "Current user: $loggedInUser"
 
 # Get the UID of the logged-in user
 uid=$(id -u "$loggedInUser")
+log "User ID: $uid"
 
 # Enable PlayerDebugMode for Adobe CEP versions 6 to 11 in user context
 for csxs_version in {6..11}; do
     launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
+    log "Enabled PlayerDebugMode for com.adobe.CSXS.$csxs_version"
 done
 
 # Define the user's Adobe CEP extensions directory
@@ -19,67 +27,73 @@ CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
 GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
-echo "Creating $CEP_EXTENSIONS_DIR..."
-mkdir -p "$CEP_EXTENSIONS_DIR" && echo "Directory created successfully." || { echo "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
+log "Creating $CEP_EXTENSIONS_DIR..."
+mkdir -p "$CEP_EXTENSIONS_DIR" && log "Directory created successfully." || { log "Failed to create $CEP_EXTENSIONS_DIR"; exit 1; }
 
-echo "Downloading com.selgy.youtubetopremiere from GitHub..."
-curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "Download successful." || { echo "Failed to download from GitHub"; exit 1; }
+log "Downloading com.selgy.youtubetopremiere from GitHub..."
+curl -L "$GITHUB_REPO_URL" --output "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && log "Download successful." || { log "Failed to download from GitHub"; exit 1; }
 
-echo "Installing com.selgy.youtubetopremiere..."
-unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && echo "Unzip successful." || { echo "Unzip failed"; exit 1; }
+log "Installing com.selgy.youtubetopremiere..."
+unzip -o "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" -d "$CEP_EXTENSIONS_DIR" && log "Unzip successful." || { log "Unzip failed"; exit 1; }
 
 # Removing existing installation if it exists
 TARGET_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere"
 SOURCE_DIR="$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released/com.selgy.youtubetopremiere"
 
 if [ -d "$TARGET_DIR" ]; then
-    echo "Existing installation found. Removing..."
-    rm -rf "$TARGET_DIR" && echo "Existing directory removed." || { echo "Failed to remove existing directory"; exit 1; }
+    log "Existing installation found. Removing..."
+    rm -rf "$TARGET_DIR" && log "Existing directory removed." || { log "Failed to remove existing directory"; exit 1; }
 fi
 
-mv -f "$SOURCE_DIR" "$TARGET_DIR" && echo "Installation successful." || { echo "Failed to install"; exit 1; }
+mv -f "$SOURCE_DIR" "$TARGET_DIR" && log "Installation successful." || { log "Failed to install"; exit 1; }
 
 # Delete the intermediate folder from GitHub
-rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && echo "Intermediate folder deleted successfully." || { echo "Failed to delete intermediate folder"; exit 1; }
+rm -rf "$CEP_EXTENSIONS_DIR/Youtube-to-PremierePro-Pre-released" && log "Intermediate folder deleted successfully." || { log "Failed to delete intermediate folder"; exit 1; }
 
 # Delete the downloaded ZIP file
-rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && echo "ZIP file deleted successfully." || { echo "Failed to delete ZIP file"; exit 1; }
+rm -f "$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere.zip" && log "ZIP file deleted successfully." || { log "Failed to delete ZIP file"; exit 1; }
 
 EXEC_DIR="$TARGET_DIR/exec"
-echo "Creating $EXEC_DIR..."
-mkdir -p "$EXEC_DIR" && echo "Exec directory created successfully." || { echo "Failed to create $EXEC_DIR"; exit 1; }
+log "Creating $EXEC_DIR..."
+mkdir -p "$EXEC_DIR" && log "Exec directory created successfully." || { log "Failed to create $EXEC_DIR"; exit 1; }
 
-echo "Copying executable to $EXEC_DIR..."
-cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && echo "Executable copied successfully." || { echo "Failed to copy executable"; exit 1; }
+log "Copying executable to $EXEC_DIR..."
+cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && log "Executable copied successfully." || { log "Failed to copy executable"; exit 1; }
 
 # Change ownership and permissions of FFmpeg binary and yt-dlp
 FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
 YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 
 # Ensure directories exist
-mkdir -p "$FFMPEG_BIN_DIR"
-mkdir -p "$YT_DLP_DIR"
+mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
+mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
 # Download and unpack FFmpeg and yt-dlp
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-115189-g0664cbd732.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip"
-unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR"
-rm "$FFMPEG_BIN_DIR/ffmpeg.zip" # Remove the ZIP file
+log "Downloading FFmpeg..."
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-115189-g0664cbd732.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
 
 # Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
-xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"
+if xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"; then
+    log "Removed quarantine attribute from FFmpeg."
+else
+    log "No quarantine attribute found on FFmpeg."
+fi
 
 # Set ownership to the logged-in user, and set execute permissions
 chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 chmod +x "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
+log "Set ownership and permissions for FFmpeg and yt-dlp."
 
-echo "Cleanup started..."
+log "Cleanup started..."
 # Force delete the directories
-sudo rm -rf "/Applications/YoutubetoPremiere" && echo "Deleted /Applications/YoutubetoPremiere directory." || { echo "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
-sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && echo "Deleted /Applications/com.selgy.youtubetopremiere directory." || { echo "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
+sudo rm -rf "/Applications/YoutubetoPremiere" && log "Deleted /Applications/YoutubetoPremiere directory." || { log "Failed to delete /Applications/YoutubetoPremiere"; exit 1; }
+sudo rm -rf "/Applications/com.selgy.youtubetopremiere" && log "Deleted /Applications/com.selgy.youtubetopremiere directory." || { log "Failed to delete /Applications/com.selgy.youtubetopremiere"; exit 1; }
 
-echo "Cleanup completed."
+log "Cleanup completed."
 
 # Open the web page in the default browser
-echo "Opening the web page in the default browser..."
+log "Opening the web page in the default browser..."
 open "https://chromewebstore.google.com/u/3/detail/youtube-to-premiere-pro-v/fnhpeiohcfobchjffmgfdeobphhmaibb?hl=fr"
-
+log "Script completed."
