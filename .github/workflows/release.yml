@@ -106,7 +106,7 @@ jobs:
         --hidden-import=pygame \
         --hidden-import=PIL \
         --hidden-import=flask \
-        --add-binary "./_include/yt-dlp:./" \
+        --add-binary "./app/_include/yt-dlp:./" \
         --hidden-import=flask_cors \
         --hidden-import=flask_socketio \
         --hidden-import=yt_dlp \
@@ -114,10 +114,11 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --hidden-import=yt_dlp \
-        --add-data "./notification_sound.mp3:." \
+        --add-data "./app/notification_sound.mp3:./" \
+        --add-data "./app/*.py:./app/" \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
-        ls -la ./dist/
+
   
 
         
@@ -271,7 +272,7 @@ jobs:
                   NOTARIZATION_ID=$(echo "$NOTARIZATION_OUTPUT" | jq -r '.id')
                   echo "Notarization ID for PKG: $NOTARIZATION_ID"
                  
-    
+     
 
                       
     - name: Get the release
@@ -281,7 +282,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -297,29 +298,37 @@ jobs:
       with:
             draft: ${{ github.ref == 'refs/heads/master' }}
             prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
+            tag_name: V2.1
             files: |
               YoutubetoPremiere_Mac_arm64.pkg
 
   mac-build-intel:
-    runs-on: macos-latest
+    runs-on: macos-13
     needs: mac-build-apple-silicon
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
 
     - name: Set up Homebrew
       uses: Homebrew/actions/setup-homebrew@master
-  
-    - name: Install and link gettext
+
+    - name: Install necessary tools
       run: |
-        brew install gettext
-        brew link --force gettext
+        brew install gettext gnu-tar
+        brew link --force gettext gnu-tar
+      shell: bash
 
+    - name: Set environment variables for gettext and gnu-tar
+      run: |
+        echo "export DYLD_LIBRARY_PATH=$(brew --prefix gettext)/lib:\$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        echo "export PATH=$(brew --prefix gettext)/bin:$(brew --prefix gnu-tar)/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin" >> $GITHUB_ENV
 
-
-
-    - name: Checkout code
-      uses: actions/checkout@v4
-
+    - name: Verify gettext and gnu-tar installation
+      run: |
+        echo "Verifying gettext and gnu-tar installation..."
+        ls -la $(brew --prefix gettext)/lib
+        ls -la $(brew --prefix gnu-tar)/bin
+      shell: bash
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -330,13 +339,21 @@ jobs:
     - name: Sync clock
       run: sudo sntp -sS time.windows.com
 
+    - name: Verify gettext installation
+      run: ls -la $(brew --prefix gettext)/lib
 
     - name: Upgrade pip
       run: python -m pip install --upgrade pip setuptools wheel
 
+    - name: Check for requirements.txt
+      run: |
+        if [ ! -f requirements.txt ]; then
+          echo "requirements.txt not found"
+          exit 1
+        fi
+
     - name: Install dependencies
       run: pip install -r requirements.txt
-
 
     - name: Create and Configure Keychain
       env:
@@ -411,7 +428,7 @@ jobs:
         --hidden-import=pygame \
         --hidden-import=PIL \
         --hidden-import=flask \
-        --add-binary "./_include/yt-dlp:./" \
+        --add-binary "./app/_include/yt-dlp:./" \
         --hidden-import=flask_cors \
         --hidden-import=flask_socketio \
         --hidden-import=yt_dlp \
@@ -419,7 +436,8 @@ jobs:
         --hidden-import=psutil \
         --hidden-import=tkinter \
         --hidden-import=yt_dlp \
-        --add-data "./notification_sound.mp3:." \
+        --add-data "./app/notification_sound.mp3:./" \
+        --add-data "./app/*.py:./app/" \
         --icon "./icon.icns" \
         YoutubetoPremiere.py
         ls -la ./dist/
@@ -533,7 +551,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           PACKAGE_IDENTIFIER="com.selgy.youtubetopremiere"
-          PACKAGE_VERSION="1.1"
+          PACKAGE_VERSION="2.1"
           PKG_ROOT="./pkgroot"
           OUTPUT_PKG="YoutubetoPremiere.pkg"
           SCRIPTS_DIR="./scripts"
@@ -586,7 +604,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo
           const releases = await github.rest.repos.listReleases({ owner, repo })
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1')
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1')
           return preRelease.upload_url
 
 
@@ -602,14 +620,13 @@ jobs:
       with:
             draft: ${{ github.ref == 'refs/heads/master' }}
             prerelease: ${{ github.ref != 'refs/heads/master' }}
-            tag_name: V1.1
+            tag_name: V2.1
             files: |
               YoutubetoPremiere_Mac_x64.pkg
 
 
-  win-build:
+  Win-build:
     runs-on: windows-latest
-  
 
     steps:
     - name: Checkout code
@@ -621,7 +638,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8.8
-      
+
     - name: Cache pip
       uses: actions/cache@v2
       with:
@@ -653,11 +670,9 @@ jobs:
       shell: pwsh
       run: |
         Get-ChildItem -Recurse -Filter ffmpeg.exe | Format-Table FullName
-      
-      
+
     - name: Install PyInstaller
       run: pip install pyinstaller
-
 
     - name: Build Application with PyInstaller
       run: |
@@ -678,7 +693,7 @@ jobs:
         --hidden-import=logging `
         --hidden-import=flask_cors `
         --hidden-import=flask `
-        --add-binary "_Include\yt-dlp.exe;_Include/" `
+        --add-binary "app\_Include\yt-dlp.exe;app/_Include/" `
         --hidden-import=flask_socketio `
         --hidden-import=json `
         --hidden-import=threading `
@@ -688,16 +703,13 @@ jobs:
         --hidden-import=tkinter `
         --hidden-import=subprocess `
         --add-binary "./ffmpeg_win/bin/ffmpeg.exe;./ffmpeg_win/bin/" `
-        --add-data "./icon.png;." `
-        --add-data "./notification_sound.mp3;." `
+        --add-data "./app/notification_sound.mp3;./" `
+        --add-data "./app/*.py;./app/" `
         --icon "./icon.ico" `
         YoutubetoPremiere.py
-      
-      
-    
+
     - name: Install NSIS
-      run: |
-        choco install nsis
+      run: choco install nsis
 
     - name: Download and Install NSIS Process Plugin
       run: |
@@ -717,11 +729,10 @@ jobs:
 
     - name: Compile Installer with NSIS
       run: makensis ./installer.nsi
-      
 
     - name: List directory contents dist
       run: dir dist
-    
+
     - name: Get the release
       id: get_release
       uses: actions/github-script@v5
@@ -729,7 +740,7 @@ jobs:
         script: |
           const { owner, repo } = context.repo;
           const releases = await github.rest.repos.listReleases({ owner, repo });
-          const preRelease = releases.data.find(release => release.prerelease && release.tag_name === 'V1.1');
+          const preRelease = releases.data.find(release => release.tag_name === 'V2.1');
           return preRelease ? preRelease.upload_url : null;
         github-token: ${{ secrets.GITHUB_TOKEN }}
         debug: false
@@ -737,8 +748,7 @@ jobs:
         result-encoding: json
       env:
         pythonLocation: C:\hostedtoolcache\windows\Python\3.8.8\x64
-      
-    
+
     - name: Upload executables to asset
       id: upload-release-asset
       uses: softprops/action-gh-release@v1
@@ -747,6 +757,6 @@ jobs:
       with:
           draft: ${{ github.ref == 'refs/heads/master' }}
           prerelease: ${{ github.ref != 'refs/heads/master' }}
-          tag_name: V1.1
+          tag_name: V2.1
           files: |
-              YoutubetoPremiereInstaller.exe
+              YoutubetoPremiere_Win.exe

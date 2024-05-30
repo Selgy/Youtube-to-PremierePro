@@ -5,7 +5,7 @@
 Var ChromeExtensionCheckbox
 
 Name 'YoutubetoPremiere Installer'
-OutFile 'YoutubetoPremiereInstaller.exe'
+OutFile 'YoutubetoPremiere_Win.exe'
 !define MUI_ICON 'icon.ico'
 !define MUI_ABORTWARNING
 

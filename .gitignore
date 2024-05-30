@@ -10,4 +10,7 @@ YoutubetoPremiere-WinInstaller.exe
 com.youtubetopremiere.YoutubetoPremiere.plist
 node_modules
 .venv
-*.pyc
+app/__pycache__/routes.cpython-38.pyc
+app/__pycache__/utils.cpython-38.pyc
+app/__pycache__/video_processing.cpython-38.pyc
+
