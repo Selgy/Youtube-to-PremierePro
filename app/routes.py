@@ -11,7 +11,7 @@ def register_routes(app, socketio, settings):
     
     @app.route('/get-version', methods=['GET'])
     def get_version():
-        return jsonify(version='2.0.8')  # Replace '1.0.0' with your actual version
+        return jsonify(version='2.0.9') 
 
 
     @app.route('/settings', methods=['POST'])
