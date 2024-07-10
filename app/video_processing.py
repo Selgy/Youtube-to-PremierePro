@@ -98,7 +98,6 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
         '--no-check-certificate',
         '--extractor-args', 'youtube:player_client=web;ios',  # Use only web and ios clients
-        '--user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         video_url
     ]
 
