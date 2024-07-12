@@ -16,6 +16,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Setup listeners for settings changes
   setupSettingsListeners();
+
+  // Setup listener for license key submission
+  const submitLicenseKeyButton = document.getElementById('submitLicenseKeyButton');
+  if (submitLicenseKeyButton) {
+    submitLicenseKeyButton.addEventListener('click', async () => {
+      const licenseKey = document.getElementById('licenseKeyInput').value;
+      if (licenseKey) {
+        await saveLicenseKey(licenseKey);
+        await checkLicenseKeyAndValidation();
+      }
+    });
+  } else {
+    console.error('License key submit button not found');
+  }
 });
 
 async function getVersionCheckStatus() {
@@ -40,7 +54,7 @@ function saveSettings() {
   const settings = {
     resolution: document.getElementById('resolution').value,
     downloadPath: document.getElementById('download-path').value,
-    downloadMP3: document.getElementById('download-mp3').checked,
+    downloadMP3: document.getElementById('download-mp3')?.checked ?? false,
     secondsBefore: document.getElementById('seconds-before').value,
     secondsAfter: document.getElementById('seconds-after').value
   };
@@ -53,14 +67,15 @@ function loadSettings() {
   const settings = JSON.parse(localStorage.getItem('settings')) || {
     resolution: '1080',
     downloadPath: '',
-//    downloadMP3: false,
     secondsBefore: 15,
     secondsAfter: 15
   };
 
   document.getElementById('resolution').value = settings.resolution;
   document.getElementById('download-path').value = settings.downloadPath;
-  //document.getElementById('download-mp3').checked = settings.downloadMP3;
+  if (document.getElementById('download-mp3')) {
+    document.getElementById('download-mp3').checked = settings.downloadMP3;
+  }
   document.getElementById('seconds-before').value = settings.secondsBefore;
   document.getElementById('seconds-after').value = settings.secondsAfter;
 }
@@ -69,7 +84,9 @@ function setupSettingsListeners() {
   console.log('Setting up settings listeners');
   document.getElementById('resolution').addEventListener('change', saveSettings);
   document.getElementById('download-path').addEventListener('input', saveSettings);
-  //document.getElementById('download-mp3').addEventListener('change', saveSettings);
+  if (document.getElementById('download-mp3')) {
+    document.getElementById('download-mp3').addEventListener('change', saveSettings);
+  }
   document.getElementById('seconds-before').addEventListener('change', saveSettings);
   document.getElementById('seconds-after').addEventListener('change', saveSettings);
 }
@@ -100,7 +117,7 @@ async function checkLicenseKeyIfNeeded() {
   } else {
     console.log('License already checked this Chrome session');
     const { isLicenseValidated } = await getLicenseKeyAndValidationStatus();
-    toggleContentVisibility(isLicenseValidated, false);
+    toggleContentVisibility(!!isLicenseValidated, false);
   }
 }
 

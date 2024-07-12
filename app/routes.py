@@ -11,7 +11,7 @@ def register_routes(app, socketio, settings):
     
     @app.route('/get-version', methods=['GET'])
     def get_version():
-        version = '2.1.0'
+        version = '2.1.1'
         logging.info(f"Version requested: {version}")
         return jsonify(version=version)
 
