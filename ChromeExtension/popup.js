@@ -1,38 +1,131 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const { licenseKey, isLicenseValidated, hasCheckedVersionAndLicense } = await getLicenseKeyAndValidationStatus();
+  console.log('DOM fully loaded and parsed');
 
-  if (!hasCheckedVersionAndLicense) {
-    await checkVersionMismatch();
-    if (licenseKey) {
-      const isValid = await validateLicenseKey(licenseKey);
-      if (isValid) {
-        await setLicenseValidationStatus(true);
-      }
-      toggleContentVisibility(isValid);
-    } else {
-      toggleContentVisibility(false);
-    }
-    await setHasCheckedVersionAndLicense(true);
-  } else {
-    toggleContentVisibility(isLicenseValidated);
-  }
+  // Show loading state immediately
+  toggleContentVisibility(false, true);
 
-  document.getElementById('submitKey').addEventListener('click', async () => {
-    console.log('Submit Key button clicked');
-    const key = document.getElementById('licenseKey').value;
-    console.log('Entered Key:', key);
-    const isValid = await validateLicenseKey(key);
-    console.log('New Key Validation Result:', isValid);
+  // Always check version when popup opens
+  console.log('Performing version check...');
+  await checkVersionMismatch();
 
-    if (isValid) {
-      await saveLicenseKey(key);
-      await setLicenseValidationStatus(true);
-      toggleContentVisibility(true);
-    } else {
-      document.getElementById('errorMessage').style.display = 'block';
-    }
-  });
+  // Check license key only if not checked this Chrome session
+  await checkLicenseKeyIfNeeded();
+
+  // Load settings immediately
+  loadSettings();
+
+  // Setup listeners for settings changes
+  setupSettingsListeners();
 });
+
+async function getVersionCheckStatus() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(['hasCheckedVersion'], function(result) {
+      resolve(result.hasCheckedVersion || false);
+    });
+  });
+}
+
+async function setVersionCheckStatus(status) {
+  return new Promise(resolve => {
+    chrome.storage.local.set({ hasCheckedVersion: status }, () => {
+      console.log('Version Check Status saved:', status);
+      resolve();
+    });
+  });
+}
+
+function saveSettings() {
+  console.log('Saving settings');
+  const settings = {
+    resolution: document.getElementById('resolution').value,
+    downloadPath: document.getElementById('download-path').value,
+    downloadMP3: document.getElementById('download-mp3').checked,
+    secondsBefore: document.getElementById('seconds-before').value,
+    secondsAfter: document.getElementById('seconds-after').value
+  };
+  localStorage.setItem('settings', JSON.stringify(settings));
+  console.log('Settings saved:', settings);
+}
+
+function loadSettings() {
+  console.log('Loading settings');
+  const settings = JSON.parse(localStorage.getItem('settings')) || {
+    resolution: '1080',
+    downloadPath: '',
+//    downloadMP3: false,
+    secondsBefore: 15,
+    secondsAfter: 15
+  };
+
+  document.getElementById('resolution').value = settings.resolution;
+  document.getElementById('download-path').value = settings.downloadPath;
+  //document.getElementById('download-mp3').checked = settings.downloadMP3;
+  document.getElementById('seconds-before').value = settings.secondsBefore;
+  document.getElementById('seconds-after').value = settings.secondsAfter;
+}
+
+function setupSettingsListeners() {
+  console.log('Setting up settings listeners');
+  document.getElementById('resolution').addEventListener('change', saveSettings);
+  document.getElementById('download-path').addEventListener('input', saveSettings);
+  //document.getElementById('download-mp3').addEventListener('change', saveSettings);
+  document.getElementById('seconds-before').addEventListener('change', saveSettings);
+  document.getElementById('seconds-after').addEventListener('change', saveSettings);
+}
+
+async function getHasCheckedLicense() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(['hasCheckedLicense'], function(result) {
+      resolve(result.hasCheckedLicense || false);
+    });
+  });
+}
+
+async function setHasCheckedLicense(status) {
+  return new Promise(resolve => {
+    chrome.storage.local.set({ hasCheckedLicense: status }, () => {
+      console.log('Has Checked License saved:', status);
+      resolve();
+    });
+  });
+}
+
+async function checkLicenseKeyIfNeeded() {
+  const hasCheckedLicense = await getHasCheckedLicense();
+  if (!hasCheckedLicense) {
+    console.log('Checking license key...');
+    await checkLicenseKeyAndValidation();
+    await setHasCheckedLicense(true);
+  } else {
+    console.log('License already checked this Chrome session');
+    const { isLicenseValidated } = await getLicenseKeyAndValidationStatus();
+    toggleContentVisibility(isLicenseValidated, false);
+  }
+}
+
+async function checkLicenseKeyAndValidation() {
+  console.log('checkLicenseKeyAndValidation function called');
+  const { licenseKey, isLicenseValidated } = await getLicenseKeyAndValidationStatus();
+  console.log('License Key:', licenseKey);
+  console.log('Is License Validated:', isLicenseValidated);
+
+  if (isLicenseValidated) {
+    toggleContentVisibility(true, false);
+  } else if (licenseKey) {
+    console.log('Validating license key...');
+    const isValid = await validateLicenseKey(licenseKey);
+    console.log('License key validation result:', isValid);
+    if (isValid) {
+      await setLicenseValidationStatus(true);
+      toggleContentVisibility(true, false);
+    } else {
+      toggleContentVisibility(false, false);
+    }
+  } else {
+    toggleContentVisibility(false, false);
+  }
+}
 
 async function getLicenseKeyAndValidationStatus() {
   return new Promise(resolve => {
@@ -40,7 +133,11 @@ async function getLicenseKeyAndValidationStatus() {
       chrome.storage.local.get(['hasCheckedVersionAndLicense'], function(localResult) {
         console.log('Retrieved License Key and Validation Status from Storage:', result);
         console.log('Retrieved Version and License Check Status from Local Storage:', localResult);
-        resolve({ ...result, ...localResult });
+        resolve({
+          licenseKey: result.licenseKey,
+          isLicenseValidated: result.isLicenseValidated,
+          hasCheckedVersionAndLicense: localResult.hasCheckedVersionAndLicense || false
+        });
       });
     });
   });
@@ -73,10 +170,28 @@ async function saveLicenseKey(key) {
   });
 }
 
+async function getVersionCheckedStatus() {
+  return new Promise(resolve => {
+    chrome.storage.local.get(['versionChecked'], function(result) {
+      resolve(result.versionChecked || false);
+    });
+  });
+}
+
+async function setVersionCheckedStatus(status) {
+  return new Promise(resolve => {
+    chrome.storage.local.set({ versionChecked: status }, () => {
+      console.log('Version Checked Status saved:', status);
+      resolve();
+    });
+  });
+}
+
 async function fetchBackendVersion() {
   try {
     console.log('Fetching backend version...');
     const response = await fetch('http://localhost:3001/get-version');
+    console.log('Response status:', response.status);
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -101,6 +216,7 @@ async function checkVersionMismatch() {
   const backendVersion = await fetchBackendVersion();
   const extensionVersion = chrome.runtime.getManifest().version;
   console.log('Extension version:', extensionVersion);
+  console.log('Backend version:', backendVersion);
 
   if (backendVersion === 'endpoint-missing') {
     console.log('Backend version endpoint missing, suggesting update...');
@@ -114,10 +230,12 @@ async function checkVersionMismatch() {
 }
 
 function showVersionMismatchMessage(message = 'Update available.') {
+  console.log('Showing version mismatch message:', message);
   const messageDiv = document.getElementById('versionMismatchMessage');
-  
+
   messageDiv.innerHTML = `${message} Click <a href="#" id="updateLink" style="color: yellow;">here</a>`;
   messageDiv.style.display = 'block';
+  messageDiv.style.color = 'red';
 
   document.getElementById('updateLink').addEventListener('click', function(event) {
     event.preventDefault();
@@ -204,31 +322,20 @@ async function validateGumroadLicense(key) {
   }
 }
 
-function toggleContentVisibility(isValid) {
-  console.log('Toggling content visibility. Is Valid:', isValid);
-  if (isValid) {
+function toggleContentVisibility(isValid, isLoading = false) {
+  console.log('Toggling content visibility. Is Valid:', isValid, 'Is Loading:', isLoading);
+  if (isLoading) {
+    document.getElementById('loadingSection').style.display = 'block';
+    document.getElementById('licenseSection').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'none';
+  } else if (isValid) {
+    document.getElementById('loadingSection').style.display = 'none';
     document.getElementById('licenseSection').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
     loadSettings();
   } else {
+    document.getElementById('loadingSection').style.display = 'none';
     document.getElementById('licenseSection').style.display = 'block';
     document.getElementById('mainContent').style.display = 'none';
   }
-}
-
-function loadSettings() {
-  console.log('Loading settings');
-  const settings = JSON.parse(localStorage.getItem('settings')) || {
-    resolution: '1080',
-    downloadPath: '',
-    downloadMP3: false,
-    secondsBefore: 15,
-    secondsAfter: 15
-  };
-
-  document.getElementById('resolution').value = settings.resolution;
-  document.getElementById('download-path').value = settings.downloadPath;
-  document.getElementById('download-mp3').checked = settings.downloadMP3;
-  document.getElementById('seconds-before').value = settings.secondsBefore;
-  document.getElementById('seconds-after').value = settings.secondsAfter;
 }

@@ -15,7 +15,7 @@ function initializeSettings() {
 
     document.getElementById('resolution').value = settings.resolution;
     document.getElementById('download-path').value = settings.downloadPath;
-    document.getElementById('download-mp3').checked = settings.downloadMP3;
+   // document.getElementById('download-mp3').checked = settings.downloadMP3;
     document.getElementById('seconds-before').value = settings.secondsBefore;
     document.getElementById('seconds-after').value = settings.secondsAfter;
 }
@@ -24,7 +24,7 @@ function setupEventListeners() {
     const elements = {
         resolution: document.getElementById('resolution'),
         downloadPath: document.getElementById('download-path'),
-        downloadMP3: document.getElementById('download-mp3'),
+ //       downloadMP3: document.getElementById('download-mp3'),
         secondsBefore: document.getElementById('seconds-before'),
         secondsAfter: document.getElementById('seconds-after'),
         showLastPathsButton: document.getElementById('show-last-paths')
@@ -32,7 +32,7 @@ function setupEventListeners() {
 
     elements.resolution.addEventListener('change', saveAndSendSettings);
     elements.downloadPath.addEventListener('change', handleDownloadPathChange);
-    elements.downloadMP3.addEventListener('change', saveAndSendSettings);
+    //elements.downloadMP3.addEventListener('change', saveAndSendSettings);
     elements.secondsBefore.addEventListener('change', saveAndSendSettings);
     elements.secondsAfter.addEventListener('change', saveAndSendSettings);
 

@@ -7,8 +7,7 @@ import logging
 import string
 import pygame
 import pymiere
-
-
+import time
 
 def load_settings():
     default_settings = {
@@ -97,6 +96,15 @@ def get_current_project_path():
         logging.error(f'Error getting project path: {e}', exc_info=True)
         return None
 
+def wait_for_file(path, timeout=60):
+    """Wait for a file to be fully written and available."""
+    start_time = time.time()
+    while not os.path.exists(path):
+        if time.time() - start_time > timeout:
+            raise TimeoutError(f"File not available after {timeout} seconds: {path}")
+        time.sleep(1)
+    logging.info(f"File is now available: {path}")
+
 def import_video_to_premiere(video_path):
     if not os.path.exists(video_path):
         logging.error(f'File does not exist: {video_path}')
@@ -111,8 +119,16 @@ def import_video_to_premiere(video_path):
         proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
         logging.info(f'Video imported to Premiere successfully: {video_path}')
 
+        # Wait for the MXF file to be available in the TRANSCODE folder
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(video_path)))  # Go up two directories
+        transcode_folder = os.path.join(base_path, 'TRANSCODE')
+        mxf_filename = os.path.splitext(os.path.basename(video_path))[0] + '.mxf'
+        transcode_path = os.path.join(transcode_folder, mxf_filename)
+        
+        wait_for_file(transcode_path)
+
         # Open clip in source monitor
-        pymiere.objects.app.sourceMonitor.openFilePath(video_path)
+        pymiere.objects.app.sourceMonitor.openFilePath(transcode_path)
         logging.info('Clip opened in source monitor.')
 
     except Exception as e:
