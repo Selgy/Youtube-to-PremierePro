@@ -6,7 +6,6 @@ import re
 from flask import jsonify
 import sys
 import platform
-import pymiere
 import time
 from app.utils import (
     is_premiere_running,
@@ -58,15 +57,7 @@ def handle_video_url(request, settings, socketio):
 
     return jsonify(success=True), 200
 
-def verify_ffmpeg_path(ffmpeg_path):
-    if not os.path.exists(ffmpeg_path):
-        logging.error(f"ffmpeg binary not found at {ffmpeg_path}")
-        return False
-    if not os.access(ffmpeg_path, os.X_OK):
-        logging.error(f"ffmpeg binary at {ffmpeg_path} is not executable")
-        return False
-    logging.info(f"ffmpeg binary found and executable at {ffmpeg_path}")
-    return True
+
 
 def download_and_process_clip(video_url, resolution, download_path, clip_start, clip_end, download_mp3, ffmpeg_path, socketio):
     clip_duration = clip_end - clip_start
@@ -75,10 +66,6 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     download_path = download_path if download_path else get_default_download_path()
     if download_path is None:
         logging.error("No active Premiere Pro project found.")
-        return
-
-    if not verify_ffmpeg_path(ffmpeg_path):
-        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
         return
 
     video_info = youtube_dl.YoutubeDL().extract_info(video_url, download=False)
@@ -92,8 +79,18 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
+    # Check the operating system
+    if platform.system() == "Windows":
+        # For Windows, yt-dlp is inside the '_include' directory
+        yt_dlp_filename = "yt-dlp.exe"
+        yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
+    else:
+        # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
+        yt_dlp_filename = "yt-dlp"
+        yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
+
     yt_dlp_command = [
-        '/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/yt-dlp',
+        yt_dlp_path,
         '--format', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
         '--ffmpeg-location', ffmpeg_path,
         '--download-sections', f'*{clip_start_str}-{clip_end_str}',
@@ -107,7 +104,6 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     try:
         subprocess.run(yt_dlp_command, check=True)
         logging.info(f"Clip downloaded: {video_file_path}")
-        logging.info(f"Video file exists: {video_file_path}")
         import_video_to_premiere(video_file_path)
         logging.info("Clip imported to Premiere Pro")
         play_notification_sound()
@@ -124,10 +120,6 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
         return None
-
-    if not verify_ffmpeg_path(ffmpeg_path):
-        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
-        return
 
     extension = 'mp4' if not download_mp3 else 'wav'
     output_filename = generate_new_filename(final_download_path, sanitized_title, extension)
@@ -173,10 +165,6 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
         socketio.emit('download-failed', {'message': 'No active Premiere Pro project found.'})
         return
 
-    if not verify_ffmpeg_path(ffmpeg_path):
-        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
-        return
-
     audio_filename = generate_new_filename(final_download_path, sanitized_title, 'wav')
     sanitized_output_template = os.path.join(final_download_path, audio_filename)
 
@@ -218,44 +206,6 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
     except Exception as e:
         logging.error(f"Error downloading audio: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download audio.'})
-
-def import_video_to_premiere(video_path):
-    if not os.path.exists(video_path):
-        logging.error(f'File does not exist: {video_path}')
-        return
-
-    try:
-        logging.info('Attempting to import video to Premiere...')
-        proj = pymiere.objects.app.project
-        root_bin = proj.rootItem
-
-        proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
-        logging.info(f'Video imported to Premiere successfully: {video_path}')
-
-        base_path = os.path.dirname(os.path.dirname(os.path.dirname(video_path)))
-        transcode_folder = os.path.join(base_path, 'TRANSCODE')
-        mxf_filename = os.path.splitext(os.path.basename(video_path))[0] + '.mxf'
-        transcode_path = os.path.join(transcode_folder, mxf_filename)
-
-        # Wait for the transcode file to appear
-        wait_for_file(transcode_path)
-
-        if os.path.exists(transcode_path):
-            pymiere.objects.app.sourceMonitor.openFilePath(transcode_path)
-            logging.info('Clip opened in source monitor.')
-        else:
-            logging.error(f'Transcode file not found: {transcode_path}')
-
-    except Exception as e:
-        logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
-
-def wait_for_file(path, timeout=60):
-    start_time = time.time()
-    while not os.path.exists(path):
-        if time.time() - start_time > timeout:
-            raise TimeoutError(f"File not available after {timeout} seconds: {path}")
-        time.sleep(1)
-    logging.info(f"File is now available: {path}")
 
 # Main execution
 if __name__ == "__main__":
