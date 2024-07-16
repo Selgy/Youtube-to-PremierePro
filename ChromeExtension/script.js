@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
     initializeSettings();
     setupEventListeners();
 });
 
 function initializeSettings() {
+    console.log('Initializing settings...');
     const defaultSettings = {
         resolution: '1080p',
         downloadPath: '',
@@ -12,6 +14,7 @@ function initializeSettings() {
         secondsAfter: '15'
     };
     const settings = JSON.parse(localStorage.getItem('settings')) || defaultSettings;
+    console.log('Loaded settings:', settings);
 
     document.getElementById('resolution').value = settings.resolution;
     document.getElementById('download-path').value = settings.downloadPath;
@@ -21,6 +24,7 @@ function initializeSettings() {
 }
 
 function setupEventListeners() {
+    console.log('Setting up event listeners...');
     const elements = {
         resolution: document.getElementById('resolution'),
         downloadPath: document.getElementById('download-path'),
@@ -99,6 +103,7 @@ function selectPath(path) {
 }
 
 function saveAndSendSettings() {
+    console.log('Saving and sending settings...');
     const settings = {
         resolution: document.getElementById('resolution').value,
         downloadPath: document.getElementById('download-path').value,
@@ -106,6 +111,7 @@ function saveAndSendSettings() {
         secondsBefore: document.getElementById('seconds-before').value,
         secondsAfter: document.getElementById('seconds-after').value
     };
+    console.log('Settings to save:', settings);
 
     localStorage.setItem('settings', JSON.stringify(settings));
     updateLastPaths(settings.downloadPath);
@@ -114,6 +120,7 @@ function saveAndSendSettings() {
 }
 
 async function sendSettingsToServer(settings) {
+    console.log('Sending settings to server:', settings);
     try {
         const response = await fetch('http://localhost:3001/settings', {
             method: 'POST',
@@ -123,14 +130,19 @@ async function sendSettingsToServer(settings) {
             body: JSON.stringify(settings),
         });
         if (!response.ok) {
+            console.error('Server response not ok:', response.statusText);
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Success:', data);
+        console.log('Server response:', data);
+        if (!data.success) {
+            console.error('Server returned an error:', data.error);
+        }
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error sending settings to server:', error);
     }
 }
+
 
 function updateLastPaths(newPath) {
     if (newPath.trim() === '') return;
