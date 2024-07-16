@@ -57,8 +57,6 @@ def handle_video_url(request, settings, socketio):
 
     return jsonify(success=True), 200
 
-
-
 def download_and_process_clip(video_url, resolution, download_path, clip_start, clip_end, download_mp3, ffmpeg_path, socketio):
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, clip_duration={clip_duration}")
@@ -89,6 +87,9 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         yt_dlp_filename = "yt-dlp"
         yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
 
+    logging.info(f"Using yt-dlp path: {yt_dlp_path}")
+    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
+
     yt_dlp_command = [
         yt_dlp_path,
         '--format', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
@@ -100,6 +101,8 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--extractor-args', 'youtube:player_client=web;ios',  # Use only web and ios clients
         video_url
     ]
+
+    logging.info(f"Running yt-dlp command: {' '.join(yt_dlp_command)}")
 
     try:
         subprocess.run(yt_dlp_command, check=True)
@@ -136,6 +139,9 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
             }
         },
     }
+
+    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
+    logging.info(f"Download options: {ydl_opts}")
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
@@ -184,6 +190,9 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
         }],
         'progress_hooks': [lambda d: progress_hook(d, socketio)]
     }
+
+    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
+    logging.info(f"Download options: {ydl_opts}")
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
