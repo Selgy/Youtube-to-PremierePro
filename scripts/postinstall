@@ -110,7 +110,7 @@ mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
 mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
 # Download and unpack FFmpeg
-FFMPEG_URL="https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116306-g5d74dcf0e3.zip"
+FFMPEG_URL="https://www.osxexperts.net/ffmpeg7arm.zip"
 log "Downloading and unzipping FFmpeg..."
 if download_and_unzip_ffmpeg "$FFMPEG_URL" "$FFMPEG_BIN_DIR"; then
     log "FFmpeg setup completed successfully."
