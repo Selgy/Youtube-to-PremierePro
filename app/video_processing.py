@@ -121,10 +121,18 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     try:
         subprocess.run(yt_dlp_command, check=True)
         logging.info(f"Clip downloaded: {video_file_path}")
-        import_video_to_premiere(video_file_path)
-        logging.info("Clip imported to Premiere Pro")
-        play_notification_sound()
-        socketio.emit('download-complete')
+
+        # Verify that the file was created and log its presence
+        if os.path.exists(video_file_path):
+            logging.info(f"Video file exists: {video_file_path}")
+            import_video_to_premiere(video_file_path)
+            logging.info("Clip imported to Premiere Pro")
+            play_notification_sound()
+            socketio.emit('download-complete')
+        else:
+            logging.error(f"Video file does not exist after download: {video_file_path}")
+            socketio.emit('download-failed', {'message': 'Failed to find the downloaded clip.'})
+
     except subprocess.CalledProcessError as e:
         logging.error(f"Error downloading clip: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download clip.'})
@@ -237,6 +245,44 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
     except Exception as e:
         logging.error(f"Error downloading audio: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download audio.'})
+
+def import_video_to_premiere(video_path):
+    if not os.path.exists(video_path):
+        logging.error(f'File does not exist: {video_path}')
+        return
+
+    try:
+        logging.info('Attempting to import video to Premiere...')
+        proj = pymiere.objects.app.project
+        root_bin = proj.rootItem
+
+        proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
+        logging.info(f'Video imported to Premiere successfully: {video_path}')
+
+        base_path = os.path.dirname(os.path.dirname(os.path.dirname(video_path)))
+        transcode_folder = os.path.join(base_path, 'TRANSCODE')
+        mxf_filename = os.path.splitext(os.path.basename(video_path))[0] + '.mxf'
+        transcode_path = os.path.join(transcode_folder, mxf_filename)
+
+        # Wait for the transcode file to appear
+        wait_for_file(transcode_path)
+
+        if os.path.exists(transcode_path):
+            pymiere.objects.app.sourceMonitor.openFilePath(transcode_path)
+            logging.info('Clip opened in source monitor.')
+        else:
+            logging.error(f'Transcode file not found: {transcode_path}')
+
+    except Exception as e:
+        logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
+
+def wait_for_file(path, timeout=60):
+    start_time = time.time()
+    while not os.path.exists(path):
+        if time.time() - start_time > timeout:
+            raise TimeoutError(f"File not available after {timeout} seconds: {path}")
+        time.sleep(1)
+    logging.info(f"File is now available: {path}")
 
 # Main execution
 if __name__ == "__main__":
