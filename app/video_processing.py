@@ -2,11 +2,11 @@ import os
 import subprocess
 import logging
 import yt_dlp as youtube_dl
-import pymiere
 import re
 from flask import jsonify
 import sys
 import platform
+import pymiere
 import time
 from app.utils import (
     is_premiere_running,
@@ -92,21 +92,8 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
-    # Check the operating system
-    if platform.system() == "Windows":
-        # For Windows, yt-dlp is inside the '_include' directory
-        yt_dlp_filename = "yt-dlp.exe"
-        yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
-    else:
-        # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
-        yt_dlp_filename = "yt-dlp"
-        yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
-
-    logging.info(f"Using yt-dlp path: {yt_dlp_path}")
-    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
-
     yt_dlp_command = [
-        yt_dlp_path,
+        '/Library/Application Support/Adobe/CEP/extensions/com.selgy.youtubetopremiere/exec/_internal/yt-dlp',
         '--format', f'bestvideo[vcodec^=avc1][ext=mp4][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]',
         '--ffmpeg-location', ffmpeg_path,
         '--download-sections', f'*{clip_start_str}-{clip_end_str}',
@@ -117,23 +104,14 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         video_url
     ]
 
-    logging.info(f"Running yt-dlp command: {' '.join(yt_dlp_command)}")
-
     try:
         subprocess.run(yt_dlp_command, check=True)
         logging.info(f"Clip downloaded: {video_file_path}")
-
-        # Verify that the file was created and log its presence
-        if os.path.exists(video_file_path):
-            logging.info(f"Video file exists: {video_file_path}")
-            import_video_to_premiere(video_file_path)
-            logging.info("Clip imported to Premiere Pro")
-            play_notification_sound()
-            socketio.emit('download-complete')
-        else:
-            logging.error(f"Video file does not exist after download: {video_file_path}")
-            socketio.emit('download-failed', {'message': 'Failed to find the downloaded clip.'})
-
+        logging.info(f"Video file exists: {video_file_path}")
+        import_video_to_premiere(video_file_path)
+        logging.info("Clip imported to Premiere Pro")
+        play_notification_sound()
+        socketio.emit('download-complete')
     except subprocess.CalledProcessError as e:
         logging.error(f"Error downloading clip: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download clip.'})
@@ -166,9 +144,6 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
             }
         },
     }
-
-    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
-    logging.info(f"Download options: {ydl_opts}")
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
@@ -221,9 +196,6 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
         }],
         'progress_hooks': [lambda d: progress_hook(d, socketio)]
     }
-
-    logging.info(f"Using ffmpeg path: {ffmpeg_path}")
-    logging.info(f"Download options: {ydl_opts}")
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
