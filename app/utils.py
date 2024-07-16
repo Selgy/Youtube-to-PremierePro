@@ -7,8 +7,8 @@ import logging
 import string
 import pygame
 import pymiere
-import time
-import shutil
+
+
 
 def load_settings():
     default_settings = {
@@ -20,25 +20,18 @@ def load_settings():
     }
 
     script_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
-
+    
     if platform.system() == 'Windows':
         appdata_path = os.environ['APPDATA']
         ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
     elif platform.system() == 'Darwin':
         appdata_path = os.path.expanduser('~/Library/Application Support')
         ffmpeg_path = os.path.join(script_dir, '_internal', 'ffmpeg', 'bin', 'ffmpeg')
-        if os.path.exists(ffmpeg_path):
-            os.chmod(ffmpeg_path, 0o755)
-        else:
-            logging.error(f"ffmpeg not found at {ffmpeg_path}. Please ensure ffmpeg is installed.")
-            raise FileNotFoundError(f"ffmpeg not found at {ffmpeg_path}")
+        os.chmod(ffmpeg_path, 0o755)
     elif platform.system() == 'Linux':
         appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+        # Define the ffmpeg path for Linux if needed
         ffmpeg_path = 'ffmpeg'  # Assuming ffmpeg is in the PATH
-        # Verify that ffmpeg exists in PATH
-        if not shutil.which(ffmpeg_path):
-            logging.error("ffmpeg not found in PATH. Please install ffmpeg.")
-            raise FileNotFoundError("ffmpeg not found in PATH")
     else:
         raise Exception("Unsupported operating system")
 
@@ -59,7 +52,6 @@ def load_settings():
 
     logging.info(f'Loaded settings: {settings}')
     return settings
-
 
 def monitor_premiere_and_shutdown():
     global should_shutdown
@@ -105,7 +97,6 @@ def get_current_project_path():
         logging.error(f'Error getting project path: {e}', exc_info=True)
         return None
 
-
 def import_video_to_premiere(video_path):
     if not os.path.exists(video_path):
         logging.error(f'File does not exist: {video_path}')
@@ -120,13 +111,12 @@ def import_video_to_premiere(video_path):
         proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
         logging.info(f'Video imported to Premiere successfully: {video_path}')
 
-        # Skip waiting for the transcode file and open the original video file in source monitor
+        # Open clip in source monitor
         pymiere.objects.app.sourceMonitor.openFilePath(video_path)
         logging.info('Clip opened in source monitor.')
 
     except Exception as e:
         logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
-
 
 def sanitize_title(title):
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)

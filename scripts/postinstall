@@ -8,8 +8,8 @@ log() {
 
 log "Starting the installation script."
 
-# Get the current user
-loggedInUser=$(scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && ! /loginwindow/ { print $3 }')
+# get the current user
+loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 log "Current user: $loggedInUser"
 
 # Get the UID of the logged-in user
@@ -18,7 +18,7 @@ log "User ID: $uid"
 
 # Enable PlayerDebugMode for Adobe CEP versions 6 to 11 in user context
 for csxs_version in {6..11}; do
-    launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write "com.adobe.CSXS.$csxs_version" PlayerDebugMode 1
+    launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
     log "Enabled PlayerDebugMode for com.adobe.CSXS.$csxs_version"
 done
 
@@ -60,47 +60,6 @@ mkdir -p "$EXEC_DIR" && log "Exec directory created successfully." || { log "Fai
 log "Copying executable to $EXEC_DIR..."
 cp -R "$EXECUTABLE_PATH/"* "$EXEC_DIR" && log "Executable copied successfully." || { log "Failed to copy executable"; exit 1; }
 
-# Function to download and unzip FFmpeg
-download_and_unzip_ffmpeg() {
-    local url="$1"
-    local output_dir="$2"
-    local zip_path="$output_dir/ffmpeg.zip"
-    local retry_count=5
-
-    for ((i=1; i<=retry_count; i++)); do
-        log "Downloading FFmpeg (attempt $i)..."
-        if curl -L "$url" --output "$zip_path"; then
-            log "FFmpeg download successful."
-        else
-            log "Failed to download FFmpeg."
-            continue
-        fi
-
-        log "Verifying the downloaded file..."
-        if file "$zip_path" | grep -q "Zip archive data"; then
-            log "Download is a valid zip file."
-        else
-            log "Download is not a valid zip file. Deleting and retrying..."
-            rm "$zip_path"
-            continue
-        fi
-
-        log "Unzipping FFmpeg..."
-        if unzip -o "$zip_path" -d "$output_dir"; then
-            log "FFmpeg unzip successful."
-            rm "$zip_path"
-            return 0
-        else
-            log "Failed to unzip FFmpeg. Deleting and retrying..."
-            rm "$zip_path"
-        fi
-
-        log "Retrying download and unzip..."
-    done
-
-    return 1
-}
-
 # Change ownership and permissions of FFmpeg binary and yt-dlp
 FFMPEG_BIN_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal/ffmpeg/bin"
 YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
@@ -109,44 +68,23 @@ YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
 mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
-# Download and unpack FFmpeg
-FFMPEG_URL="https://www.osxexperts.net/ffmpeg7arm.zip"
-log "Downloading and unzipping FFmpeg..."
-if download_and_unzip_ffmpeg "$FFMPEG_URL" "$FFMPEG_BIN_DIR"; then
-    log "FFmpeg setup completed successfully."
-else
-    log "Failed to set up FFmpeg after multiple attempts."
-    exit 1
-fi
+# Download and unpack FFmpeg and yt-dlp
+log "Downloading FFmpeg..."
+curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-115189-g0664cbd732.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
+unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
+rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
 
 # Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
-if [ -f "$FFMPEG_BIN_DIR/ffmpeg" ]; then
-    if xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"; then
-        log "Removed quarantine attribute from FFmpeg."
-    else
-        log "No quarantine attribute found on FFmpeg."
-    fi
+if xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"; then
+    log "Removed quarantine attribute from FFmpeg."
 else
-    log "FFmpeg binary not found after unzip."
-    exit 1
+    log "No quarantine attribute found on FFmpeg."
 fi
 
 # Set ownership to the logged-in user, and set execute permissions
 chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 chmod +x "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
 log "Set ownership and permissions for FFmpeg and yt-dlp."
-
-# Ensure FFmpeg is executable and in the PATH
-export FFMPEG="$FFMPEG_BIN_DIR/ffmpeg"
-log "FFmpeg path set to $FFMPEG"
-
-# Test if FFmpeg is correctly set up
-if [ -x "$FFMPEG" ]; then
-    log "FFmpeg is executable."
-else
-    log "FFmpeg is not executable. Exiting."
-    exit 1
-fi
 
 log "Cleanup started..."
 # Force delete the directories
