@@ -15,10 +15,31 @@ download_and_unzip_ffmpeg() {
 
     for ((i=1; i<=retry_count; i++)); do
         log "Downloading FFmpeg (attempt $i)..."
-        curl -L "$url" --output "$zip_path" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; continue; }
+        if curl -L "$url" --output "$zip_path"; then
+            log "FFmpeg download successful."
+        else
+            log "Failed to download FFmpeg."
+            continue
+        fi
+
+        log "Verifying the downloaded file..."
+        if file "$zip_path" | grep -q "Zip archive data"; then
+            log "Download is a valid zip file."
+        else
+            log "Download is not a valid zip file."
+            rm "$zip_path"
+            continue
+        fi
 
         log "Unzipping FFmpeg..."
-        unzip -o "$zip_path" -d "$output_dir" && { log "FFmpeg unzip successful."; rm "$zip_path"; return 0; } || log "Failed to unzip FFmpeg"
+        if unzip -o "$zip_path" -d "$output_dir"; then
+            log "FFmpeg unzip successful."
+            rm "$zip_path"
+            return 0
+        else
+            log "Failed to unzip FFmpeg."
+            rm "$zip_path"
+        fi
 
         log "Retrying download and unzip..."
     done
