@@ -8,8 +8,8 @@ log() {
 
 log "Starting the installation script."
 
-# get the current user
-loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+# Get the current user
+loggedInUser=$( scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 log "Current user: $loggedInUser"
 
 # Get the UID of the logged-in user
@@ -24,7 +24,7 @@ done
 
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
-GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
+GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/refs/heads/Pre-released.zip"
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
 log "Creating $CEP_EXTENSIONS_DIR..."
