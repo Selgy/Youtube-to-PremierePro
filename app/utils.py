@@ -8,6 +8,7 @@ import string
 import pygame
 import pymiere
 import time
+import shutil
 
 def load_settings():
     default_settings = {
@@ -19,18 +20,25 @@ def load_settings():
     }
 
     script_dir = os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
-    
+
     if platform.system() == 'Windows':
         appdata_path = os.environ['APPDATA']
         ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
     elif platform.system() == 'Darwin':
         appdata_path = os.path.expanduser('~/Library/Application Support')
         ffmpeg_path = os.path.join(script_dir, '_internal', 'ffmpeg', 'bin', 'ffmpeg')
-        os.chmod(ffmpeg_path, 0o755)
+        if os.path.exists(ffmpeg_path):
+            os.chmod(ffmpeg_path, 0o755)
+        else:
+            logging.error(f"ffmpeg not found at {ffmpeg_path}. Please ensure ffmpeg is installed.")
+            raise FileNotFoundError(f"ffmpeg not found at {ffmpeg_path}")
     elif platform.system() == 'Linux':
         appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
-        # Define the ffmpeg path for Linux if needed
         ffmpeg_path = 'ffmpeg'  # Assuming ffmpeg is in the PATH
+        # Verify that ffmpeg exists in PATH
+        if not shutil.which(ffmpeg_path):
+            logging.error("ffmpeg not found in PATH. Please install ffmpeg.")
+            raise FileNotFoundError("ffmpeg not found in PATH")
     else:
         raise Exception("Unsupported operating system")
 
@@ -51,6 +59,7 @@ def load_settings():
 
     logging.info(f'Loaded settings: {settings}')
     return settings
+
 
 def monitor_premiere_and_shutdown():
     global should_shutdown
