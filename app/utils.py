@@ -28,7 +28,7 @@ def load_settings():
         ffmpeg_path = os.path.join(script_dir, 'ffmpeg_win', 'bin', 'ffmpeg.exe')
     elif platform.system() == 'Darwin':
         appdata_path = os.path.expanduser('~/Library/Application Support')
-        ffmpeg_path = os.path.join(script_dir, '_internal', 'ffmpeg', 'bin', 'ffmpeg')
+        ffmpeg_path = os.path.join(script_dir, 'ffmpeg', 'bin', 'ffmpeg')
         os.chmod(ffmpeg_path, 0o755)
     elif platform.system() == 'Linux':
         appdata_path = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
