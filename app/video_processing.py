@@ -57,6 +57,16 @@ def handle_video_url(request, settings, socketio):
 
     return jsonify(success=True), 200
 
+def verify_ffmpeg_path(ffmpeg_path):
+    if not os.path.exists(ffmpeg_path):
+        logging.error(f"ffmpeg binary not found at {ffmpeg_path}")
+        return False
+    if not os.access(ffmpeg_path, os.X_OK):
+        logging.error(f"ffmpeg binary at {ffmpeg_path} is not executable")
+        return False
+    logging.info(f"ffmpeg binary found and executable at {ffmpeg_path}")
+    return True
+
 def download_and_process_clip(video_url, resolution, download_path, clip_start, clip_end, download_mp3, ffmpeg_path, socketio):
     clip_duration = clip_end - clip_start
     logging.info(f"Received clip parameters: clip_start={clip_start}, clip_end={clip_end}, clip_duration={clip_duration}")
@@ -64,6 +74,10 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     download_path = download_path if download_path else get_default_download_path()
     if download_path is None:
         logging.error("No active Premiere Pro project found.")
+        return
+
+    if not verify_ffmpeg_path(ffmpeg_path):
+        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
         return
 
     video_info = youtube_dl.YoutubeDL().extract_info(video_url, download=False)
@@ -124,6 +138,10 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
         logging.error("No active Premiere Pro project found.")
         return None
 
+    if not verify_ffmpeg_path(ffmpeg_path):
+        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
+        return
+
     extension = 'mp4' if not download_mp3 else 'wav'
     output_filename = generate_new_filename(final_download_path, sanitized_title, extension)
     sanitized_output_template = os.path.join(final_download_path, output_filename)
@@ -169,6 +187,10 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
     if final_download_path is None:
         logging.error("No active Premiere Pro project found.")
         socketio.emit('download-failed', {'message': 'No active Premiere Pro project found.'})
+        return
+
+    if not verify_ffmpeg_path(ffmpeg_path):
+        socketio.emit('download-failed', {'message': 'ffmpeg not found or not executable.'})
         return
 
     audio_filename = generate_new_filename(final_download_path, sanitized_title, 'wav')
