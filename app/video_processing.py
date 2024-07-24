@@ -97,7 +97,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--output', video_file_path,
         '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
         '--no-check-certificate',
-        '--extractor-args', 'youtube:player_client=web;ios',  # Use only web and ios clients
+        '--extractor-args', 'youtube:player_client=android,web,ios',  # Use only web and ios clients
         video_url
     ]
 
