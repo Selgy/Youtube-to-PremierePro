@@ -95,7 +95,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--ffmpeg-location', ffmpeg_path,
         '--download-sections', f'*{clip_start_str}-{clip_end_str}',
         '--output', video_file_path,
-        '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
+        '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy -metadata comment="Source URL: {video_url}"',
         '--no-check-certificate',
         '--extractor-args', 'youtube:player_client=android,web,ios',  # Use only web and ios clients
         video_url
@@ -135,7 +135,10 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
                 'player_client': ['web', 'ios']  # Use only web and ios clients, skipping android
             }
         },
-    }
+        'postprocessor_args': [
+            f'-metadata comment="Source URL: {video_url}"'
+    ]
+}
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
@@ -181,6 +184,9 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav',
             'preferredquality': '192',
+            'postprocessor_args': [
+                f'-metadata comment="Source URL: {video_url}"'
+        ]
         }],
         'progress_hooks': [lambda d: progress_hook(d, socketio)]
     }
