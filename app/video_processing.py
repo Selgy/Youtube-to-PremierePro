@@ -81,11 +81,9 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
 
     # Check the operating system
     if platform.system() == "Windows":
-        # For Windows, yt-dlp is inside the '_include' directory
         yt_dlp_filename = "yt-dlp.exe"
         yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
     else:
-        # For macOS (and potentially other Unix-like systems), yt-dlp is inside the '_internal' directory
         yt_dlp_filename = "yt-dlp"
         yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
 
@@ -95,7 +93,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--ffmpeg-location', ffmpeg_path,
         '--download-sections', f'*{clip_start_str}-{clip_end_str}',
         '--output', video_file_path,
-        '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy -metadata comment="Source URL: {video_url}"',
+        '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
         '--no-check-certificate',
         '--extractor-args', 'youtube:player_client=android,web,ios',  # Use only web and ios clients
         video_url
@@ -104,6 +102,26 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     try:
         subprocess.run(yt_dlp_command, check=True)
         logging.info(f"Clip downloaded: {video_file_path}")
+
+        # Add URL to metadata
+        metadata_command = [
+            ffmpeg_path,
+            '-i', video_file_path,
+            '-metadata', f'comment=Downloaded from {video_url}',
+            '-codec', 'copy',  # To avoid re-encoding the video
+            f'{video_file_path}_with_metadata.mp4'
+        ]
+
+        try:
+            subprocess.run(metadata_command, check=True)
+            # Replace original file with the one containing metadata
+            os.replace(f'{video_file_path}_with_metadata.mp4', video_file_path)
+            logging.info(f"Metadata added: {video_file_path}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Error adding metadata: {e}")
+            socketio.emit('download-failed', {'message': 'Failed to add metadata.'})
+            return
+
         import_video_to_premiere(video_file_path)
         logging.info("Clip imported to Premiere Pro")
         play_notification_sound()
@@ -135,10 +153,7 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
                 'player_client': ['web', 'ios']  # Use only web and ios clients, skipping android
             }
         },
-        'postprocessor_args': [
-            f'-metadata comment="Source URL: {video_url}"'
-    ]
-}
+    }
 
     def progress_hook(d, socketio):
         if d['status'] == 'downloading':
@@ -151,12 +166,33 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
         result = ydl.download([video_url])
         if result == 0 and os.path.exists(sanitized_output_template):
             logging.info(f"Video downloaded: {sanitized_output_template}")
+            
+            # Add URL to metadata
+            metadata_command = [
+                ffmpeg_path,
+                '-i', sanitized_output_template,
+                '-metadata', f'comment=Downloaded from {video_url}',
+                '-codec', 'copy',  # To avoid re-encoding the video
+                f'{sanitized_output_template}_with_metadata.{extension}'
+            ]
+
+            try:
+                subprocess.run(metadata_command, check=True)
+                # Replace original file with the one containing metadata
+                os.replace(f'{sanitized_output_template}_with_metadata.{extension}', sanitized_output_template)
+                logging.info(f"Metadata added: {sanitized_output_template}")
+            except subprocess.CalledProcessError as e:
+                logging.error(f"Error adding metadata: {e}")
+                socketio.emit('download-failed', {'message': 'Failed to add metadata.'})
+                return
+
             import_video_to_premiere(sanitized_output_template)
             play_notification_sound()
             socketio.emit('download-complete')
         else:
             logging.error("Video download failed.")
             socketio.emit('download-failed', {'message': 'Failed to download video.'})
+
 
 def download_audio(video_url, download_path, ffmpeg_path, socketio):
     logging.info(f"Starting audio download for URL: {video_url}")
@@ -184,9 +220,6 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav',
             'preferredquality': '192',
-            'postprocessor_args': [
-                f'-metadata comment="Source URL: {video_url}"'
-        ]
         }],
         'progress_hooks': [lambda d: progress_hook(d, socketio)]
     }
@@ -203,6 +236,26 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
             result = ydl.download([video_url])
         if result == 0 and os.path.exists(sanitized_output_template):
             logging.info(f"Audio downloaded: {sanitized_output_template}")
+
+            # Add URL to metadata
+            metadata_command = [
+                ffmpeg_path,
+                '-i', sanitized_output_template,
+                '-metadata', f'comment=Downloaded from {video_url}',
+                '-codec', 'copy',  # To avoid re-encoding the audio
+                f'{sanitized_output_template}_with_metadata.wav'
+            ]
+
+            try:
+                subprocess.run(metadata_command, check=True)
+                # Replace original file with the one containing metadata
+                os.replace(f'{sanitized_output_template}_with_metadata.wav', sanitized_output_template)
+                logging.info(f"Metadata added: {sanitized_output_template}")
+            except subprocess.CalledProcessError as e:
+                logging.error(f"Error adding metadata: {e}")
+                socketio.emit('download-failed', {'message': 'Failed to add metadata.'})
+                return
+
             import_video_to_premiere(sanitized_output_template)
             play_notification_sound()
             socketio.emit('download-complete')
@@ -212,6 +265,7 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
     except Exception as e:
         logging.error(f"Error downloading audio: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download audio.'})
+
 
 # Main execution
 if __name__ == "__main__":
