@@ -107,7 +107,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         metadata_command = [
             ffmpeg_path,
             '-i', video_file_path,
-            '-metadata', f'comment=Downloaded from {video_url}',
+            '-metadata', f'comment={video_url}',
             '-codec', 'copy',  # To avoid re-encoding the video
             f'{video_file_path}_with_metadata.mp4'
         ]
@@ -171,7 +171,7 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
             metadata_command = [
                 ffmpeg_path,
                 '-i', sanitized_output_template,
-                '-metadata', f'comment=Downloaded from {video_url}',
+                '-metadata', f'comment={video_url}',
                 '-codec', 'copy',  # To avoid re-encoding the video
                 f'{sanitized_output_template}_with_metadata.{extension}'
             ]
@@ -241,7 +241,7 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
             metadata_command = [
                 ffmpeg_path,
                 '-i', sanitized_output_template,
-                '-metadata', f'comment=Downloaded from {video_url}',
+                '-metadata', f'comment={video_url}',
                 '-codec', 'copy',  # To avoid re-encoding the audio
                 f'{sanitized_output_template}_with_metadata.wav'
             ]
