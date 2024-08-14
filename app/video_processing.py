@@ -79,11 +79,11 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
-    # Check the operating system
+
     if platform.system() == "Windows":
         yt_dlp_filename = "yt-dlp.exe"
         yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
-        hwaccel_args = '-hwaccel cuda -c:v h264_nvenc'
+        hwaccel_args = '-c:v h264_nvenc -c:a copy'
     else:
         yt_dlp_filename = "yt-dlp"
         yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
@@ -132,6 +132,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     except subprocess.CalledProcessError as e:
         logging.error(f"Error downloading clip: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download clip.'})
+
 
 
 def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_path, socketio):
