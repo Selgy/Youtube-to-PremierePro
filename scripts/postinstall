@@ -70,7 +70,7 @@ mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
 # Download and unpack FFmpeg and yt-dlp
 log "Downloading FFmpeg..."
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116208-gb6c43328ee.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
+curl -L "https://www.osxexperts.net/ffmpeg7arm.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
 

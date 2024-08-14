@@ -83,9 +83,11 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     if platform.system() == "Windows":
         yt_dlp_filename = "yt-dlp.exe"
         yt_dlp_path = os.path.join(base_path, 'app', '_include', yt_dlp_filename)
+        hwaccel_args = '-hwaccel cuda -c:v h264_nvenc'
     else:
         yt_dlp_filename = "yt-dlp"
         yt_dlp_path = os.path.join(base_path, yt_dlp_filename)
+        hwaccel_args = '-c:v h264_videotoolbox -c:a copy'
 
     yt_dlp_command = [
         yt_dlp_path,
@@ -93,9 +95,10 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--ffmpeg-location', ffmpeg_path,
         '--download-sections', f'*{clip_start_str}-{clip_end_str}',
         '--output', video_file_path,
-        '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
+        '--external-downloader-args', f'ffmpeg:{hwaccel_args}',
+        '--force-keyframes-at-cuts',
         '--no-check-certificate',
-        '--extractor-args', 'youtube:player_client=android,web,ios',  # Use only web and ios clients
+        '--extractor-args', 'youtube:player_client=web_creator',
         video_url
     ]
 
@@ -129,6 +132,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
     except subprocess.CalledProcessError as e:
         logging.error(f"Error downloading clip: {e}")
         socketio.emit('download-failed', {'message': 'Failed to download clip.'})
+
 
 def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_path, socketio):
     logging.info(f"Starting video download for URL: {video_url}")
