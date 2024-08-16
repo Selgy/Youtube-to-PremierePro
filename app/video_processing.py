@@ -222,9 +222,6 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav',
             'preferredquality': '192',
-            'postprocessor_args': [
-                f'-metadata comment="Source URL: {video_url}"'
-        ]
         }],
         'progress_hooks': [lambda d: progress_hook(d, socketio)]
     }
