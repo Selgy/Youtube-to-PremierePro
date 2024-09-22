@@ -24,7 +24,7 @@ done
 
 # Define the user's Adobe CEP extensions directory
 CEP_EXTENSIONS_DIR="/Library/Application Support/Adobe/CEP/extensions"
-GITHUB_REPO_URL="https://github.com/Selgy/Youtube-to-PremierePro/archive/Pre-released.zip"
+LOCAL_FFMPEG_PATH="/path/to/your/local/ffmpeg"  # <- Chemin vers le fichier `ffmpeg` extrait
 EXECUTABLE_PATH="/Applications/YoutubetoPremiere"
 
 log "Creating $CEP_EXTENSIONS_DIR..."
@@ -68,11 +68,9 @@ YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
 mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
-# Download and unpack FFmpeg and yt-dlp
-log "Downloading FFmpeg..."
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116208-gb6c43328ee.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
-unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
-rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
+# Utiliser le fichier ffmpeg local au lieu de le télécharger
+log "Copying local FFmpeg..."
+cp "$LOCAL_FFMPEG_PATH/ffmpeg" "$FFMPEG_BIN_DIR/ffmpeg" && log "Local FFmpeg copied successfully." || { log "Failed to copy local FFmpeg"; exit 1; }
 
 # Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
 if xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"; then
