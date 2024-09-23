@@ -68,9 +68,29 @@ YT_DLP_DIR="$CEP_EXTENSIONS_DIR/com.selgy.youtubetopremiere/exec/_internal"
 mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
 mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
-# Download and unpack FFmpeg and yt-dlp
+# Manual input for the specific FFmpeg version URL
+FFMPEG_VERSION_URL="https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116208-gb6c43328ee.zip"
+log "Using FFmpeg version from URL: $FFMPEG_VERSION_URL"
+
+# Download and unpack FFmpeg
 log "Downloading FFmpeg..."
-curl -L "https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116208-gb6c43328ee.zip" --output "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
+curl -L "$FFMPEG_VERSION_URL" --output "$FFMPEG_BIN_DIR/ffmpeg-temp.zip" && log "FFmpeg download successful." || { log "Failed to download FFmpeg"; exit 1; }
+
+# Rename the downloaded file to 'ffmpeg.zip'
+log "Renaming FFmpeg file to 'ffmpeg.zip'..."
+mv "$FFMPEG_BIN_DIR/ffmpeg-temp.zip" "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "File renamed successfully." || { log "Failed to rename the file"; exit 1; }
+
+# Verify the file is a valid ZIP
+file_type=$(file "$FFMPEG_BIN_DIR/ffmpeg.zip")
+if [[ "$file_type" == *"Zip archive data"* ]]; then
+    log "File verified as a valid ZIP archive."
+else
+    log "File is not a valid ZIP archive. Exiting."
+    exit 1
+fi
+
+# Unzip the renamed file
+log "Unzipping FFmpeg..."
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
 
