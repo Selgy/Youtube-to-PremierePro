@@ -69,7 +69,7 @@ mkdir -p "$FFMPEG_BIN_DIR" && log "FFmpeg bin directory created."
 mkdir -p "$YT_DLP_DIR" && log "yt-dlp directory created."
 
 # Manual input for the specific FFmpeg version URL
-FFMPEG_VERSION_URL="https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116208-gb6c43328ee.zip"
+FFMPEG_VERSION_URL="https://evermeet.cx/pub/ffmpeg/snapshots/ffmpeg-116991-ga15d2fdfd9.zip"
 log "Using FFmpeg version from URL: $FFMPEG_VERSION_URL"
 
 # Download and unpack FFmpeg
