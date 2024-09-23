@@ -94,12 +94,6 @@ log "Unzipping FFmpeg..."
 unzip -o "$FFMPEG_BIN_DIR/ffmpeg.zip" -d "$FFMPEG_BIN_DIR" && log "FFmpeg unzip successful." || { log "Failed to unzip FFmpeg"; exit 1; }
 rm "$FFMPEG_BIN_DIR/ffmpeg.zip" && log "FFmpeg ZIP file removed."
 
-# Remove quarantine attribute from FFmpeg to avoid "cannot be opened" error
-if xattr -d com.apple.quarantine "$FFMPEG_BIN_DIR/ffmpeg"; then
-    log "Removed quarantine attribute from FFmpeg."
-else
-    log "No quarantine attribute found on FFmpeg."
-fi
 
 # Set ownership to the logged-in user, and set execute permissions
 chown "$loggedInUser" "$FFMPEG_BIN_DIR/ffmpeg" "$YT_DLP_DIR/yt-dlp"
