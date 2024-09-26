@@ -8,7 +8,7 @@ import string
 import pygame
 import pymiere
 
-
+import time
 
 def load_settings():
     default_settings = {
@@ -98,6 +98,7 @@ def get_current_project_path():
         return None
 
 def import_video_to_premiere(video_path):
+    """Import video file into the active Premiere Pro project and open it in the source monitor."""
     if not os.path.exists(video_path):
         logging.error(f'File does not exist: {video_path}')
         return
@@ -107,16 +108,50 @@ def import_video_to_premiere(video_path):
         proj = pymiere.objects.app.project
         root_bin = proj.rootItem
 
-        # Import file
-        proj.importFiles([video_path], suppressUI=True, targetBin=root_bin, importAsNumberedStills=False)
+        # Capture the state of the root bin before the import
+        before_import_items = set(item.nodeId for item in root_bin.children)
+
+        # Import the file
+        success = proj.importFiles(
+            [video_path],
+            suppressUI=True,
+            targetBin=root_bin,
+            importAsNumberedStills=False
+        )
+
+        if not success:
+            logging.error('Failed to import video into Premiere.')
+            return
+
         logging.info(f'Video imported to Premiere successfully: {video_path}')
 
-        # Open clip in source monitor
-        pymiere.objects.app.sourceMonitor.openFilePath(video_path)
-        logging.info('Clip opened in source monitor.')
+        # Wait briefly to ensure the item is added to the project
+        time.sleep(1)
+
+        # Capture the state of the root bin after the import
+        after_import_items = list(root_bin.children)
+        after_import_ids = set(item.nodeId for item in after_import_items)
+
+        # Identify the new item(s)
+        new_item_ids = after_import_ids - before_import_items
+        if not new_item_ids:
+            logging.error('No new items found in root bin after import.')
+            return
+
+        # Get the imported item(s) based on nodeId
+        imported_items = [item for item in after_import_items if item.nodeId in new_item_ids]
+
+        # Open each imported item in the source monitor
+        for imported_item in imported_items:
+            logging.info(f'Imported item found: {imported_item.name}')
+            pymiere.objects.app.sourceMonitor.openProjectItem(imported_item)
+            logging.info(f'Video {imported_item.name} opened in source monitor.')
 
     except Exception as e:
-        logging.error(f'Error during import or opening clip in source monitor: {e}', exc_info=True)
+        logging.error(f'Error during import or opening video in source monitor: {e}', exc_info=True)
+
+
+
 
 def sanitize_title(title):
     valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
