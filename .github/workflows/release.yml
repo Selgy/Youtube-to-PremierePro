@@ -664,7 +664,7 @@ jobs:
 
     - name: Rename FFmpeg Folder
       run: |
-        mv ./ffmpeg/ffmpeg-6.1.1-full_build ./ffmpeg_win
+        mv ./ffmpeg/ffmpeg-release-full ./ffmpeg_win
 
     - name: Find ffmpeg.exe
       shell: pwsh
