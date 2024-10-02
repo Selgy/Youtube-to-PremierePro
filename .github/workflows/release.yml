@@ -656,7 +656,7 @@ jobs:
     - name: Download FFmpeg
       run: |
         mkdir ffmpeg
-        curl -L https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-6.1.1-full_build.7z -o ffmpeg.7z
+        curl -L https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z -o ffmpeg.7z
 
     - name: Extract FFmpeg
       run: |
