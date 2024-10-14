@@ -95,7 +95,7 @@ def download_and_process_clip(video_url, resolution, download_path, clip_start, 
         '--output', video_file_path,
         '--postprocessor-args', 'ffmpeg:-c:v copy -c:a copy',
         '--no-check-certificate',
-        '--extractor-args', 'youtube:player_client=web_creator,ios',  # Use only web and ios clients
+        '--extractor-args', 'youtube:player_client=ios,mweb',  # Use only web and ios clients
         video_url
     ]
 
@@ -152,7 +152,7 @@ def download_video(video_url, resolution, download_path, download_mp3, ffmpeg_pa
         'format': 'bestaudio[ext=m4a]/best' if download_mp3 else f'bestvideo[ext=mp4][vcodec^=avc1][height<={resolution}]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'extractor_args': {
             'youtube': {
-                'player_client': ['web_creator', 'ios']  # Use only web and ios clients, skipping android
+                'player_client': ['ios', 'mweb']  # Use only web and ios clients, skipping android
             }
         },
     }
@@ -215,7 +215,7 @@ def download_audio(video_url, download_path, ffmpeg_path, socketio):
         'format': 'bestaudio/best',
         'extractor_args': {
             'youtube': {
-                'player_client': ['web_creator', 'ios']  # Use only web and ios clients, skipping android
+                'player_client': ['ios', 'mweb']  
             }
         },
         'postprocessors': [{
