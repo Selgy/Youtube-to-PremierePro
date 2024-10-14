@@ -49,6 +49,7 @@ Section "Enable Debugging for CSXS Versions 6 to 11"
     WriteRegStr HKCU "Software\Adobe\CSXS.9" "PlayerDebugMode" "1"
     WriteRegStr HKCU "Software\Adobe\CSXS.10" "PlayerDebugMode" "1"
     WriteRegStr HKCU "Software\Adobe\CSXS.11" "PlayerDebugMode" "1"
+    WriteRegStr HKCU "Software\Adobe\CSXS.12" "PlayerDebugMode" "1"
 SectionEnd
 
 Section 'Uninstall'

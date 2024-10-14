@@ -17,7 +17,7 @@ uid=$(id -u "$loggedInUser")
 log "User ID: $uid"
 
 # Enable PlayerDebugMode for Adobe CEP versions 6 to 11 in user context
-for csxs_version in {6..11}; do
+for csxs_version in {6..12}; do
     launchctl asuser "$uid" sudo -u "$loggedInUser" defaults write com.adobe.CSXS."$csxs_version" PlayerDebugMode 1
     log "Enabled PlayerDebugMode for com.adobe.CSXS.$csxs_version"
 done
